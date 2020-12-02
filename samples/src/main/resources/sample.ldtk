@@ -12,7 +12,7 @@
 	"defaultGridSize": 8,
 	"bgColor": "#18131B",
 	"defaultLevelBgColor": "#121331",
-	"nextUid": 42,
+	"nextUid": 51,
 	"minifyJson": false,
 	"exportTiled": false,
 	"worldLayout": "Free",
@@ -509,6 +509,112 @@
 						"defaultOverride": null
 					}
 				]
+			},
+			{
+				"identifier": "Mob",
+				"uid": 42,
+				"width": 8,
+				"height": 10,
+				"color": "#FF0000",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileId": null,
+				"tileRenderMode": "Stretch",
+				"maxPerLevel": 0,
+				"limitBehavior": "DiscardOldOnes",
+				"pivotX": 0.5,
+				"pivotY": 1,
+				"fieldDefs": [
+					{
+						"identifier": "health",
+						"__type": "Int",
+						"uid": 43,
+						"type": "F_Int",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": { "id": "V_Int", "params": [1] }
+					},
+					{
+						"identifier": "name",
+						"__type": "String",
+						"uid": 44,
+						"type": "F_String",
+						"isArray": false,
+						"canBeNull": true,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
+					},
+					{
+						"identifier": "color",
+						"__type": "Color",
+						"uid": 47,
+						"type": "F_Color",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
+					},
+					{
+						"identifier": "canDie",
+						"__type": "Bool",
+						"uid": 48,
+						"type": "F_Bool",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": {
+							"id": "V_Bool",
+							"params": [ true ]
+						}
+					},
+					{
+						"identifier": "mobs",
+						"__type": "LocalEnum.Mobs",
+						"uid": 50,
+						"type": { "id": "F_Enum", "params": [49] },
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
+					}
+				]
 			}
 		],
 		"tilesets": [
@@ -560,11 +666,18 @@
 				}
 			}
 		],
-		"enums": [{ "identifier": "Items", "uid": 30, "values": [
-			{ "id": "Pickaxe", "tileId": 0, "__tileSrcRect": [0,0,16,16] },
-			{ "id": "Potion", "tileId": 6, "__tileSrcRect": [96,0,16,16] },
-			{ "id": "Food", "tileId": 67, "__tileSrcRect": [16,96,16,16] }
-		], "iconTilesetUid": 31, "externalRelPath": null, "externalFileChecksum": null }],
+		"enums": [
+			{ "identifier": "Items", "uid": 30, "values": [
+				{ "id": "Pickaxe", "tileId": 0, "__tileSrcRect": [0,0,16,16] },
+				{ "id": "Potion", "tileId": 6, "__tileSrcRect": [96,0,16,16] },
+				{ "id": "Food", "tileId": 67, "__tileSrcRect": [16,96,16,16] }
+			], "iconTilesetUid": 31, "externalRelPath": null, "externalFileChecksum": null },
+			{ "identifier": "Mobs", "uid": 49, "values": [
+				{ "id": "Bear", "tileId": null, "__tileSrcRect": null },
+				{ "id": "Goblin", "tileId": null, "__tileSrcRect": null },
+				{ "id": "Highwayman", "tileId": null, "__tileSrcRect": null }
+			], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null }
+		],
 		"externalEnums": []
 	},
 	"levels": [
@@ -628,7 +741,69 @@
 								"id": "V_String",
 								"params": ["Pickaxe"]
 							}]
-						}] }
+						}] },
+						{ "__identifier": "Mob", "__grid": [17,23], "__tile": null, "defUid": 42, "px": [140,192], "fieldInstances": [
+							{
+								"__identifier": "health",
+								"__value": 5,
+								"__type": "Int",
+								"defUid": 43,
+								"realEditorValues": [{ "id": "V_Int", "params": [5] }]
+							},
+							{
+								"__identifier": "name",
+								"__value": "mr bear",
+								"__type": "String",
+								"defUid": 44,
+								"realEditorValues": [{
+									"id": "V_String",
+									"params": ["mr bear"]
+								}]
+							},
+							{ "__identifier": "color", "__value": "#000000", "__type": "Color", "defUid": 47, "realEditorValues": [] },
+							{ "__identifier": "canDie", "__value": true, "__type": "Bool", "defUid": 48, "realEditorValues": [] },
+							{
+								"__identifier": "mobs",
+								"__value": "Goblin",
+								"__type": "LocalEnum.Mobs",
+								"defUid": 50,
+								"realEditorValues": [{
+									"id": "V_String",
+									"params": ["Goblin"]
+								}]
+							}
+						] },
+						{ "__identifier": "Mob", "__grid": [25,18], "__tile": null, "defUid": 42, "px": [204,152], "fieldInstances": [
+							{
+								"__identifier": "health",
+								"__value": 34,
+								"__type": "Int",
+								"defUid": 43,
+								"realEditorValues": [{ "id": "V_Int", "params": [34] }]
+							},
+							{
+								"__identifier": "name",
+								"__value": "Goblin boy",
+								"__type": "String",
+								"defUid": 44,
+								"realEditorValues": [{
+									"id": "V_String",
+									"params": ["Goblin boy"]
+								}]
+							},
+							{ "__identifier": "color", "__value": "#000000", "__type": "Color", "defUid": 47, "realEditorValues": [] },
+							{ "__identifier": "canDie", "__value": true, "__type": "Bool", "defUid": 48, "realEditorValues": [] },
+							{
+								"__identifier": "mobs",
+								"__value": "Goblin",
+								"__type": "LocalEnum.Mobs",
+								"defUid": 50,
+								"realEditorValues": [{
+									"id": "V_String",
+									"params": ["Goblin"]
+								}]
+							}
+						] }
 					]
 				},
 				{
