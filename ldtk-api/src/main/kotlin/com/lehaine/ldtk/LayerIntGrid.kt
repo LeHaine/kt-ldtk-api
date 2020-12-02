@@ -1,10 +1,10 @@
 package com.lehaine.ldtk
 
-class LayerIntGrid(json: LayerInstanceJson) : Layer(json) {
+open class LayerIntGrid(json: LayerInstanceJson) : Layer(json) {
 
     data class ValueInfo(val identifier: String?, val color: Int)
 
-    val valueInfos = mutableListOf<ValueInfo>()
+    internal val valueInfos = mutableListOf<ValueInfo>()
 
     private val _intGrid = mutableMapOf<Int, Int>().apply {
         json.intGrid.forEach {
