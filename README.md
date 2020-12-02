@@ -1,6 +1,6 @@
-# THIS IS CURRENTLY IN DEVELOPMENT AND SHOULD NOT BE USED YET
 
 # About
+**!! This project is currently in development and should not be used yet !!**
 
 This is a Kotlin and Java API to load **LDtk project json** files and render them in LibGDX.
 
