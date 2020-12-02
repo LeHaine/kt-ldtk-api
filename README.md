@@ -11,15 +11,15 @@ This is a Kotlin and Java API to load **LDtk project json** files and render the
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
 
 
-#
+# Usage
 ## Documentation
 
 TODO
 
-# Download
+## Download
 
 TODO
 
-# Samples
+## Samples
 
 You can check out a few samples in the [samples](samples) module.
