@@ -1,6 +1,6 @@
-# gdx-ldtk-api
+# THIS IS CURRENTLY IN DEVELOPMENT AND SHOULD NOT BE USED YET
 
-# THIS IS CURRENT IN DEVELOPMENT AND SHOULD NOT BE USED YET
+# About
 
 This is a Kotlin and Java API to load **LDtk project json** files and render them in LibGDX.
 
