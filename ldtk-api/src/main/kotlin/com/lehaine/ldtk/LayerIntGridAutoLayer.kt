@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-class LayerIntGridAutoLayer(json: LayerInstanceJson) : LayerIntGrid(json) {
+open class LayerIntGridAutoLayer(json: LayerInstanceJson) : LayerIntGrid(json) {
 
     val autoTiles: List<AutoLayer.AutoTile> =
         json.autoLayerTiles.map {

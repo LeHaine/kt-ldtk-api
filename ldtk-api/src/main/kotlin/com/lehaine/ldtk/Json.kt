@@ -572,5 +572,5 @@ data class EnumData(
 
     /** An array of 4 Int values that refers to the tile in the tileset image: `[ x, y, width, height ]` **/
     @Added("0.4.0")
-    val __tileSrcRect: List<Int>,
+    val __tileSrcRect: List<Int>?,
 )

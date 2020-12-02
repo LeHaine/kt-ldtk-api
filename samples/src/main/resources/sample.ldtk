@@ -598,8 +598,8 @@
 						}
 					},
 					{
-						"identifier": "mobs",
-						"__type": "LocalEnum.Mobs",
+						"identifier": "type",
+						"__type": "LocalEnum.MobType",
 						"uid": 50,
 						"type": { "id": "F_Enum", "params": [49] },
 						"isArray": false,
@@ -672,7 +672,7 @@
 				{ "id": "Potion", "tileId": 6, "__tileSrcRect": [96,0,16,16] },
 				{ "id": "Food", "tileId": 67, "__tileSrcRect": [16,96,16,16] }
 			], "iconTilesetUid": 31, "externalRelPath": null, "externalFileChecksum": null },
-			{ "identifier": "Mobs", "uid": 49, "values": [
+			{ "identifier": "MobType", "uid": 49, "values": [
 				{ "id": "Bear", "tileId": null, "__tileSrcRect": null },
 				{ "id": "Goblin", "tileId": null, "__tileSrcRect": null },
 				{ "id": "Highwayman", "tileId": null, "__tileSrcRect": null }
@@ -763,9 +763,9 @@
 							{ "__identifier": "color", "__value": "#000000", "__type": "Color", "defUid": 47, "realEditorValues": [] },
 							{ "__identifier": "canDie", "__value": true, "__type": "Bool", "defUid": 48, "realEditorValues": [] },
 							{
-								"__identifier": "mobs",
+								"__identifier": "type",
 								"__value": "Goblin",
-								"__type": "LocalEnum.Mobs",
+								"__type": "LocalEnum.MobType",
 								"defUid": 50,
 								"realEditorValues": [{
 									"id": "V_String",
@@ -794,9 +794,9 @@
 							{ "__identifier": "color", "__value": "#000000", "__type": "Color", "defUid": 47, "realEditorValues": [] },
 							{ "__identifier": "canDie", "__value": true, "__type": "Bool", "defUid": 48, "realEditorValues": [] },
 							{
-								"__identifier": "mobs",
+								"__identifier": "type",
 								"__value": "Goblin",
-								"__type": "LocalEnum.Mobs",
+								"__type": "LocalEnum.MobType",
 								"defUid": 50,
 								"realEditorValues": [{
 									"id": "V_String",

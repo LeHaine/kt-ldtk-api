@@ -11,6 +11,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.tools.StandardLocation
+import kotlin.reflect.KClass
 
 @AutoService(Processor::class)
 class ProjectProcessor : AbstractProcessor() {
@@ -80,20 +81,39 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
         layers.forEach { layerDef ->
+            val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
+            val layerConstructor =
+                FunSpec.constructorBuilder()
+                    .addParameter("json", LayerInstanceJson::class)
+
+            fun extendLayerClass(superClass: KClass<*>) {
+                layerClassSpec.run {
+                    superclass(superClass)
+                    addSuperclassConstructorParameter("%N", "json")
+                }
+            }
+
             when (layerDef.type) {
                 "IntGrid" -> {
+                    extendLayerClass(LayerIntGrid::class)
                 }
                 "AutoLayer" -> {
+                    extendLayerClass(LayerIntGridAutoLayer::class)
                 }
                 "Entities" -> {
+                    extendLayerClass(LayerEntities::class)
                 }
                 "Tiles" -> {
+                    extendLayerClass(LayerTiles::class)
                 }
                 else -> {
                     error("Unknown layer type ${layerDef.type}")
                 }
 
             }
+
+            layerClassSpec.primaryConstructor(layerConstructor.build())
+            projectClassSpec.addType(layerClassSpec.build())
         }
     }
 
@@ -106,19 +126,23 @@ class ProjectProcessor : AbstractProcessor() {
             val entityConstructor =
                 FunSpec.constructorBuilder()
                     .addParameter("json", EntityInstanceJson::class)
+
+            fun addToEntity(id: String, typeName: TypeName) {
+                entityConstructor.addParameter(id, typeName)
+                entityClassSpec.addProperty(
+                    PropertySpec.builder(
+                        id, typeName
+                    ).initializer(id)
+                        .build()
+                )
+            }
             entityDef.fieldDefs.forEach {
                 val canBeNull = it.canBeNull
                 when (val typeName = it.__type) {
                     "Int", "Float", "Bool", "String" -> {
                         val name = if (typeName == "Bool") "Boolean" else typeName
                         val className = ClassName("kotlin", name).copy(canBeNull)
-                        entityConstructor.addParameter(it.identifier, className)
-                        entityClassSpec.addProperty(
-                            PropertySpec.builder(
-                                it.identifier, className
-                            ).initializer(it.identifier)
-                                .build()
-                        )
+                        addToEntity(it.identifier, className)
                     }
                     "Color" -> {
                     }
@@ -129,16 +153,10 @@ class ProjectProcessor : AbstractProcessor() {
                             "LocalEnum." in typeName -> {
                                 val type = typeName.substring(typeName.indexOf(".") + 1)
                                 val className = ClassName.bestGuess(type).copy(canBeNull)
-                                entityConstructor.addParameter(it.identifier, className)
-                                entityClassSpec.addProperty(
-                                    PropertySpec.builder(
-                                        it.identifier,
-                                        className
-                                    ).initializer(it.identifier).build()
-                                )
+                                addToEntity(it.identifier, className)
                             }
                             "ExternEnum." in typeName -> {
-                                // TODO handle ExternEnums
+                                error("ExternEnums are not supported!")
                             }
                             else -> {
                                 error("Unknown field type $typeName")
