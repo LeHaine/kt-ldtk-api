@@ -29,7 +29,11 @@ class ProjectProcessor : AbstractProcessor() {
             .forEach {
                 val ldtkProject = it.getAnnotation(LDtkProject::class.java)
                 val ldtkFileLocation = ldtkProject.ldtkFileLocation
-                val className = it.simpleName.toString()
+                val className = if (ldtkProject.name.isBlank()) {
+                    "${it.simpleName}_"
+                } else {
+                    ldtkProject.name
+                }
                 println("Processing $className")
                 val pkg = processingEnv.elementUtils.getPackageOf(it).toString()
                 generateProject(className, pkg, ldtkFileLocation)
@@ -49,7 +53,7 @@ class ProjectProcessor : AbstractProcessor() {
 
             require(json != null) { "LDtk project file is empty or or missing! Please check to ensure it exists." }
 
-            val fileName = "${className}_"
+            val fileName = "${className}"
 
             val fileSpec = FileSpec.builder(pkg, fileName)
             val projectClassSpec = TypeSpec.classBuilder(fileName)

@@ -26,4 +26,4 @@ annotation class Changed(val version: String)
 annotation class Only(val types: Array<String>)
 
 @Target(AnnotationTarget.CLASS)
-annotation class LDtkProject(val ldtkFileLocation: String)
+annotation class LDtkProject(val ldtkFileLocation: String, val name: String = "")
