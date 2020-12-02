@@ -53,10 +53,11 @@ class ProjectProcessor : AbstractProcessor() {
 
             require(json != null) { "LDtk project file is empty or or missing! Please check to ensure it exists." }
 
-            val fileName = "${className}"
-
-            val fileSpec = FileSpec.builder(pkg, fileName)
-            val projectClassSpec = TypeSpec.classBuilder(fileName)
+            val fileSpec = FileSpec.builder(pkg, className)
+            val projectClassSpec = TypeSpec.classBuilder(className).apply {
+                superclass(Project::class)
+                addSuperclassConstructorParameter("%S", ldtkFileLocation)
+            }
 
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)

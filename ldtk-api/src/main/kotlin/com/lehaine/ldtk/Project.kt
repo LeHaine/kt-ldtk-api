@@ -1,6 +1,9 @@
 package com.lehaine.ldtk
 
-class Project {
+open class Project(val projectFilePath: String) {
+
+    var bgColorInt: Int = 0x0
+    var bgColorHex: String = "#000000"
 
     companion object {
         fun intToHex(color: Int, leadingZeros: Int = 6): String {
