@@ -4,7 +4,7 @@
 
 This is a Kotlin and Java API to load **LDtk project json** files and render them in LibGDX.
 
-[LDtk official page](https://deepnight.net/tools/ldtk-2d-level-editor)
+[LDtk official website](https://ldtk.io/)
 
 ## Features
 - **Annotation processing**: Adding a simple annontation will allow fully generated typesafe code to be used within your game.
