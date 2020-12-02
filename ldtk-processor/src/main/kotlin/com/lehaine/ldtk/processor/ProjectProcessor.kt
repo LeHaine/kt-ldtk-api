@@ -53,7 +53,7 @@ class ProjectProcessor : AbstractProcessor() {
 
             require(json != null) { "LDtk project file is empty or or missing! Please check to ensure it exists." }
 
-            val fileSpec = FileSpec.builder(pkg, className)
+            val fileSpec = FileSpec.builder(pkg, className).indent(FILE_INDENT)
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
                 superclass(Project::class)
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
@@ -62,7 +62,7 @@ class ProjectProcessor : AbstractProcessor() {
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
             generateLayers(projectClassSpec, json.defs.layers)
-            generateLevel(projectClassSpec, className)
+            generateLevel(projectClassSpec, className, json.defs.layers)
 
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
@@ -178,7 +178,7 @@ class ProjectProcessor : AbstractProcessor() {
     }
 
 
-    private fun generateLevel(projectClassSpec: TypeSpec.Builder, className: String) {
+    private fun generateLevel(projectClassSpec: TypeSpec.Builder, className: String, layers: List<LayerDefJson>) {
         val levelClassSpec = TypeSpec.classBuilder("${className}_Level").apply {
             superclass(Level::class)
             addSuperclassConstructorParameter("%N", "project")
@@ -191,10 +191,31 @@ class ProjectProcessor : AbstractProcessor() {
 
         levelClassSpec.primaryConstructor(levelConstructor.build())
 
+        layers.forEach {
+            levelClassSpec.addProperty(
+                PropertySpec.builder(
+                    "layer_${it.identifier}",
+                    ClassName.bestGuess("Layer_${it.identifier}")
+                ).initializer("resolveLayer(%S) as Layer_%N", it.identifier, it.identifier).build()
+            )
+        }
+
+        levelClassSpec.addFunction(
+            FunSpec.builder("instantiateLayer")
+                .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+                .addParameter("json", LayerInstanceJson::class)
+                .returns(Layer::class.asTypeName().copy(nullable = true))
+                .addStatement(
+                    "return Class.forName(\"Layer_\${%L}\").getDeclaredConstructor().newInstance() as Layer",
+                    "json.__identifier"
+                )
+                .build()
+        )
         projectClassSpec.addType(levelClassSpec.build())
     }
 
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
+        const val FILE_INDENT = "    "
     }
 }

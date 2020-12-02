@@ -50,7 +50,12 @@ open class Level(val project: Project, val json: LevelJson) {
 
     }
 
-    protected fun instantiateLayer(json: LayerInstanceJson): Layer? {
+    fun resolveLayer(id: String): Layer? {
+        return allUntypedLayers.find { it.identifier == id }
+    }
+
+    protected open fun instantiateLayer(json: LayerInstanceJson): Layer? {
         return null
     }
+
 }
