@@ -107,13 +107,15 @@ class ProjectProcessor : AbstractProcessor() {
                 FunSpec.constructorBuilder()
                     .addParameter("json", EntityInstanceJson::class)
             entityDef.fieldDefs.forEach {
+                val canBeNull = it.canBeNull
                 when (val typeName = it.__type) {
                     "Int", "Float", "Bool", "String" -> {
-                        entityConstructor.addParameter(it.identifier, ClassName.bestGuess(typeName))
+                        val name = if (typeName == "Bool") "Boolean" else typeName
+                        val className = ClassName("kotlin", name).copy(canBeNull)
+                        entityConstructor.addParameter(it.identifier, className)
                         entityClassSpec.addProperty(
                             PropertySpec.builder(
-                                it.identifier,
-                                ClassName.bestGuess(typeName)
+                                it.identifier, className
                             ).initializer(it.identifier)
                                 .build()
                         )
@@ -126,11 +128,12 @@ class ProjectProcessor : AbstractProcessor() {
                         when {
                             "LocalEnum." in typeName -> {
                                 val type = typeName.substring(typeName.indexOf(".") + 1)
-                                entityConstructor.addParameter(it.identifier, ClassName.bestGuess(type))
+                                val className = ClassName.bestGuess(type).copy(canBeNull)
+                                entityConstructor.addParameter(it.identifier, className)
                                 entityClassSpec.addProperty(
                                     PropertySpec.builder(
                                         it.identifier,
-                                        ClassName.bestGuess(type)
+                                        className
                                     ).initializer(it.identifier).build()
                                 )
                             }

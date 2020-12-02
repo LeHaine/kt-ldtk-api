@@ -19,18 +19,19 @@ open class Entity(private val json: EntityInstanceJson) {
     val tileInfosJson: TileInfo? = if (json.__tileJson == null) {
         null
     } else {
-        TileInfo(tilesetUid = json.__tileJson.tilesetUid,
-                x = json.__tileJson.srcRect[0],
-                y = json.__tileJson.srcRect[1],
-                w = json.__tileJson.srcRect[2],
-                h = json.__tileJson.srcRect[3])
+        TileInfo(
+            tilesetUid = json.__tileJson.tilesetUid,
+            x = json.__tileJson.srcRect[0],
+            y = json.__tileJson.srcRect[1],
+            w = json.__tileJson.srcRect[2],
+            h = json.__tileJson.srcRect[3]
+        )
     }
 
     init {
-        
+
     }
 
-
+    data class TileInfo(val tilesetUid: Int, val x: Int, val y: Int, val w: Int, val h: Int)
 }
 
-data class TileInfo(val tilesetUid: Int, val x: Int, val y: Int, val w: Int, val h: Int)

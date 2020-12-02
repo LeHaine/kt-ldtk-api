@@ -246,7 +246,7 @@ data class FieldInstanceJson(
     Actual value of the field instance. The value type may vary, depending on `__type` (Integer, Boolean, String etc.)
     It can also be an `List` of various types.
      **/
-    val __value: Any,
+    val __value: Any?,
 
     /** Type of the field, such as Int, Float, Enum(enum_name), Boolean, etc. **/
     val __type: Any,
