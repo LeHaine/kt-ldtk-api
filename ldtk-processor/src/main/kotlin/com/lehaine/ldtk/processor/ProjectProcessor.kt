@@ -1,10 +1,7 @@
 package com.lehaine.ldtk.processor
 
 import com.google.auto.service.AutoService
-import com.lehaine.ldtk.Entity
-import com.lehaine.ldtk.EntityInstanceJson
-import com.lehaine.ldtk.LDtkApi
-import com.lehaine.ldtk.LDtkProject
+import com.lehaine.ldtk.*
 import com.squareup.kotlinpoet.*
 import java.io.File
 import java.nio.file.Paths
@@ -55,82 +52,9 @@ class ProjectProcessor : AbstractProcessor() {
 
             val fileSpec = FileSpec.builder(pkg, fileName)
             val projectClassSpec = TypeSpec.classBuilder(fileName)
-            json.defs.enums.forEach { enumDef ->
-                val typeSpec = TypeSpec.enumBuilder(enumDef.identifier)
-                enumDef.values.forEach {
-                    typeSpec.addEnumConstant(it.id)
-                }
-                projectClassSpec.addType(typeSpec.build())
-            }
 
-            json.defs.layers.forEach { layerDef ->
-                when (layerDef.type) {
-                    "IntGrid" -> {
-                    }
-                    "AutoLayer" -> {
-                    }
-                    "Entities" -> {
-                        json.defs.entities.forEach { entityDef ->
-                            val entityClassSpec = TypeSpec.classBuilder("Entity_${entityDef.identifier}").apply {
-                                superclass(Entity::class)
-                                addSuperclassConstructorParameter("%N", "json")
-                            }
-                            val entityConstructor =
-                                FunSpec.constructorBuilder()
-                                    .addParameter("json", EntityInstanceJson::class)
-                            entityDef.fieldDefs.forEach {
-                                when (val typeName = it.__type) {
-                                    "Int", "Float", "Bool", "String" -> {
-                                        entityConstructor.addParameter(it.identifier, ClassName.bestGuess(typeName))
-                                        entityClassSpec.addProperty(
-                                            PropertySpec.builder(
-                                                it.identifier,
-                                                ClassName.bestGuess(typeName)
-                                            ).initializer(it.identifier)
-                                                .build()
-                                        )
-                                    }
-                                    "Color" -> {
-                                    }
-                                    "Point" -> {
-                                    }
-                                    else -> { // field type is an enum
-                                        when {
-                                            "LocalEnum." in typeName -> {
-                                                val type = typeName.substring(typeName.indexOf(".") + 1)
-                                                entityConstructor.addParameter(it.identifier, ClassName.bestGuess(type))
-                                                entityClassSpec.addProperty(
-                                                    PropertySpec.builder(
-                                                        it.identifier,
-                                                        ClassName.bestGuess(type)
-                                                    ).initializer(it.identifier).build()
-                                                )
-                                            }
-                                            "ExternEnum." in typeName -> {
-
-                                            }
-                                            else -> {
-                                                error("Unknown field type $typeName")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            entityClassSpec.primaryConstructor(entityConstructor.build())
-                            projectClassSpec.addType(entityClassSpec.build())
-
-                        }
-                    }
-                    "Tiles" -> {
-                    }
-                    else -> {
-                        error("Unknown layer type ${layerDef.type}")
-                    }
-
-                }
-
-            }
-
+            generateEnums(projectClassSpec, json.defs.enums)
+            generateLayers(projectClassSpec, json.defs)
 
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
@@ -143,13 +67,89 @@ class ProjectProcessor : AbstractProcessor() {
         }
     }
 
+    private fun generateEnums(projectClassSpec: TypeSpec.Builder, enums: List<EnumDefJson>) {
+        enums.forEach { enumDef ->
+            val typeSpec = TypeSpec.enumBuilder(enumDef.identifier)
+            enumDef.values.forEach {
+                typeSpec.addEnumConstant(it.id)
+            }
+            projectClassSpec.addType(typeSpec.build())
+        }
+    }
+
+    private fun generateLayers(projectClassSpec: TypeSpec.Builder, defs: DefinitionJson) {
+        defs.layers.forEach { layerDef ->
+            when (layerDef.type) {
+                "IntGrid" -> {
+                }
+                "AutoLayer" -> {
+                }
+                "Entities" -> {
+                    generateEntities(projectClassSpec, defs.entities)
+                }
+                "Tiles" -> {
+                }
+                else -> {
+                    error("Unknown layer type ${layerDef.type}")
+                }
+
+            }
+        }
+    }
+
+    private fun generateEntities(projectClassSpec: TypeSpec.Builder, entities: List<EntityDefJson>) {
+        entities.forEach { entityDef ->
+            val entityClassSpec = TypeSpec.classBuilder("Entity_${entityDef.identifier}").apply {
+                superclass(Entity::class)
+                addSuperclassConstructorParameter("%N", "json")
+            }
+            val entityConstructor =
+                FunSpec.constructorBuilder()
+                    .addParameter("json", EntityInstanceJson::class)
+            entityDef.fieldDefs.forEach {
+                when (val typeName = it.__type) {
+                    "Int", "Float", "Bool", "String" -> {
+                        entityConstructor.addParameter(it.identifier, ClassName.bestGuess(typeName))
+                        entityClassSpec.addProperty(
+                            PropertySpec.builder(
+                                it.identifier,
+                                ClassName.bestGuess(typeName)
+                            ).initializer(it.identifier)
+                                .build()
+                        )
+                    }
+                    "Color" -> {
+                    }
+                    "Point" -> {
+                    }
+                    else -> { // field type is an enum
+                        when {
+                            "LocalEnum." in typeName -> {
+                                val type = typeName.substring(typeName.indexOf(".") + 1)
+                                entityConstructor.addParameter(it.identifier, ClassName.bestGuess(type))
+                                entityClassSpec.addProperty(
+                                    PropertySpec.builder(
+                                        it.identifier,
+                                        ClassName.bestGuess(type)
+                                    ).initializer(it.identifier).build()
+                                )
+                            }
+                            "ExternEnum." in typeName -> {
+                                // TODO handle ExternEnums
+                            }
+                            else -> {
+                                error("Unknown field type $typeName")
+                            }
+                        }
+                    }
+                }
+            }
+            entityClassSpec.primaryConstructor(entityConstructor.build())
+            projectClassSpec.addType(entityClassSpec.build())
+        }
+    }
+
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
-        val TYPE_TO_CLASS = mapOf(
-            "Int" to Int::class,
-            "Float" to Float::class,
-            "Bool" to Boolean::class,
-            "String" to String::class
-        )
     }
 }
