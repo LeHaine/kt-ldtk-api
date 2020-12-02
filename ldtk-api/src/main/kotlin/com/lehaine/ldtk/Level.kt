@@ -58,4 +58,9 @@ open class Level(val project: Project, val json: LevelJson) {
         return null
     }
 
+    override fun toString(): String {
+        return "Level(project=$project, uid=$uid, identifier='$identifier', pxWidth=$pxWidth, pxHeight=$pxHeight, worldX=$worldX, worldY=$worldY, bgColor=$bgColor, _allUntypedLayers=$_allUntypedLayers, _neighbors=$_neighbors)"
+    }
+
+
 }

@@ -47,9 +47,9 @@ class ProjectProcessor : AbstractProcessor() {
             val path = Paths.get(resource.toUri()).resolve("../../../../../") // major hack
             resource.delete()
             val resourcePath = path.resolve("resources/main")
-            val fileText = resourcePath.resolve(ldtkFileLocation).toFile().readText()
+            val fileContent = resourcePath.resolve(ldtkFileLocation).toFile().readText()
 
-            val json = LDtkApi.parseLDtkFile(fileText)
+            val json = LDtkApi.parseLDtkFile(fileContent)
 
             require(json != null) { "LDtk project file is empty or or missing! Please check to ensure it exists." }
 
@@ -57,12 +57,30 @@ class ProjectProcessor : AbstractProcessor() {
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
                 superclass(Project::class)
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
+                addInitializerBlock(
+                    CodeBlock.builder()
+                        .addStatement(
+                            "val jsonString = javaClass.classLoader.getResource(%S)?.readText() ?: error(\"Unable to load LDtk file content!\")",
+                            ldtkFileLocation
+                        )
+                        .addStatement("parseJson(jsonString)")
+                        .build()
+                )
+                addFunction(
+                    FunSpec.builder("instantiateLevel")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addParameter("project", Project::class)
+                        .addParameter("json", LevelJson::class)
+                        .returns(Level::class)
+                        .addStatement("return %L_Level(project, json)", className)
+                        .build()
+                )
             }
 
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
             generateLayers(projectClassSpec, json.defs.layers)
-            generateLevel(projectClassSpec, className, json.defs.layers)
+            generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
@@ -178,7 +196,12 @@ class ProjectProcessor : AbstractProcessor() {
     }
 
 
-    private fun generateLevel(projectClassSpec: TypeSpec.Builder, className: String, layers: List<LayerDefJson>) {
+    private fun generateLevel(
+        projectClassSpec: TypeSpec.Builder,
+        pkg: String,
+        className: String,
+        layers: List<LayerDefJson>
+    ) {
         val levelClassSpec = TypeSpec.classBuilder("${className}_Level").apply {
             superclass(Level::class)
             addSuperclassConstructorParameter("%N", "project")
@@ -206,8 +229,11 @@ class ProjectProcessor : AbstractProcessor() {
                 .addParameter("json", LayerInstanceJson::class)
                 .returns(Layer::class.asTypeName().copy(nullable = true))
                 .addStatement(
-                    "return Class.forName(\"Layer_\${%L}\").getDeclaredConstructor().newInstance() as Layer",
-                    "json.__identifier"
+                    "return Class.forName(\"%L.%L\\\$Layer_\${%L}\").getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(%L) as Layer",
+                    pkg,
+                    className,
+                    "json.__identifier",
+                    "json"
                 )
                 .build()
         )

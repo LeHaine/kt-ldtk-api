@@ -3,7 +3,7 @@ package com.lehaine.ldtk
 
 enum class LayerType {
     IntGrid,
-    Titles,
+    Tiles,
     Entities,
     AutoLayer,
     Unknown
