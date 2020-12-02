@@ -1,0 +1,56 @@
+package com.lehaine.ldtk
+
+open class Level(val project: Project, val json: LevelJson) {
+    enum class NeighborDirection {
+        North,
+        South,
+        West,
+        East;
+
+        companion object {
+            fun fromDir(dir: String): NeighborDirection {
+                return when (dir.toLowerCase()) {
+                    "n" -> North
+                    "e" -> East
+                    "s" -> South
+                    "w" -> West
+                    else -> {
+                        System.err.println("WARNING: unknown neighbor level direction: $dir")
+                        North
+                    }
+                }
+            }
+        }
+    }
+
+    data class Neighbor(val levelUid: Int, val dir: NeighborDirection)
+
+    val uid = json.uid
+    val identifier = json.identifier
+    val pxWidth = json.pxWid
+    val pxHeight = json.pxHei
+    val worldX = json.worldX
+    val worldY = json.worldY
+    val bgColor = Project.hexToInt(json.__bgColor)
+
+    private val _allUntypedLayers = mutableListOf<Layer>()
+    val allUntypedLayers get() = _allUntypedLayers
+
+    private val _neighbors = mutableListOf<Neighbor>()
+    val neighors get() = _neighbors.toList()
+
+    init {
+        json.layerInstances.forEach { layerInstanceJson ->
+            val layer = instantiateLayer(layerInstanceJson)
+            layer?.let { _allUntypedLayers.add(it) }
+        }
+        json.__neighbours?.forEach {
+            _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
+        }
+
+    }
+
+    protected fun instantiateLayer(json: LayerInstanceJson): Layer? {
+        return null
+    }
+}

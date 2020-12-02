@@ -84,7 +84,7 @@ data class LevelJson(
     val layerInstances: List<LayerInstanceJson>,
 
     /** A list of all other levels touching this one on the world map. The `dir` is a single lowercase character tipping on the level location (`n`orth, `s`outh, `w`est, `e`ast). In "linear" world layouts, this List is populated with previous/next levels in List, and `dir` depends on the linear horizontal/vertical layout. **/
-    val __neighbours: List<Neighbour>,
+    val __neighbours: List<Neighbour>?,
 )
 
 @JsonClass(generateAdapter = true)

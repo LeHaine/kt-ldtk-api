@@ -62,6 +62,7 @@ class ProjectProcessor : AbstractProcessor() {
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
             generateLayers(projectClassSpec, json.defs.layers)
+            generateLevel(projectClassSpec, className)
 
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
@@ -74,6 +75,7 @@ class ProjectProcessor : AbstractProcessor() {
         }
     }
 
+
     private fun generateEnums(projectClassSpec: TypeSpec.Builder, enums: List<EnumDefJson>) {
         enums.forEach { enumDef ->
             val typeSpec = TypeSpec.enumBuilder(enumDef.identifier)
@@ -81,44 +83,6 @@ class ProjectProcessor : AbstractProcessor() {
                 typeSpec.addEnumConstant(it.id)
             }
             projectClassSpec.addType(typeSpec.build())
-        }
-    }
-
-    private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
-        layers.forEach { layerDef ->
-            val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
-            val layerConstructor =
-                FunSpec.constructorBuilder()
-                    .addParameter("json", LayerInstanceJson::class)
-
-            fun extendLayerClass(superClass: KClass<*>) {
-                layerClassSpec.run {
-                    superclass(superClass)
-                    addSuperclassConstructorParameter("%N", "json")
-                }
-            }
-
-            when (layerDef.type) {
-                "IntGrid" -> {
-                    extendLayerClass(LayerIntGrid::class)
-                }
-                "AutoLayer" -> {
-                    extendLayerClass(LayerIntGridAutoLayer::class)
-                }
-                "Entities" -> {
-                    extendLayerClass(LayerEntities::class)
-                }
-                "Tiles" -> {
-                    extendLayerClass(LayerTiles::class)
-                }
-                else -> {
-                    error("Unknown layer type ${layerDef.type}")
-                }
-
-            }
-
-            layerClassSpec.primaryConstructor(layerConstructor.build())
-            projectClassSpec.addType(layerClassSpec.build())
         }
     }
 
@@ -173,6 +137,61 @@ class ProjectProcessor : AbstractProcessor() {
             entityClassSpec.primaryConstructor(entityConstructor.build())
             projectClassSpec.addType(entityClassSpec.build())
         }
+    }
+
+    private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
+        layers.forEach { layerDef ->
+            val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
+            val layerConstructor =
+                FunSpec.constructorBuilder()
+                    .addParameter("json", LayerInstanceJson::class)
+
+            fun extendLayerClass(superClass: KClass<*>) {
+                layerClassSpec.run {
+                    superclass(superClass)
+                    addSuperclassConstructorParameter("%N", "json")
+                }
+            }
+
+            when (layerDef.type) {
+                "IntGrid" -> {
+                    extendLayerClass(LayerIntGrid::class)
+                }
+                "AutoLayer" -> {
+                    extendLayerClass(LayerIntGridAutoLayer::class)
+                }
+                "Entities" -> {
+                    extendLayerClass(LayerEntities::class)
+                }
+                "Tiles" -> {
+                    extendLayerClass(LayerTiles::class)
+                }
+                else -> {
+                    error("Unknown layer type ${layerDef.type}")
+                }
+
+            }
+
+            layerClassSpec.primaryConstructor(layerConstructor.build())
+            projectClassSpec.addType(layerClassSpec.build())
+        }
+    }
+
+
+    private fun generateLevel(projectClassSpec: TypeSpec.Builder, className: String) {
+        val levelClassSpec = TypeSpec.classBuilder("${className}_Level").apply {
+            superclass(Level::class)
+            addSuperclassConstructorParameter("%N", "project")
+            addSuperclassConstructorParameter("%N", "json")
+        }
+        val levelConstructor =
+            FunSpec.constructorBuilder()
+                .addParameter("project", Project::class)
+                .addParameter("json", LevelJson::class)
+
+        levelClassSpec.primaryConstructor(levelConstructor.build())
+
+        projectClassSpec.addType(levelClassSpec.build())
     }
 
     companion object {
