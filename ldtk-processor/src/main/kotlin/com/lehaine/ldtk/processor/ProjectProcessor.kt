@@ -54,7 +54,8 @@ class ProjectProcessor : AbstractProcessor() {
             val projectClassSpec = TypeSpec.classBuilder(fileName)
 
             generateEnums(projectClassSpec, json.defs.enums)
-            generateLayers(projectClassSpec, json.defs)
+            generateEntities(projectClassSpec, json.defs.entities)
+            generateLayers(projectClassSpec, json.defs.layers)
 
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
@@ -77,15 +78,14 @@ class ProjectProcessor : AbstractProcessor() {
         }
     }
 
-    private fun generateLayers(projectClassSpec: TypeSpec.Builder, defs: DefinitionJson) {
-        defs.layers.forEach { layerDef ->
+    private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
+        layers.forEach { layerDef ->
             when (layerDef.type) {
                 "IntGrid" -> {
                 }
                 "AutoLayer" -> {
                 }
                 "Entities" -> {
-                    generateEntities(projectClassSpec, defs.entities)
                 }
                 "Tiles" -> {
                 }
