@@ -23,7 +23,14 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
         json.fieldInstances.forEach {
             if ("LocalEnum" in it.__type) {
                 val type = it.__type.substring(it.__type.indexOf(".") + 1)
-
+                val field = clazz.getDeclaredField(it.__identifier)
+                val setter = clazz.getDeclaredMethod(
+                    "set${it.__identifier.capitalize()}",
+                    Class.forName("$classPath\$$type")
+                )
+                val valueOf = field.type.getMethod("valueOf", String::class.java)
+                val value = valueOf.invoke(null, it.__value)
+                setter.invoke(entity, value)
             } else {
                 val classType = when (it.__type) {
                     "Int" -> Int::class.java
