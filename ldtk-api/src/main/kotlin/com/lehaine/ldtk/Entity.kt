@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-open class Entity(private val json: EntityInstanceJson) {
+open class Entity(val json: EntityInstanceJson) {
     val identifier: String = json.__identifier
 
     /** Grid-based X coordinate **/
@@ -33,5 +33,11 @@ open class Entity(private val json: EntityInstanceJson) {
     }
 
     data class TileInfo(val tilesetUid: Int, val x: Int, val y: Int, val w: Int, val h: Int)
+
+    override fun toString(): String {
+        return "Entity(identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfosJson)"
+    }
+
+
 }
 

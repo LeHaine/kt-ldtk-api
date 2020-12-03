@@ -249,7 +249,7 @@ data class FieldInstanceJson(
     val __value: Any?,
 
     /** Type of the field, such as Int, Float, Enum(enum_name), Boolean, etc. **/
-    val __type: Any,
+    val __type: String,
 
     /** Reference of the **Field definition** UID **/
     val defUid: Int,
@@ -482,8 +482,7 @@ data class FieldDefJson(
     val acceptFileTypes: List<String>?,
 
     /** Default value if selected value is null or invalid. **/
-
-    val defaultOverride: Any?,
+    val defaultOverride: DefaultOverrideInfo?,
 
     val editorDisplayMode: Any,
 
@@ -491,6 +490,9 @@ data class FieldDefJson(
 
     val editorAlwaysShow: Boolean,
 )
+
+@JsonClass(generateAdapter = true)
+data class DefaultOverrideInfo(val id:String, val params:List<Any>)
 
 @JsonClass(generateAdapter = true)
 data class TilesetDefJson(

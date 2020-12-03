@@ -15,4 +15,9 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
     protected open fun instantiateEntity(json: EntityInstanceJson): Entity? {
         return null
     }
+
+    override fun toString(): String {
+        return "LayerEntities(entities=$entities)"
+    }
+
 }

@@ -82,7 +82,7 @@ class ProjectProcessor : AbstractProcessor() {
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
             val tilesets = generateTilesets(projectClassSpec, json.defs.tilesets)
-            generateLayers(projectClassSpec, tilesets, json.defs.layers)
+            generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
             fileSpec.addType(projectClassSpec.build())
@@ -117,13 +117,17 @@ class ProjectProcessor : AbstractProcessor() {
                 FunSpec.constructorBuilder()
                     .addParameter("json", EntityInstanceJson::class)
 
-            fun addToEntity(id: String, typeName: TypeName) {
-                entityConstructor.addParameter(id, typeName)
+            fun addToEntity(id: String, typeName: TypeName, defaultOverride: Any?, lateinit: Boolean = false) {
                 entityClassSpec.addProperty(
                     PropertySpec.builder(
                         id, typeName
-                    ).initializer(id)
-                        .build()
+                    ).mutable(true).also {
+                        if (lateinit) {
+                            it.addModifiers(KModifier.LATEINIT)
+                        } else {
+                            it.initializer("%L", defaultOverride)
+                        }
+                    }.build()
                 )
             }
             entityDef.fieldDefs.forEach {
@@ -132,7 +136,12 @@ class ProjectProcessor : AbstractProcessor() {
                     "Int", "Float", "Bool", "String" -> {
                         val name = if (typeName == "Bool") "Boolean" else typeName
                         val className = ClassName("kotlin", name).copy(canBeNull)
-                        addToEntity(it.identifier, className)
+                        val defaultValue = if (typeName == "Int") {
+                            (it.defaultOverride?.params?.get(0) as? Double)?.toInt()
+                        } else {
+                            it.defaultOverride?.params?.get(0)
+                        }
+                        addToEntity(it.identifier, className, defaultValue)
                     }
                     "Color" -> {
                     }
@@ -143,7 +152,7 @@ class ProjectProcessor : AbstractProcessor() {
                             "LocalEnum." in typeName -> {
                                 val type = typeName.substring(typeName.indexOf(".") + 1)
                                 val className = ClassName.bestGuess(type).copy(canBeNull)
-                                addToEntity(it.identifier, className)
+                                addToEntity(it.identifier, className, it.defaultOverride?.params?.get(0), !canBeNull)
                             }
                             "ExternEnum." in typeName -> {
                                 error("ExternEnums are not supported!")
@@ -190,6 +199,8 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateLayers(
         projectClassSpec: TypeSpec.Builder,
+        pkg: String,
+        className: String,
         tilesets: MutableMap<Int, TilesetInfo>,
         layers: List<LayerDefJson>
     ) {
@@ -249,6 +260,51 @@ class ProjectProcessor : AbstractProcessor() {
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
+
+                    layerClassSpec.addFunction(
+                        FunSpec.builder("instantiateEntity").returns(Entity::class.asTypeName().copy(true))
+                            .addModifiers(KModifier.OVERRIDE)
+                            .returns(Entity::class.asTypeName().copy(nullable = true))
+                            .addParameter("json", EntityInstanceJson::class)
+                            .addStatement(
+                                "val clazz =  Class.forName(\"%L.%L\\\$Entity_\${%L}\")",
+                                pkg,
+                                className,
+                                "json.__identifier"
+                            )
+                            .addStatement(
+                                "val entity = clazz.getDeclaredConstructor(EntityInstanceJson::class.java).newInstance(%L) as Entity",
+                                "json",
+                            )
+                            .beginControlFlow("json.fieldInstances.forEach")
+                            .beginControlFlow("if (%S in it.__type)", "LocalEnum")
+                            .addStatement("val type = it.__type.substring(it.__type.indexOf(\".\") + 1)")
+                            .nextControlFlow("else")
+                            .beginControlFlow("val classType = when(it.__type)")
+                            .addStatement("%S -> Int::class.java", "Int")
+                            .addStatement("%S -> Boolean::class.java", "Bool")
+                            .addStatement("%S -> Double::class.java", "Double")
+                            .addStatement("%S -> Float::class.java", "Float")
+                            .addStatement("%S -> String::class.java", "String")
+                            .beginControlFlow("else ->")
+                            .addStatement("println(\"Unsupported type: \${it.__type}\")")
+                            .addStatement("null")
+                            .endControlFlow()
+                            .endControlFlow()
+                            .beginControlFlow("if (classType != null)")
+                            .addStatement("val setter =  clazz.getDeclaredMethod(\"set\${it.__identifier.capitalize()}\", classType)")
+                            .beginControlFlow("val value = if (it.__type == %S)", "Int")
+                            .addStatement("(it.__value as Double).toInt()")
+                            .nextControlFlow("else")
+                            .addStatement("it.__value")
+                            .endControlFlow()
+                            .addStatement("setter.invoke(entity, value)")
+                            .endControlFlow()
+                            .endControlFlow()
+                            .endControlFlow()
+                            .addStatement("return entity")
+                            .build()
+                    )
                 }
                 "Tiles" -> {
                     extendLayerClass(LayerTiles::class)
