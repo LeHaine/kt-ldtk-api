@@ -5,6 +5,8 @@ import com.lehaine.ldtk.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -46,9 +48,8 @@ class ProjectProcessor : AbstractProcessor() {
     private fun generateProject(className: String, pkg: String, ldtkFileLocation: String) {
         try {
             val resource = processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp", null)
-            val path = Paths.get(resource.toUri()).resolve("../../../../../") // major hack
+            val resourcePath = findResourcePath(Paths.get(resource.toUri()))
             resource.delete()
-            val resourcePath = path.resolve("resources/main")
             val fileContent = resourcePath.resolve(ldtkFileLocation).toFile().readText()
 
             val json = LDtkApi.parseLDtkFile(fileContent)
@@ -93,6 +94,15 @@ class ProjectProcessor : AbstractProcessor() {
             file.writeTo(File(kaptKotlinGeneratedDir))
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun findResourcePath(path: Path): Path {
+        val newPath = path.resolve("../resources/main")
+        return if (Files.exists(newPath)) {
+            newPath
+        } else {
+            findResourcePath(path.resolve("../"))
         }
     }
 
