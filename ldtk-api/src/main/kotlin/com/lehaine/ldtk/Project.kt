@@ -5,6 +5,7 @@ open class Project(val projectFilePath: String) {
     var bgColorInt: Int = 0x0
     var bgColorHex: String = "#000000"
 
+    lateinit var defs: DefinitionJson
     private val _allUntypedLevels = mutableListOf<Level>()
     val allUntypedLevels get() = _allUntypedLevels
 
@@ -24,6 +25,7 @@ open class Project(val projectFilePath: String) {
 
     fun parseJson(jsonString: String) {
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
+        defs = json.defs
         bgColorHex = json.bgColor
         bgColorInt = hexToInt(json.bgColor)
 
@@ -37,5 +39,20 @@ open class Project(val projectFilePath: String) {
 
     open fun instantiateLevel(project: Project, json: LevelJson): Level? {
         return null
+    }
+
+
+    fun getLayerDef(uid: Int?, identifier: String? = ""): LayerDefJson? {
+        if (uid == null && identifier == null) {
+            return null
+        }
+        return defs.layers.find { it.uid == uid || it.identifier == identifier }
+    }
+
+    fun getTilesetDef(uid: Int?, identifier: String? = ""): TilesetDefJson? {
+        if (uid == null && identifier == null) {
+            return null
+        }
+        return defs.tilesets.find { it.uid == uid || it.identifier == identifier }
     }
 }

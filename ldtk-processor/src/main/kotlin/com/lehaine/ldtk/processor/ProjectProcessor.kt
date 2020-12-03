@@ -3,6 +3,7 @@ package com.lehaine.ldtk.processor
 import com.google.auto.service.AutoService
 import com.lehaine.ldtk.*
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 import java.nio.file.Paths
 import javax.annotation.processing.AbstractProcessor
@@ -15,6 +16,7 @@ import kotlin.reflect.KClass
 
 @AutoService(Processor::class)
 class ProjectProcessor : AbstractProcessor() {
+
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(LDtkProject::class.java.name)
@@ -79,8 +81,8 @@ class ProjectProcessor : AbstractProcessor() {
 
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
-            generateTilesets(projectClassSpec, json.defs.tilesets)
-            generateLayers(projectClassSpec, json.defs.layers)
+            val tilesets = generateTilesets(projectClassSpec, json.defs.tilesets)
+            generateLayers(projectClassSpec, tilesets, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
             fileSpec.addType(projectClassSpec.build())
@@ -159,9 +161,16 @@ class ProjectProcessor : AbstractProcessor() {
     }
 
 
-    private fun generateTilesets(projectClassSpec: TypeSpec.Builder, tilesets: List<TilesetDefJson>) {
+    private data class TilesetInfo(val typeName: String, val json: TilesetDefJson)
+
+    private fun generateTilesets(
+        projectClassSpec: TypeSpec.Builder,
+        tilesets: List<TilesetDefJson>
+    ): MutableMap<Int, TilesetInfo> {
+        val allTilesets = mutableMapOf<Int, TilesetInfo>()
         tilesets.forEach {
-            val tilesetClassSpec = TypeSpec.classBuilder("Tileset_${it.identifier}").apply {
+            val name = "Tileset_${it.identifier}"
+            val tilesetClassSpec = TypeSpec.classBuilder(name).apply {
                 superclass(Tileset::class)
                 addSuperclassConstructorParameter("%N", "json")
 
@@ -173,19 +182,39 @@ class ProjectProcessor : AbstractProcessor() {
 
             tilesetClassSpec.primaryConstructor(tilesetConstructor.build())
             projectClassSpec.addType(tilesetClassSpec.build())
+
+            allTilesets[it.uid] = TilesetInfo(name, it)
         }
+        return allTilesets
     }
 
-    private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
+    private fun generateLayers(
+        projectClassSpec: TypeSpec.Builder,
+        tilesets: MutableMap<Int, TilesetInfo>,
+        layers: List<LayerDefJson>
+    ) {
         layers.forEach { layerDef ->
             val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
-            val layerConstructor =
-                FunSpec.constructorBuilder()
-                    .addParameter("json", LayerInstanceJson::class)
+            val layerConstructor = FunSpec.constructorBuilder()
 
             fun extendLayerClass(superClass: KClass<*>) {
                 layerClassSpec.run {
                     superclass(superClass)
+                    if (superClass == LayerIntGrid::class || superClass == LayerIntGridAutoLayer::class) {
+                        if (superClass == LayerIntGridAutoLayer::class) {
+                            layerConstructor.addParameter(
+                                "tilesetDefJson",
+                                TilesetDefJson::class.asTypeName().copy(nullable = true)
+                            )
+                            addSuperclassConstructorParameter("%N", "tilesetDefJson")
+                        }
+                        layerConstructor.addParameter(
+                            "intGridValues",
+                            List::class.asTypeName().parameterizedBy(IntGridValue::class.asTypeName())
+                        )
+                        addSuperclassConstructorParameter("%N", "intGridValues")
+                    }
+                    layerConstructor.addParameter("json", LayerInstanceJson::class)
                     addSuperclassConstructorParameter("%N", "json")
                 }
             }
@@ -199,15 +228,20 @@ class ProjectProcessor : AbstractProcessor() {
                     } else {
                         // Auto-layer IntGrid
                         extendLayerClass(LayerIntGridAutoLayer::class)
-//                        layerClassSpec.addProperty(
-//                            PropertySpec.builder("tileset", Tileset::class.asTypeName().copy(nullable = true))
-//                                .initializer()
-//                                .build()
-//                        )
-//                        layerClassSpec.addFunction(
-//                            FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
-//                                .addStatement("return tileset").build()
-//                        )
+                        val tileset = tilesets[layerDef.autoTilesetDefUid]
+                        if (tileset != null) {
+                            val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
+                            layerClassSpec.addProperty(
+                                PropertySpec.builder("tileset", tilesetType)
+                                    .initializer("%L(%N!!)", tileset.typeName, "tilesetDefJson")
+                                    .build()
+                            )
+                            layerClassSpec.addFunction(
+                                FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
+                                    .addModifiers(KModifier.OVERRIDE)
+                                    .addStatement("return tileset").build()
+                            )
+                        }
                     }
                 }
                 "AutoLayer" -> {
@@ -258,18 +292,70 @@ class ProjectProcessor : AbstractProcessor() {
             )
         }
 
+
         levelClassSpec.addFunction(
             FunSpec.builder("instantiateLayer")
                 .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
                 .addParameter("json", LayerInstanceJson::class)
                 .returns(Layer::class.asTypeName().copy(nullable = true))
                 .addStatement(
-                    "return Class.forName(\"%L.%L\\\$Layer_\${%L}\").getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(%L) as Layer",
+                    "val clazz =  Class.forName(\"%L.%L\\\$Layer_\${%L}\")",
                     pkg,
                     className,
-                    "json.__identifier",
+                    "json.__identifier"
+                )
+                .addStatement(
+                    "val superClass = clazz.superclass.simpleName",
+                )
+                .beginControlFlow("return when(superClass)")
+                .beginControlFlow("%S ->", "LayerIntGrid")
+                .addStatement(
+                    "val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues"
+                )
+                .addStatement(
+                    "clazz.getDeclaredConstructor(List::class.java, LayerInstanceJson::class.java).newInstance(%L, %L) as Layer",
+                    "intGridValues",
                     "json"
                 )
+                .endControlFlow()
+
+                .beginControlFlow("%S ->", "LayerIntGridAutoLayer")
+                .addStatement(
+                    "val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues"
+                )
+                .addStatement(
+                    "val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)"
+                )
+                .addStatement(
+                    "clazz.getDeclaredConstructor(TilesetDefJson::class.java, List::class.java, LayerInstanceJson::class.java).newInstance(%L, %L, %L) as Layer",
+                    "tilesetDef",
+                    "intGridValues",
+                    "json"
+                )
+                .endControlFlow()
+                .beginControlFlow("%S ->", "LayerEntities")
+                .addStatement(
+                    "clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(%L) as Layer",
+                    "json"
+                )
+                .endControlFlow()
+                .beginControlFlow("%S ->", "LayerTiles")
+                .addStatement(
+                    "clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(%L) as Layer",
+                    "json"
+                )
+                .endControlFlow()
+                .beginControlFlow("%S ->", "LayerAutoLayer")
+                .addStatement(
+                    "clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(%L) as Layer",
+                    "json"
+                )
+                .endControlFlow()
+                .beginControlFlow("else ->")
+                .addStatement("null")
+                .endControlFlow()
+                .endControlFlow()
+
                 .build()
         )
         projectClassSpec.addType(levelClassSpec.build())
