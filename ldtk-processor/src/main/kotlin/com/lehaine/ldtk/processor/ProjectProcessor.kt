@@ -60,15 +60,6 @@ class ProjectProcessor : AbstractProcessor() {
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
                 superclass(Project::class)
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
-                addInitializerBlock(
-                    CodeBlock.builder()
-                        .addStatement(
-                            "val jsonString = javaClass.classLoader.getResource(%S)?.readText() ?: error(\"Unable to load LDtk file content!\")",
-                            ldtkFileLocation
-                        )
-                        .addStatement("parseJson(jsonString)")
-                        .build()
-                )
                 addFunction(
                     FunSpec.builder("instantiateLevel")
                         .addModifiers(KModifier.OVERRIDE)
