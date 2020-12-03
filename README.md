@@ -2,7 +2,7 @@
 # About
 **!! This project is currently in development and should not be used yet !!**
 
-This is a Kotlin to load **LDtk project json** files and render them in LibGDX.
+This is a Kotlin API to load **LDtk project json** files and render them in LibGDX.
 
 [LDtk official website](https://ldtk.io/)
 
