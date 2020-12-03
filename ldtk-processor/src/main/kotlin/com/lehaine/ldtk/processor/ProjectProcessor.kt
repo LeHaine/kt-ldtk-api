@@ -109,7 +109,8 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateEntities(projectClassSpec: TypeSpec.Builder, entities: List<EntityDefJson>) {
         entities.forEach { entityDef ->
-            val entityClassSpec = TypeSpec.classBuilder("Entity_${entityDef.identifier}").apply {
+            val entityClassName = "Entity_${entityDef.identifier}"
+            val entityClassSpec = TypeSpec.classBuilder(entityClassName).apply {
                 superclass(Entity::class)
                 addSuperclassConstructorParameter("%N", "json")
             }
@@ -130,6 +131,8 @@ class ProjectProcessor : AbstractProcessor() {
                     }.build()
                 )
             }
+
+            val fields = mutableListOf<String>()
             entityDef.fieldDefs.forEach {
                 val canBeNull = it.canBeNull
                 when (val typeName = it.__type) {
@@ -141,6 +144,7 @@ class ProjectProcessor : AbstractProcessor() {
                         } else {
                             it.defaultOverride?.params?.get(0)
                         }
+                        fields.add(it.identifier)
                         addToEntity(it.identifier, className, defaultValue)
                     }
                     "Color" -> {
@@ -152,6 +156,7 @@ class ProjectProcessor : AbstractProcessor() {
                             "LocalEnum." in typeName -> {
                                 val type = typeName.substring(typeName.indexOf(".") + 1)
                                 val className = ClassName.bestGuess(type).copy(canBeNull)
+                                fields.add(it.identifier)
                                 addToEntity(it.identifier, className, it.defaultOverride?.params?.get(0), !canBeNull)
                             }
                             "ExternEnum." in typeName -> {
@@ -164,6 +169,18 @@ class ProjectProcessor : AbstractProcessor() {
                     }
                 }
             }
+            var stringStatment = ""
+            fields.forEachIndexed { index, s ->
+                stringStatment += "$s=\${$s}"
+                if (index != fields.size - 1) {
+                    stringStatment += ",·"
+                }
+            }
+            entityClassSpec.addFunction(
+                FunSpec.builder("toString").addModifiers(KModifier.OVERRIDE)
+                    .returns(String::class)
+                    .addStatement("return \"%L(%L)\"", entityClassName, stringStatment).build()
+            )
             entityClassSpec.primaryConstructor(entityConstructor.build())
             projectClassSpec.addType(entityClassSpec.build())
         }
