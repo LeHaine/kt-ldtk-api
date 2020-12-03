@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-open class Level(val project: Project, val json: LevelJson) {
+open class Level(val classPath: String, val project: Project, val json: LevelJson) {
     enum class NeighborDirection {
         North,
         South,
@@ -41,21 +41,54 @@ open class Level(val project: Project, val json: LevelJson) {
 
     init {
         json.layerInstances.forEach { layerInstanceJson ->
-            val layer = instantiateLayer(layerInstanceJson)
-            layer?.let { _allUntypedLayers.add(it) }
+            instantiateLayer(classPath, layerInstanceJson)?.also { _allUntypedLayers.add(it) }
         }
         json.__neighbours?.forEach {
             _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
         }
-
     }
 
-    fun resolveLayer(id: String): Layer? {
-        return allUntypedLayers.find { it.identifier == id }
+    fun resolveLayer(id: String): Layer {
+        return allUntypedLayers.find { it.identifier == id } ?: error("Unable to find $id layer")
     }
 
-    protected open fun instantiateLayer(json: LayerInstanceJson): Layer? {
-        return null
+    protected fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
+        val clazz = Class.forName("$classPath\$Layer_${json.__identifier}")
+        return when (clazz.superclass.simpleName) {
+            "LayerIntGrid" -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
+                clazz.getDeclaredConstructor(
+                    List::class.java,
+                    LayerInstanceJson::class.java
+                ).newInstance(intGridValues, json) as Layer
+            }
+            "LayerIntGridAutoLayer" -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
+                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
+                clazz.getDeclaredConstructor(
+                    TilesetDefJson::class.java, List::class.java,
+                    LayerInstanceJson::class.java
+                ).newInstance(
+                    tilesetDef, intGridValues,
+                    json
+                ) as Layer
+            }
+            "LayerEntities" -> {
+                clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                        Layer
+            }
+            "LayerTiles" -> {
+                clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                        Layer
+            }
+            "LayerAutoLayer" -> {
+                clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                        Layer
+            }
+            else -> {
+                null
+            }
+        }
     }
 
     override fun toString(): String {
