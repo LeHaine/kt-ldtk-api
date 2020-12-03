@@ -77,6 +77,21 @@ class ProjectProcessor : AbstractProcessor() {
             generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
+            val levelClassType = ClassName.bestGuess("${className}_Level")
+            // all levels list property
+            projectClassSpec.addProperty(
+                PropertySpec.builder(
+                    "allLevels",
+                    List::class.asTypeName().parameterizedBy(levelClassType)
+                ).initializer(
+                    CodeBlock.builder()
+                        .beginControlFlow("allUntypedLevels.map")
+                        .addStatement("it as %T", levelClassType)
+                        .endControlFlow()
+                        .build()
+                ).build()
+            )
+
             fileSpec.addType(projectClassSpec.build())
             val file = fileSpec.build()
 

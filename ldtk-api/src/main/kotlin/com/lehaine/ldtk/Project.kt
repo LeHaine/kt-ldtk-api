@@ -7,7 +7,7 @@ open class Project(val projectFilePath: String) {
 
     lateinit var defs: DefinitionJson
     private val _allUntypedLevels = mutableListOf<Level>()
-    val allUntypedLevels get() = _allUntypedLevels
+    val allUntypedLevels get() = _allUntypedLevels.toList()
 
     companion object {
         fun intToHex(color: Int, leadingZeros: Int = 6): String {
