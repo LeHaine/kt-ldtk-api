@@ -79,6 +79,7 @@ class ProjectProcessor : AbstractProcessor() {
 
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
+            generateTilesets(projectClassSpec, json.defs.tilesets)
             generateLayers(projectClassSpec, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
@@ -157,6 +158,24 @@ class ProjectProcessor : AbstractProcessor() {
         }
     }
 
+
+    private fun generateTilesets(projectClassSpec: TypeSpec.Builder, tilesets: List<TilesetDefJson>) {
+        tilesets.forEach {
+            val tilesetClassSpec = TypeSpec.classBuilder("Tileset_${it.identifier}").apply {
+                superclass(Tileset::class)
+                addSuperclassConstructorParameter("%N", "json")
+
+            }
+            val tilesetConstructor =
+                FunSpec.constructorBuilder()
+                    .addParameter("json", TilesetDefJson::class)
+
+
+            tilesetClassSpec.primaryConstructor(tilesetConstructor.build())
+            projectClassSpec.addType(tilesetClassSpec.build())
+        }
+    }
+
     private fun generateLayers(projectClassSpec: TypeSpec.Builder, layers: List<LayerDefJson>) {
         layers.forEach { layerDef ->
             val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
@@ -173,10 +192,26 @@ class ProjectProcessor : AbstractProcessor() {
 
             when (layerDef.type) {
                 "IntGrid" -> {
-                    extendLayerClass(LayerIntGrid::class)
+                    if (layerDef.autoTilesetDefUid == null) {
+                        // IntGrid
+                        extendLayerClass(LayerIntGrid::class)
+
+                    } else {
+                        // Auto-layer IntGrid
+                        extendLayerClass(LayerIntGridAutoLayer::class)
+//                        layerClassSpec.addProperty(
+//                            PropertySpec.builder("tileset", Tileset::class.asTypeName().copy(nullable = true))
+//                                .initializer()
+//                                .build()
+//                        )
+//                        layerClassSpec.addFunction(
+//                            FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
+//                                .addStatement("return tileset").build()
+//                        )
+                    }
                 }
                 "AutoLayer" -> {
-                    extendLayerClass(LayerIntGridAutoLayer::class)
+                    extendLayerClass(LayerAutoLayer::class)
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)

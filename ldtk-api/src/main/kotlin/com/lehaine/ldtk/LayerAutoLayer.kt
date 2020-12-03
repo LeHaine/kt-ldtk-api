@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-class AutoLayer(json: LayerInstanceJson) : Layer(json) {
+open class LayerAutoLayer(json: LayerInstanceJson) : Layer(json) {
 
     val autoTiles = json.autoLayerTiles.map {
         AutoTile(it.t, it.f, it.px[0], it.px[1])
