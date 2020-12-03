@@ -261,49 +261,8 @@ class ProjectProcessor : AbstractProcessor() {
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
 
-                    layerClassSpec.addFunction(
-                        FunSpec.builder("instantiateEntity").returns(Entity::class.asTypeName().copy(true))
-                            .addModifiers(KModifier.OVERRIDE)
-                            .returns(Entity::class.asTypeName().copy(nullable = true))
-                            .addParameter("json", EntityInstanceJson::class)
-                            .addStatement(
-                                "val clazz =  Class.forName(\"%L.%L\\\$Entity_\${%L}\")",
-                                pkg,
-                                className,
-                                "json.__identifier"
-                            )
-                            .addStatement(
-                                "val entity = clazz.getDeclaredConstructor(EntityInstanceJson::class.java).newInstance(%L) as Entity",
-                                "json",
-                            )
-                            .beginControlFlow("json.fieldInstances.forEach")
-                            .beginControlFlow("if (%S in it.__type)", "LocalEnum")
-                            .addStatement("val type = it.__type.substring(it.__type.indexOf(\".\") + 1)")
-                            .nextControlFlow("else")
-                            .beginControlFlow("val classType = when(it.__type)")
-                            .addStatement("%S -> Int::class.java", "Int")
-                            .addStatement("%S -> Boolean::class.java", "Bool")
-                            .addStatement("%S -> Double::class.java", "Double")
-                            .addStatement("%S -> Float::class.java", "Float")
-                            .addStatement("%S -> String::class.java", "String")
-                            .beginControlFlow("else ->")
-                            .addStatement("println(\"Unsupported type: \${it.__type}\")")
-                            .addStatement("null")
-                            .endControlFlow()
-                            .endControlFlow()
-                            .beginControlFlow("if (classType != null)")
-                            .addStatement("val setter =  clazz.getDeclaredMethod(\"set\${it.__identifier.capitalize()}\", classType)")
-                            .beginControlFlow("val value = if (it.__type == %S)", "Int")
-                            .addStatement("(it.__value as Double).toInt()")
-                            .nextControlFlow("else")
-                            .addStatement("it.__value")
-                            .endControlFlow()
-                            .addStatement("setter.invoke(entity, value)")
-                            .endControlFlow()
-                            .endControlFlow()
-                            .endControlFlow()
-                            .addStatement("return entity")
-                            .build()
+                    layerClassSpec.addInitializerBlock(
+                        CodeBlock.builder().addStatement("instantiateEntities(\"%L.%L\")", pkg, className).build()
                     )
                 }
                 "Tiles" -> {
