@@ -74,8 +74,16 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                 ) as Layer
             }
             "LayerEntities" -> {
-                clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
-                        Layer
+                val entitiesLayer = clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                        LayerEntities
+                entitiesLayer.entities.forEach {
+                    val allListField = clazz.getDeclaredField("_all_${it.identifier}")
+                    allListField.isAccessible = true
+                    @Suppress("UNCHECKED_CAST")
+                    val allList = allListField.get(entitiesLayer) as MutableList<Any>
+                    allList.add(it)
+                }
+                entitiesLayer
             }
             "LayerTiles" -> {
                 clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as

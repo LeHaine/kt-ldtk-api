@@ -74,7 +74,7 @@ class ProjectProcessor : AbstractProcessor() {
             generateEnums(projectClassSpec, json.defs.enums)
             generateEntities(projectClassSpec, json.defs.entities)
             val tilesets = generateTilesets(projectClassSpec, json.defs.tilesets)
-            generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.layers)
+            generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.entities, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
             val levelClassType = ClassName.bestGuess("${className}_Level")
@@ -235,6 +235,7 @@ class ProjectProcessor : AbstractProcessor() {
         pkg: String,
         className: String,
         tilesets: MutableMap<Int, TilesetInfo>,
+        entities: List<EntityDefJson>,
         layers: List<LayerDefJson>
     ) {
         layers.forEach { layerDef ->
@@ -297,6 +298,33 @@ class ProjectProcessor : AbstractProcessor() {
                     layerClassSpec.addInitializerBlock(
                         CodeBlock.builder().addStatement("instantiateEntities(\"%L.%L\")", pkg, className).build()
                     )
+
+                    entities.forEach {
+                        val levelClassType = ClassName.bestGuess("Entity_${it.identifier}")
+                        // all levels list property
+                        layerClassSpec.addProperty(
+                            PropertySpec.builder(
+                                "_all_${it.identifier}",
+                                ClassName("kotlin.collections", "MutableList").parameterizedBy(levelClassType)
+                            ).initializer(
+                                CodeBlock.builder()
+                                    .addStatement("mutableListOf()")
+                                    .build()
+                            ).addModifiers(KModifier.PRIVATE).build()
+                        )
+
+                        layerClassSpec.addProperty(
+                            PropertySpec.builder(
+                                "all_${it.identifier}",
+                                List::class.asTypeName().parameterizedBy(levelClassType)
+                            ).getter(
+                                FunSpec.getterBuilder()
+                                    .addStatement("return _all_${it.identifier}.toList()")
+                                    .build()
+                            ).build()
+                        )
+
+                    }
                 }
                 "Tiles" -> {
                     extendLayerClass(LayerTiles::class)
