@@ -19,6 +19,7 @@ fun main(args: Array<String>) {
         // logic for handling the tile
     }
 
+    // iterate over entities
     level.layerEntities.allMob.forEach { mob ->
         // access entity fields
         val type: World.MobType = mob.type // generated enum class
@@ -27,7 +28,7 @@ fun main(args: Array<String>) {
     }
 
     level.layerEntities.allCart.forEach { cart ->
-        // field arrays
+        // field arrays / lists
         cart.items.forEach { item ->
             if (item == World.Items.Pickaxe) {
                 // spawn pickaxe

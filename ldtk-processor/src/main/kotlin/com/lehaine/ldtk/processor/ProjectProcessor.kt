@@ -49,7 +49,7 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateProject(className: String, pkg: String, ldtkFileLocation: String) {
         try {
-            val resource = processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp", null)
+            val resource = processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp_${className}", null)
             val resourcePath = findResourcePath(Paths.get(resource.toUri()))
             resource.delete()
             val fileContent = resourcePath.resolve(ldtkFileLocation).toFile().readText()
