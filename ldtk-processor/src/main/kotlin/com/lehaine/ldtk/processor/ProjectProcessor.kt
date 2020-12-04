@@ -164,6 +164,17 @@ class ProjectProcessor : AbstractProcessor() {
                         addToEntity(it.identifier, className, defaultValue)
                     }
                     "Color" -> {
+                        val intId = "${it.identifier}Int"
+                        val intClass = ClassName("kotlin", "Int").copy(nullable = canBeNull)
+                        val intDefaultValue = it.defaultOverride?.params?.get(0) ?: 0
+                        addToEntity(intId, intClass, intDefaultValue)
+                        fields.add(intId)
+
+                        val hextId = "${it.identifier}Hex"
+                        val hexClass = ClassName("kotlin", "String").copy(nullable = canBeNull)
+                        val hexDefaultValue = it.defaultOverride?.params?.get(0) ?: "\"#000000\""
+                        addToEntity(hextId, hexClass, hexDefaultValue)
+                        fields.add(hextId)
                     }
                     "Point" -> {
                         val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)

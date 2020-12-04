@@ -8,5 +8,7 @@ class _World
 fun main(args: Array<String>) {
 
     val world = World()
-    world.allLevels[0].layer_Entities.all_Mob[0].health
+
+    println(world.allLevels[0].layer_Entities.all_Mob[1].colorHex)
+
 }
