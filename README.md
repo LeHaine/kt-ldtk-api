@@ -2,7 +2,7 @@
 # About
 **!! This project is currently in development and should not be used yet !!**
 
-This is a Kotlin JVM API to parse and load **LDtk project** files. 
+This is a Kotlin JVM API (Java API and annontation processing planned) to parse and load **LDtk project** files. 
 
 This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
 
