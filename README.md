@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
 
     // iterate over a layers tiles
     level.layer_Background.autoTiles.forEach {
-        // logic for handling the tile
+        // logic for handling the tile such as rendering it
     }
 
     level.layer_Entities.all_Mob.forEach { mob ->
