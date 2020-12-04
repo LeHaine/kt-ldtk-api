@@ -1,6 +1,8 @@
 package com.lehaine.ldtk
 
-open class LayerTiles(json: LayerInstanceJson) : Layer(json) {
+open class LayerTiles(
+    val tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
+) : Layer(json) {
     data class TileInfo(val tileId: Int, val flipBits: Int)
 
     private val _tiles = mutableMapOf<Int, List<TileInfo>>()
@@ -27,6 +29,10 @@ open class LayerTiles(json: LayerInstanceJson) : Layer(json) {
 
     fun hasAnyTileAt(cx: Int, cy: Int): Boolean {
         return _tiles.contains(getCoordId(cx, cy))
+    }
+
+    protected open fun getTileset(): Tileset? {
+        return null
     }
 
 }

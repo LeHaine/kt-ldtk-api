@@ -245,19 +245,29 @@ class ProjectProcessor : AbstractProcessor() {
             fun extendLayerClass(superClass: KClass<*>) {
                 layerClassSpec.run {
                     superclass(superClass)
-                    if (superClass == LayerIntGrid::class || superClass == LayerIntGridAutoLayer::class) {
-                        if (superClass == LayerIntGridAutoLayer::class) {
+
+                    when (superClass) {
+                        LayerIntGrid::class, LayerIntGridAutoLayer::class -> {
+                            if (superClass == LayerIntGridAutoLayer::class) {
+                                layerConstructor.addParameter(
+                                    "tilesetDefJson",
+                                    TilesetDefJson::class.asTypeName().copy(nullable = true)
+                                )
+                                addSuperclassConstructorParameter("%N", "tilesetDefJson")
+                            }
+                            layerConstructor.addParameter(
+                                "intGridValues",
+                                List::class.asTypeName().parameterizedBy(IntGridValue::class.asTypeName())
+                            )
+                            addSuperclassConstructorParameter("%N", "intGridValues")
+                        }
+                        LayerTiles::class -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
-                                TilesetDefJson::class.asTypeName().copy(nullable = true)
+                                TilesetDefJson::class.asTypeName()
                             )
                             addSuperclassConstructorParameter("%N", "tilesetDefJson")
                         }
-                        layerConstructor.addParameter(
-                            "intGridValues",
-                            List::class.asTypeName().parameterizedBy(IntGridValue::class.asTypeName())
-                        )
-                        addSuperclassConstructorParameter("%N", "intGridValues")
                     }
                     layerConstructor.addParameter("json", LayerInstanceJson::class)
                     addSuperclassConstructorParameter("%N", "json")
@@ -274,6 +284,7 @@ class ProjectProcessor : AbstractProcessor() {
                         // Auto-layer IntGrid
                         extendLayerClass(LayerIntGridAutoLayer::class)
                         val tileset = tilesets[layerDef.autoTilesetDefUid]
+                        println("auto layer: ${layerDef.autoTilesetDefUid}")
                         if (tileset != null) {
                             val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
                             layerClassSpec.addProperty(
@@ -328,6 +339,21 @@ class ProjectProcessor : AbstractProcessor() {
                 }
                 "Tiles" -> {
                     extendLayerClass(LayerTiles::class)
+
+                    val tileset = tilesets[layerDef.tilesetDefUid]
+                        ?: error("Tiles layer ${layerDef.identifier} doesn't have a tileset!")
+                    val tilesetType = ClassName.bestGuess(tileset.typeName)
+                    layerClassSpec.addProperty(
+                        PropertySpec.builder("tileset", tilesetType)
+                            .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
+                            .build()
+                    )
+                    layerClassSpec.addFunction(
+                        FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addStatement("return tileset").build()
+                    )
+
                 }
                 else -> {
                     error("Unknown layer type ${layerDef.type}")
