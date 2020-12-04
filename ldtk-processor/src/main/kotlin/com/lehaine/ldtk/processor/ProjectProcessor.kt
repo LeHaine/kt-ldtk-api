@@ -49,10 +49,11 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateProject(className: String, pkg: String, ldtkFileLocation: String) {
         try {
-            val resource = processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp_${className}", null)
-            val resourcePath = findResourcePath(Paths.get(resource.toUri()))
+            val resource =
+                processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp_${className}", null)
+            val resourcePath = findResourcePath(Paths.get(resource.toUri()), ldtkFileLocation)
             resource.delete()
-            val fileContent = resourcePath.resolve(ldtkFileLocation).toFile().readText()
+            val fileContent = resourcePath.toFile().readText()
 
             val json = LDtkApi.parseLDtkFile(fileContent)
 
@@ -105,12 +106,18 @@ class ProjectProcessor : AbstractProcessor() {
         }
     }
 
-    private fun findResourcePath(path: Path): Path {
-        val newPath = path.resolve("../resources/main")
+    private fun findResourcePath(path: Path, ldtkFileLocation: String, maxPath: Int = 15, currentPath: Int = 0): Path {
+        val newPath = path.resolve("./resources/main/${ldtkFileLocation}")
+        if (!Files.exists(newPath)) {
+            newPath.resolve("./$ldtkFileLocation")
+        }
         return if (Files.exists(newPath)) {
             newPath
         } else {
-            findResourcePath(path.resolve("../"))
+            if(currentPath >= maxPath) {
+                error("Unable to find resource file $ldtkFileLocation. Aborting...")
+            }
+            findResourcePath(path.resolve("../"), ldtkFileLocation, currentPath = currentPath + 1)
         }
     }
 
