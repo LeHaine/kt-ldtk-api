@@ -21,17 +21,38 @@ Create any class and add an `@LDtkProject` annotation to it with the location to
 
 Build your project, and it is ready to be used.
 ```Kotlin
-import com.lehaine.ldtk.LDtkProject
-
-// designated class for the LDtk annotation
+// designate class for loading and attaching LDtk file to
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
 class _World
 
 fun main(args: Array<String>) {
-    // create newly generated object
+    // create new LDtk world
     val world = World()
-    // access the fully typed data
-    println(world.allLevels[0].layer_Entities.all_Mob[0].health)
+
+    // get a level
+    val level = world.allLevels[0]
+
+    // iterate over a layers tiles
+    level.layer_Background.autoTiles.forEach {
+        // logic for handling the tile
+    }
+
+    level.layer_Entities.all_Mob.forEach { mob ->
+        // access entity fields
+        val type: World.MobType = mob.type // generated enum class
+        val patrolPoint: Point? = mob.patrol // points
+        val health:Int = mob.health
+        // access other fields, etc
+    }
+
+    level.layer_Entities.all_Cart.forEach { cart ->
+        // field arrays
+        cart.items.forEach { item ->
+            if(item == World.Items.Pickaxe) {
+                // spawn pickaxe
+            }
+        }
+    }
 }
 ```
 
