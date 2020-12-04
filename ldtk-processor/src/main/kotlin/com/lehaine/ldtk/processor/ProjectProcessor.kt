@@ -210,7 +210,7 @@ class ProjectProcessor : AbstractProcessor() {
             entityClassSpec.addFunction(
                 FunSpec.builder("toString").addModifiers(KModifier.OVERRIDE)
                     .returns(String::class)
-                    .addStatement("return \"%L(%L)\"", entityClassName, stringStatment).build()
+                    .addStatement("return \"%L(%L,·\${entityInfoString()})\"", entityClassName, stringStatment).build()
             )
             entityClassSpec.primaryConstructor(entityConstructor.build())
             projectClassSpec.addType(entityClassSpec.build())

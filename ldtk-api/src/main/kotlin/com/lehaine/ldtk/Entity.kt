@@ -38,6 +38,10 @@ open class Entity(val json: EntityInstanceJson) {
         return "Entity(identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfosJson)"
     }
 
+    protected fun entityInfoString(): String {
+        return "identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfosJson"
+    }
+
 
 }
 
