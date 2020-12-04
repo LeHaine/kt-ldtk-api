@@ -1,5 +1,7 @@
 package com.lehaine.ldtk
 
+import com.lehaine.ldtk.LDtkApi.ENTITY_PREFIX
+
 open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
 
     private val _entities = mutableListOf<Entity>()
@@ -12,7 +14,7 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
     }
 
     private fun instantiateEntity(classPath: String, json: EntityInstanceJson): Entity {
-        val clazz = Class.forName("$classPath\$Entity_${json.__identifier}")
+        val clazz = Class.forName("$classPath\$$ENTITY_PREFIX${json.__identifier}")
         val entity =
             clazz.getDeclaredConstructor(EntityInstanceJson::class.java).newInstance(json)
                     as Entity

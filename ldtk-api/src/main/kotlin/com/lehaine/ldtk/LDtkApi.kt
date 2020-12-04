@@ -11,4 +11,9 @@ object LDtkApi {
         return projectAdapter.fromJson(json)
     }
 
+
+    const val ENTITY_PREFIX = "Entity"
+    const val LEVEL_SUFFIX = "Level"
+    const val LAYER_PREFIX = "Layer"
+
 }

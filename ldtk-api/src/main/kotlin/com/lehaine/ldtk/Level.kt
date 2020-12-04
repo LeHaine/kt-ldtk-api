@@ -1,5 +1,7 @@
 package com.lehaine.ldtk
 
+import com.lehaine.ldtk.LDtkApi.LAYER_PREFIX
+
 open class Level(val classPath: String, val project: Project, val json: LevelJson) {
     enum class NeighborDirection {
         North,
@@ -53,7 +55,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
     }
 
     private fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
-        val clazz = Class.forName("$classPath\$Layer_${json.__identifier}")
+        val clazz = Class.forName("$classPath\$$LAYER_PREFIX${json.__identifier}")
         return when (clazz.superclass.simpleName) {
             "LayerIntGrid" -> {
                 val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
@@ -77,7 +79,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                 val entitiesLayer = clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
                         LayerEntities
                 entitiesLayer.entities.forEach {
-                    val allListField = clazz.getDeclaredField("_all_${it.identifier}")
+                    val allListField = clazz.getDeclaredField("_all${it.identifier.capitalize()}")
                     allListField.isAccessible = true
                     @Suppress("UNCHECKED_CAST")
                     val allList = allListField.get(entitiesLayer) as MutableList<Any>

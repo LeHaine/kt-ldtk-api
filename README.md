@@ -30,25 +30,24 @@ fun main(args: Array<String>) {
     val world = World()
 
     // get a level
-    val level = world.allLevels[0]
+    val level: World.WorldLevel = world.allLevels[0]
 
     // iterate over a layers tiles
-    level.layer_Background.autoTiles.forEach {
-        // logic for handling the tile such as rendering it
+    level.layerBackground.autoTiles.forEach {
+        // logic for handling the tile
     }
 
-    level.layer_Entities.all_Mob.forEach { mob ->
+    level.layerEntities.allMob.forEach { mob ->
         // access entity fields
         val type: World.MobType = mob.type // generated enum class
         val patrolPoint: Point? = mob.patrol // points
-        val health:Int = mob.health
-        // access other fields, etc
+        val health: Int = mob.health
     }
 
-    level.layer_Entities.all_Cart.forEach { cart ->
+    level.layerEntities.allCart.forEach { cart ->
         // field arrays
         cart.items.forEach { item ->
-            if(item == World.Items.Pickaxe) {
+            if (item == World.Items.Pickaxe) {
                 // spawn pickaxe
             }
         }

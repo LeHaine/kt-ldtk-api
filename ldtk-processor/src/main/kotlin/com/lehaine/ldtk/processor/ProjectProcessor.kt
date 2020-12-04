@@ -2,6 +2,9 @@ package com.lehaine.ldtk.processor
 
 import com.google.auto.service.AutoService
 import com.lehaine.ldtk.*
+import com.lehaine.ldtk.LDtkApi.ENTITY_PREFIX
+import com.lehaine.ldtk.LDtkApi.LAYER_PREFIX
+import com.lehaine.ldtk.LDtkApi.LEVEL_SUFFIX
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
@@ -65,7 +68,7 @@ class ProjectProcessor : AbstractProcessor() {
                         .addParameter("project", Project::class)
                         .addParameter("json", LevelJson::class)
                         .returns(Level::class)
-                        .addStatement("return %L_Level(project, json)", className)
+                        .addStatement("return %L$LEVEL_SUFFIX(project, json)", className)
                         .build()
                 )
             }
@@ -76,7 +79,7 @@ class ProjectProcessor : AbstractProcessor() {
             generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.entities, json.defs.layers)
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
-            val levelClassType = ClassName.bestGuess("${className}_Level")
+            val levelClassType = ClassName.bestGuess("${className}$LEVEL_SUFFIX")
             // all levels list property
             projectClassSpec.addProperty(
                 PropertySpec.builder(
@@ -124,7 +127,7 @@ class ProjectProcessor : AbstractProcessor() {
 
     private fun generateEntities(projectClassSpec: TypeSpec.Builder, entities: List<EntityDefJson>) {
         entities.forEach { entityDef ->
-            val entityClassName = "Entity_${entityDef.identifier}"
+            val entityClassName = "$ENTITY_PREFIX${entityDef.identifier}"
             val entityClassSpec = TypeSpec.classBuilder(entityClassName).apply {
                 superclass(Entity::class)
                 addSuperclassConstructorParameter("%N", "json")
@@ -323,7 +326,7 @@ class ProjectProcessor : AbstractProcessor() {
         layers: List<LayerDefJson>
     ) {
         layers.forEach { layerDef ->
-            val layerClassSpec = TypeSpec.classBuilder("Layer_${layerDef.identifier}")
+            val layerClassSpec = TypeSpec.classBuilder("$LAYER_PREFIX${layerDef.identifier}")
             val layerConstructor = FunSpec.constructorBuilder()
 
             fun extendLayerClass(superClass: KClass<*>) {
@@ -394,11 +397,11 @@ class ProjectProcessor : AbstractProcessor() {
                     )
 
                     entities.forEach {
-                        val levelClassType = ClassName.bestGuess("Entity_${it.identifier}")
+                        val levelClassType = ClassName.bestGuess("$ENTITY_PREFIX${it.identifier}")
                         // all levels list property
                         layerClassSpec.addProperty(
                             PropertySpec.builder(
-                                "_all_${it.identifier}",
+                                "_all${it.identifier.capitalize()}",
                                 ClassName("kotlin.collections", "MutableList").parameterizedBy(levelClassType)
                             ).initializer(
                                 CodeBlock.builder()
@@ -409,11 +412,11 @@ class ProjectProcessor : AbstractProcessor() {
 
                         layerClassSpec.addProperty(
                             PropertySpec.builder(
-                                "all_${it.identifier}",
+                                "all${it.identifier.capitalize()}",
                                 List::class.asTypeName().parameterizedBy(levelClassType)
                             ).getter(
                                 FunSpec.getterBuilder()
-                                    .addStatement("return _all_${it.identifier}.toList()")
+                                    .addStatement("return _all${it.identifier.capitalize()}.toList()")
                                     .build()
                             ).build()
                         )
@@ -456,7 +459,7 @@ class ProjectProcessor : AbstractProcessor() {
         className: String,
         layers: List<LayerDefJson>
     ) {
-        val levelClassSpec = TypeSpec.classBuilder("${className}_Level").apply {
+        val levelClassSpec = TypeSpec.classBuilder("${className}$LEVEL_SUFFIX").apply {
             superclass(Level::class)
             addSuperclassConstructorParameter("\"%L.%L\"", pkg, className)
             addSuperclassConstructorParameter("%N", "project")
@@ -472,9 +475,9 @@ class ProjectProcessor : AbstractProcessor() {
         layers.forEach {
             levelClassSpec.addProperty(
                 PropertySpec.builder(
-                    "layer_${it.identifier}",
-                    ClassName.bestGuess("Layer_${it.identifier}")
-                ).initializer("resolveLayer(%S) as Layer_%N", it.identifier, it.identifier).build()
+                    "layer${it.identifier.capitalize()}",
+                    ClassName.bestGuess("$LAYER_PREFIX${it.identifier}")
+                ).initializer("resolveLayer(%S) as $LAYER_PREFIX%N", it.identifier, it.identifier).build()
             )
         }
         projectClassSpec.addType(levelClassSpec.build())
