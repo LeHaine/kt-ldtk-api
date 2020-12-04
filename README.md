@@ -104,12 +104,32 @@ TODO
 
 ## Download
 
-TODO
+In your gradle build script ensure you have the `kotlin` and `kapt` gradle plugins enabled.
+
+If you are using **Kotlin** then they may already be enabled.
+
+If you are using **Java** then they need to be enabled. **Warning**: This will most likely force you to change any `annontationPrcessing` dependencies to `kapt`.
+
+
+```Kotlin
+plugins {
+    kotlin("jvm") version "1.4.20"
+    kotlin("kapt") version "1.4.20"
+}
+```
+
+Add the libraries to your dependencies. 
+**The `ldtk-api` and `ldtk-processor` libraries are not yet published to any repositories for download.**
+
+```Kotlin
+dependencies {
+    implementation("ldtk-api")
+    kapt("ldtk-processor")
+}
+```
 
 ## TODO
 
 - [ ] Add LibGDX module
-- [ ] Add Java friendly API
-- [ ] Add a module for generating Java code instead of Kotlin
 - [ ] Major code clean up
 - [ ] Add documentation
