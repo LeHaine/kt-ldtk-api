@@ -4,8 +4,8 @@ open class LayerIntGrid(val intGridValues: List<IntGridValue>, json: LayerInstan
 
     data class ValueInfo(val identifier: String?, val color: Int)
 
-    internal val valueInfos = intGridValues.map {
-        ValueInfo(it.identifier, "${it.color.substring(1)}".toInt(16))
+    private val valueInfos = intGridValues.map {
+        ValueInfo(it.identifier, it.color.substring(1).toInt(16))
 
     }
     private val _intGrid = mutableMapOf<Int, Int>().apply {

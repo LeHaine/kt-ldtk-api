@@ -70,6 +70,6 @@ TODO
 
 - [ ] Add LibGDX module
 - [ ] Add Java friendly API
-- [ ] Add module for generating Java code instead of Kotlin
+- [ ] Add a module for generating Java code instead of Kotlin
 - [ ] Major code clean up
 - [ ] Add documentation

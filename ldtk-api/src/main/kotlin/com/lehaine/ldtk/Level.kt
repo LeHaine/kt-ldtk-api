@@ -52,7 +52,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         return allUntypedLayers.find { it.identifier == id } ?: error("Unable to find $id layer")
     }
 
-    protected fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
+    private fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
         val clazz = Class.forName("$classPath\$Layer_${json.__identifier}")
         return when (clazz.superclass.simpleName) {
             "LayerIntGrid" -> {

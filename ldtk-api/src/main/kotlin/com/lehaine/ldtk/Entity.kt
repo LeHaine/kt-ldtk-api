@@ -28,10 +28,6 @@ open class Entity(val json: EntityInstanceJson) {
         )
     }
 
-    init {
-
-    }
-
     data class TileInfo(val tilesetUid: Int, val x: Int, val y: Int, val w: Int, val h: Int)
 
     override fun toString(): String {
