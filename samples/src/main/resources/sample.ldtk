@@ -13,7 +13,7 @@
 	"defaultGridSize": 8,
 	"bgColor": "#18131B",
 	"defaultLevelBgColor": "#121331",
-	"nextUid": 57,
+	"nextUid": 58,
 	"minifyJson": false,
 	"exportTiled": false,
 	"worldLayout": "Free",
@@ -683,6 +683,23 @@
 						"max": null,
 						"acceptFileTypes": null,
 						"defaultOverride": null
+					},
+					{
+						"identifier": "jumps",
+						"__type": "Array<Int>",
+						"uid": 57,
+						"type": "F_Int",
+						"isArray": true,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
 					}
 				]
 			}
@@ -917,11 +934,19 @@
 									"params": ["31,7"]
 								} ]
 							},
-							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] }
+							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] },
+							{
+								"__identifier": "jumps",
+								"__value": [0,2,1],
+								"__type": "Array<Int>",
+								"defUid": 57,
+								"realEditorValues": [ null, { "id": "V_Int", "params": [2] }, { "id": "V_Int", "params": [1] } ]
+							}
 						] },
 						{ "__identifier": "Cart", "__grid": [11,12], "__tile": null, "defUid": 52, "px": [92,104], "fieldInstances": [
 							{ "__identifier": "patrol_points", "__value": [], "__type": "Array<Point>", "defUid": 54, "realEditorValues": [] },
-							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] }
+							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] },
+							{ "__identifier": "jumps", "__value": [], "__type": "Array<Int>", "defUid": 57, "realEditorValues": [] }
 						] }
 					]
 				},

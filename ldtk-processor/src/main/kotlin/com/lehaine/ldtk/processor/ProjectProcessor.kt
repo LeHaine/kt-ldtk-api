@@ -38,7 +38,6 @@ class ProjectProcessor : AbstractProcessor() {
                 } else {
                     ldtkProject.name
                 }
-                println("Processing $className")
                 val pkg = processingEnv.elementUtils.getPackageOf(it).toString()
                 generateProject(className, pkg, ldtkFileLocation)
             }
@@ -195,6 +194,7 @@ class ProjectProcessor : AbstractProcessor() {
                                 .build()
                         ).build()
                     )
+                    fields.add(fieldDefJson.identifier)
                 } else {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
@@ -369,7 +369,6 @@ class ProjectProcessor : AbstractProcessor() {
                         // Auto-layer IntGrid
                         extendLayerClass(LayerIntGridAutoLayer::class)
                         val tileset = tilesets[layerDef.autoTilesetDefUid]
-                        println("auto layer: ${layerDef.autoTilesetDefUid}")
                         if (tileset != null) {
                             val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
                             layerClassSpec.addProperty(
