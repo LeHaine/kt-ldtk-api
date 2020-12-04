@@ -166,6 +166,10 @@ class ProjectProcessor : AbstractProcessor() {
                     "Color" -> {
                     }
                     "Point" -> {
+                        val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)
+                        val defaultValue = it.defaultOverride?.params?.get(0)
+                        addToEntity(it.identifier, className, defaultValue)
+                        fields.add(it.identifier)
                     }
                     else -> { // field type is an enum
                         when {
