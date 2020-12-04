@@ -35,9 +35,10 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
                 val classType = when (it.__type) {
                     "Int" -> Int::class.java
                     "Bool" -> Boolean::class.java
-                    "Double" -> Double::class.java
-                    "Float" -> Float::class.java
+                    "Float" -> Double::class.java
                     "String" -> String::class.java
+                    "Color" -> Color::class.java
+                    "Point" -> Point::class.java
                     else -> {
                         println("Unsupported type: ${it.__type}")
                         null
@@ -48,10 +49,29 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
                         "set${it.__identifier.capitalize()}",
                         classType
                     )
-                    val value = if (it.__type == "Int") {
-                        (it.__value as Double).toInt()
-                    } else {
-                        it.__value
+                    val value = when (it.__type) {
+                        "Int" -> {
+                            (it.__value as Double).toInt()
+                        }
+                        "Color" -> {
+                            val value = Project.hexToInt(it.__value as String)
+                            val hexValue = it.__value
+                            Color(value, hexValue)
+                        }
+                        "Point" -> {
+                            println(it.__value?.javaClass?.simpleName)
+                            if (it.__value != null) {
+                                val map = it.__value as Map<*, *>
+                                val cx = (map["cx"] as Double).toInt()
+                                val cy = (map["cy"] as Double).toInt()
+                                Point(cx, cy)
+                            } else {
+                                null
+                            }
+                        }
+                        else -> {
+                            it.__value
+                        }
                     }
                     setter.invoke(entity, value)
                 }

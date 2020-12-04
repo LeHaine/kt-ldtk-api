@@ -155,8 +155,8 @@ class ProjectProcessor : AbstractProcessor() {
                 val isArray = arrayReg.matches(fieldDefJson.__type)
                 val typeName =
                     if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
+                val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
                 if (isArray) {
-                    val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
                     val fieldTypePkg = when (name) {
                         "Int", "Double", "Boolean", "String" -> "kotlin"
                         "Point", "Color" -> "com.lehaine.ldtk"
@@ -196,9 +196,8 @@ class ProjectProcessor : AbstractProcessor() {
                         ).build()
                     )
                 } else {
-                    when (typeName) {
-                        "Int", "Float", "Bool", "String" -> {
-                            val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
+                    when (name) {
+                        "Int", "Double", "Boolean", "String" -> {
                             val className = ClassName("kotlin", name).copy(canBeNull)
                             val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
                             val hasOverride = defaultOverride != null
