@@ -6,9 +6,6 @@ import com.lehaine.ldtk.LDtkProject
 class _World
 
 fun main(args: Array<String>) {
-
     val world = World()
-
-    println(world.allLevels[0].layer_Entities.all_Cart)
-
+    println(world.allLevels[0].layer_Entities.all_Mob[0].health)
 }
