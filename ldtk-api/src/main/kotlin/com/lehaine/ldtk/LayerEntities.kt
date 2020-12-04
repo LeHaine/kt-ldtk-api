@@ -31,7 +31,7 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
                     "Int" -> {
                         arrList.map { (it as Double).toInt() }
                     }
-                    "Double", "Boolean" -> {
+                    "Double", "Boolean", "String" -> {
                         arrList
                     }
                     "Color" -> {
@@ -50,7 +50,17 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
                         }
                     }
                     else -> {
-                        fieldJson.__value
+                        if ("LocalEnum" in typeName) {
+                            val type = typeName.substring(typeName.indexOf(".") + 1)
+                            val enumClass = Class.forName("$classPath\$$type")
+                            val valueOf = enumClass.getMethod("valueOf", String::class.java)
+                            arrList.map {
+                                val enumString = it as String
+                                valueOf.invoke(null, enumString)
+                            }
+                        } else {
+                            fieldJson.__value
+                        }
                     }
                 }
 
