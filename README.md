@@ -44,3 +44,9 @@ TODO
 ## Download
 
 TODO
+
+## TODO
+
+- [ ] Add LibGDX module
+- [ ] Add Java friendly API
+- [ ] Add module for generating Java code instead of Kotlin
