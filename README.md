@@ -2,14 +2,14 @@
 # About
 **!! This project is currently in development and should not be used yet !!**
 
-This is a Kotlin JVM API (Java API and annontation processing planned) to parse and load **LDtk project** files. 
+This is a Kotlin and Java API to parse and load **LDtk project** files. 
 
 This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
 
 [LDtk official website](https://ldtk.io/)
 
 ## Features
-- **Annotation processing**: Adding a simple annontation will allow fully generated typesafe code to be used within your game.
+- **Annotation processing**: Adding a simple annotation will allow fully generated typesafe code to be used within your game.
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
 - **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
@@ -20,6 +20,8 @@ This library can be used for any JVM game engine/framework. It features a separa
 Create any class and add an `@LDtkProject` annotation to it with the location to your LDtk file on your projects classpath.
 
 Build your project, and it is ready to be used.
+
+**Kotlin example**
 ```Kotlin
 // designate class for loading and attaching LDtk file to
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
@@ -49,6 +51,45 @@ fun main(args: Array<String>) {
         cart.items.forEach { item ->
             if (item == World.Items.Pickaxe) {
                 // spawn pickaxe
+            }
+        }
+    }
+}
+```
+
+**Java Example**
+```Java
+// designate class for loading and attaching LDtk file to
+@LDtkProject(ldtkFileLocation = "sample.ldtk", name = "JavaWorld")
+public class SampleJava {
+    public static void main(String[] args) {
+        // create new LDtk world
+        JavaWorld world = new JavaWorld();
+
+        // get a level
+        JavaWorld.JavaWorldLevel level = world.getAllLevels().get(0);
+
+        // iterate over a layers tiles
+        for (LayerAutoLayer.AutoTile tile : level.getLayerBackground().getAutoTiles()) {
+            // logic for handling the tile
+            int x = tile.getRenderX();
+        }
+
+        // iterate over entities
+        for (JavaWorld.EntityMob mob : level.getLayerEntities().getAllMob()) {
+            JavaWorld.MobType type = mob.type;
+            Point patrolPoint = mob.getPatrol();
+            int health = mob.getHealth();
+        }
+
+        for (JavaWorld.EntityCart cart : level.getLayerEntities().getAllCart()) {
+            // field arrays / lists
+            List<JavaWorld.Items> items = cart.getItems();
+
+            for (JavaWorld.Items item : items) {
+                if (item == JavaWorld.Items.Pickaxe) {
+                    // spawn pickaxe
+                }
             }
         }
     }
