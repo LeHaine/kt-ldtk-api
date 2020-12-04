@@ -51,3 +51,4 @@ TODO
 - [ ] Add Java friendly API
 - [ ] Add module for generating Java code instead of Kotlin
 - [ ] Major code clean up
+- [ ] Add documentation
