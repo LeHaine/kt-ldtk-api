@@ -59,7 +59,6 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
                             Color(value, hexValue)
                         }
                         "Point" -> {
-                            println(it.__value?.javaClass?.simpleName)
                             if (it.__value != null) {
                                 val map = it.__value as Map<*, *>
                                 val cx = (map["cx"] as Double).toInt()
