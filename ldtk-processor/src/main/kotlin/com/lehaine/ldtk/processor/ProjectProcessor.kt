@@ -156,13 +156,13 @@ class ProjectProcessor : AbstractProcessor() {
                     if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
                 val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
                 if (isArray) {
-                    val fieldTypePkg = when (name) {
-                        "Int", "Double", "Boolean", "String" -> "kotlin"
-                        "Point", "Color" -> "com.lehaine.ldtk"
+                    val fieldClassType = when (name) {
+                        "Int", "Double", "Boolean", "String" -> ClassName("kotlin", name)
+                        "Point", "Color" -> ClassName("com.lehaine.ldtk", name)
                         else -> {
                             when {
                                 "LocalEnum." in name -> {
-                                    typeName.substring(typeName.indexOf(".") + 1)
+                                    ClassName.bestGuess(typeName.substring(typeName.indexOf(".") + 1))
                                 }
                                 "ExternEnum." in name -> {
                                     error("ExternEnums are not supported!")
@@ -173,7 +173,6 @@ class ProjectProcessor : AbstractProcessor() {
                             }
                         }
                     }
-                    val fieldClassType = ClassName(fieldTypePkg, name)
                     entityClassSpec.addProperty(
                         PropertySpec.builder(
                             "_${fieldDefJson.identifier}",

@@ -13,7 +13,7 @@
 	"defaultGridSize": 8,
 	"bgColor": "#18131B",
 	"defaultLevelBgColor": "#121331",
-	"nextUid": 58,
+	"nextUid": 59,
 	"minifyJson": false,
 	"exportTiled": false,
 	"worldLayout": "Free",
@@ -700,6 +700,23 @@
 						"max": null,
 						"acceptFileTypes": null,
 						"defaultOverride": null
+					},
+					{
+						"identifier": "items",
+						"__type": "Array<LocalEnum.Items>",
+						"uid": 58,
+						"type": { "id": "F_Enum", "params": [30] },
+						"isArray": true,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
 					}
 				]
 			}
@@ -941,12 +958,38 @@
 								"__type": "Array<Int>",
 								"defUid": 57,
 								"realEditorValues": [ null, { "id": "V_Int", "params": [2] }, { "id": "V_Int", "params": [1] } ]
+							},
+							{
+								"__identifier": "items",
+								"__value": [ "Potion", "Food", "Pickaxe" ],
+								"__type": "Array<LocalEnum.Items>",
+								"defUid": 58,
+								"realEditorValues": [ {
+									"id": "V_String",
+									"params": ["Potion"]
+								}, {
+									"id": "V_String",
+									"params": ["Food"]
+								}, {
+									"id": "V_String",
+									"params": ["Pickaxe"]
+								} ]
 							}
 						] },
 						{ "__identifier": "Cart", "__grid": [11,12], "__tile": null, "defUid": 52, "px": [92,104], "fieldInstances": [
 							{ "__identifier": "patrol_points", "__value": [], "__type": "Array<Point>", "defUid": 54, "realEditorValues": [] },
 							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] },
-							{ "__identifier": "jumps", "__value": [], "__type": "Array<Int>", "defUid": 57, "realEditorValues": [] }
+							{ "__identifier": "jumps", "__value": [], "__type": "Array<Int>", "defUid": 57, "realEditorValues": [] },
+							{
+								"__identifier": "items",
+								"__value": ["Potion"],
+								"__type": "Array<LocalEnum.Items>",
+								"defUid": 58,
+								"realEditorValues": [{
+									"id": "V_String",
+									"params": ["Potion"]
+								}]
+							}
 						] }
 					]
 				},
