@@ -183,7 +183,7 @@ class ProjectProcessor : AbstractProcessor() {
                                 error("ExternEnums are not supported!")
                             }
                             else -> {
-                                error("Unknown field type $typeName")
+                                error("Unsupported field type $typeName")
                             }
                         }
                     }
