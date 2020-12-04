@@ -149,52 +149,123 @@ class ProjectProcessor : AbstractProcessor() {
             }
 
             val fields = mutableListOf<String>()
-            entityDef.fieldDefs.forEach {
-                val canBeNull = it.canBeNull
-                when (val typeName = it.__type) {
-                    "Int", "Float", "Bool", "String" -> {
-                        val name = if (typeName == "Bool") "Boolean" else typeName
-                        val className = ClassName("kotlin", name).copy(canBeNull)
-                        val defaultValue = if (typeName == "Int") {
-                            (it.defaultOverride?.params?.get(0) as? Double)?.toInt()
-                        } else {
-                            it.defaultOverride?.params?.get(0)
+            val arrayReg = "Array<(.*)>".toRegex()
+            entityDef.fieldDefs.forEach { fieldDefJson ->
+                val canBeNull = fieldDefJson.canBeNull
+                val isArray = arrayReg.matches(fieldDefJson.__type)
+                val typeName =
+                    if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
+                if (isArray) {
+                    val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
+                    val fieldTypePkg = when (name) {
+                        "Int", "Double", "Boolean", "String" -> "kotlin"
+                        "Point", "Color" -> "com.lehaine.ldtk"
+                        else -> {
+                            when {
+                                "LocalEnum." in name -> {
+                                    typeName.substring(typeName.indexOf(".") + 1)
+                                }
+                                "ExternEnum." in name -> {
+                                    error("ExternEnums are not supported!")
+                                }
+                                else -> {
+                                    error("Unsupported Array type ${fieldDefJson.__type}")
+                                }
+                            }
                         }
-                        fields.add(it.identifier)
-                        addToEntity(it.identifier, className, defaultValue)
                     }
-                    "Color" -> {
-                        val intId = "${it.identifier}Int"
-                        val intClass = ClassName("kotlin", "Int").copy(nullable = canBeNull)
-                        val intDefaultValue = it.defaultOverride?.params?.get(0) ?: 0
-                        addToEntity(intId, intClass, intDefaultValue)
-                        fields.add(intId)
+                    val fieldClassType = ClassName(fieldTypePkg, name)
+                    entityClassSpec.addProperty(
+                        PropertySpec.builder(
+                            "_${fieldDefJson.identifier}",
+                            ClassName("kotlin.collections", "MutableList").parameterizedBy(fieldClassType)
+                        ).initializer(
+                            CodeBlock.builder()
+                                .addStatement("mutableListOf()")
+                                .build()
+                        ).addModifiers(KModifier.PRIVATE).build()
+                    )
+                    entityClassSpec.addProperty(
+                        PropertySpec.builder(
+                            fieldDefJson.identifier,
+                            List::class.asTypeName().parameterizedBy(fieldClassType)
+                        ).getter(
+                            FunSpec.getterBuilder()
+                                .addStatement("return _${fieldDefJson.identifier}.toList()")
+                                .build()
+                        ).build()
+                    )
+                } else {
+                    when (typeName) {
+                        "Int", "Float", "Bool", "String" -> {
+                            val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
+                            val className = ClassName("kotlin", name).copy(canBeNull)
+                            val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
+                            val hasOverride = defaultOverride != null
+                            val defaultValue = when {
+                                hasOverride -> {
+                                    when (name) {
+                                        "Int" -> (defaultOverride as? Double)?.toInt()
+                                        "Double", "Boolean", "String" -> defaultOverride
+                                        else -> error("Unsupported primitive field $typeName!")
+                                    }
+                                }
+                                canBeNull -> {
+                                    null
+                                }
+                                !canBeNull -> {
+                                    when (name) {
+                                        "Int" -> 0
+                                        "Double" -> 0.0
+                                        "Boolean" -> false
+                                        "String" -> "\"\""
+                                        else -> error("Unsupported primitive field $typeName!")
+                                    }
+                                }
+                                else -> {
+                                    error("Unable to set default value for $typeName")
+                                }
+                            }
+                            fields.add(fieldDefJson.identifier)
+                            addToEntity(fieldDefJson.identifier, className, defaultValue)
+                        }
+                        "Color" -> {
+                            val defaultValue = (fieldDefJson.defaultOverride?.params?.get(0) as? Double)?.toInt()
+                            val intDefaultValue = defaultValue ?: 0
+                            val hexDefaultValue = defaultValue?.let { "\"${Project.intToHex(it)}\"" }
+                                ?: "\"#000000\""
+                            val colorDefault = Color(intDefaultValue, hexDefaultValue)
+                            val colorClass = ClassName("com.lehaine.ldtk", "Color").copy(nullable = canBeNull)
 
-                        val hextId = "${it.identifier}Hex"
-                        val hexClass = ClassName("kotlin", "String").copy(nullable = canBeNull)
-                        val hexDefaultValue = it.defaultOverride?.params?.get(0) ?: "\"#000000\""
-                        addToEntity(hextId, hexClass, hexDefaultValue)
-                        fields.add(hextId)
-                    }
-                    "Point" -> {
-                        val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)
-                        val defaultValue = it.defaultOverride?.params?.get(0)
-                        addToEntity(it.identifier, className, defaultValue)
-                        fields.add(it.identifier)
-                    }
-                    else -> { // field type is an enum
-                        when {
-                            "LocalEnum." in typeName -> {
-                                val type = typeName.substring(typeName.indexOf(".") + 1)
-                                val className = ClassName.bestGuess(type).copy(canBeNull)
-                                fields.add(it.identifier)
-                                addToEntity(it.identifier, className, it.defaultOverride?.params?.get(0), !canBeNull)
-                            }
-                            "ExternEnum." in typeName -> {
-                                error("ExternEnums are not supported!")
-                            }
-                            else -> {
-                                error("Unsupported field type $typeName")
+                            addToEntity(fieldDefJson.identifier, colorClass, colorDefault)
+                            fields.add(fieldDefJson.identifier)
+
+                        }
+                        "Point" -> {
+                            val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)
+                            val defaultValue = fieldDefJson.defaultOverride?.params?.get(0)
+                            addToEntity(fieldDefJson.identifier, className, defaultValue)
+                            fields.add(fieldDefJson.identifier)
+                        }
+                        else -> { // field type is an enum
+                            when {
+                                "LocalEnum." in typeName -> {
+                                    val type = typeName.substring(typeName.indexOf(".") + 1)
+                                    val className = ClassName.bestGuess(type).copy(canBeNull)
+                                    fields.add(fieldDefJson.identifier)
+                                    addToEntity(
+                                        fieldDefJson.identifier,
+                                        className,
+                                        fieldDefJson.defaultOverride?.params?.get(0),
+                                        !canBeNull
+                                    )
+                                }
+                                "ExternEnum." in typeName -> {
+                                    error("ExternEnums are not supported!")
+                                }
+                                else -> {
+                                    error("Unsupported field type $typeName")
+                                }
                             }
                         }
                     }

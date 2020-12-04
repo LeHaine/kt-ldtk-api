@@ -13,7 +13,7 @@
 	"defaultGridSize": 8,
 	"bgColor": "#18131B",
 	"defaultLevelBgColor": "#121331",
-	"nextUid": 52,
+	"nextUid": 56,
 	"minifyJson": false,
 	"exportTiled": false,
 	"worldLayout": "Free",
@@ -576,7 +576,7 @@
 						"min": null,
 						"max": null,
 						"acceptFileTypes": null,
-						"defaultOverride": null
+						"defaultOverride": { "id": "V_Int", "params": [0] }
 					},
 					{
 						"identifier": "canDie",
@@ -625,6 +625,58 @@
 						"arrayMinLength": null,
 						"arrayMaxLength": null,
 						"editorDisplayMode": "PointStar",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
+					}
+				]
+			},
+			{
+				"identifier": "Cart",
+				"uid": 52,
+				"width": 8,
+				"height": 10,
+				"color": "#94D9B3",
+				"renderMode": "Rectangle",
+				"showName": true,
+				"tilesetId": null,
+				"tileId": null,
+				"tileRenderMode": "Stretch",
+				"maxPerLevel": 0,
+				"limitBehavior": "DiscardOldOnes",
+				"pivotX": 0.5,
+				"pivotY": 1,
+				"fieldDefs": [
+					{
+						"identifier": "patrol_points",
+						"__type": "Array<Point>",
+						"uid": 54,
+						"type": "F_Point",
+						"isArray": true,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "PointPath",
+						"editorDisplayPos": "Above",
+						"editorAlwaysShow": false,
+						"min": null,
+						"max": null,
+						"acceptFileTypes": null,
+						"defaultOverride": null
+					},
+					{
+						"identifier": "speed",
+						"__type": "Float",
+						"uid": 55,
+						"type": "F_Float",
+						"isArray": false,
+						"canBeNull": false,
+						"arrayMinLength": null,
+						"arrayMaxLength": null,
+						"editorDisplayMode": "Hidden",
 						"editorDisplayPos": "Above",
 						"editorAlwaysShow": false,
 						"min": null,
@@ -838,6 +890,32 @@
 									"params": ["21,18"]
 								}]
 							}
+						] },
+						{ "__identifier": "Cart", "__grid": [5,12], "__tile": null, "defUid": 52, "px": [44,104], "fieldInstances": [
+							{
+								"__identifier": "patrol_points",
+								"__value": [ { "cx": 14, "cy": 12 }, { "cx": 20, "cy": 12 }, { "cx": 31, "cy": 12 }, { "cx": 31, "cy": 7 } ],
+								"__type": "Array<Point>",
+								"defUid": 54,
+								"realEditorValues": [ {
+									"id": "V_String",
+									"params": ["14,12"]
+								}, {
+									"id": "V_String",
+									"params": ["20,12"]
+								}, {
+									"id": "V_String",
+									"params": ["31,12"]
+								}, {
+									"id": "V_String",
+									"params": ["31,7"]
+								} ]
+							},
+							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] }
+						] },
+						{ "__identifier": "Cart", "__grid": [9,18], "__tile": null, "defUid": 52, "px": [76,152], "fieldInstances": [
+							{ "__identifier": "patrol_points", "__value": [], "__type": "Array<Point>", "defUid": 54, "realEditorValues": [] },
+							{ "__identifier": "speed", "__value": 0, "__type": "Float", "defUid": 55, "realEditorValues": [] }
 						] }
 					]
 				},
