@@ -20,8 +20,23 @@ import javax.tools.StandardLocation
 import kotlin.reflect.KClass
 
 @AutoService(Processor::class)
-class ProjectProcessor : AbstractProcessor() {
+open class ProjectProcessor : AbstractProcessor() {
 
+    open fun baseLayerAutoLayerClass(): Class<out LayerAutoLayer> {
+        return LayerAutoLayer::class.java
+    }
+
+    open fun baseLayerIntGridClass(): Class<out LayerIntGrid> {
+        return LayerIntGrid::class.java
+    }
+
+    open fun baseLayerIntGridAutoLayerClass(): Class<out LayerIntGridAutoLayer> {
+        return LayerIntGridAutoLayer::class.java
+    }
+
+    open fun baseLayerTilesClass(): Class<out LayerTiles> {
+        return LayerTiles::class.java
+    }
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(LDtkProject::class.java.name)
@@ -114,7 +129,7 @@ class ProjectProcessor : AbstractProcessor() {
         return if (Files.exists(newPath)) {
             newPath
         } else {
-            if(currentPath >= maxPath) {
+            if (currentPath >= maxPath) {
                 error("Unable to find resource file $ldtkFileLocation. Aborting...")
             }
             findResourcePath(path.resolve("../"), ldtkFileLocation, currentPath = currentPath + 1)
@@ -136,7 +151,7 @@ class ProjectProcessor : AbstractProcessor() {
         entities.forEach { entityDef ->
             val entityClassName = "$ENTITY_PREFIX${entityDef.identifier}"
             val entityClassSpec = TypeSpec.classBuilder(entityClassName).apply {
-                superclass(Entity::class)
+                superclass(Entity::class.java)
                 addSuperclassConstructorParameter("%N", "json")
             }
             val entityConstructor =
@@ -341,8 +356,8 @@ class ProjectProcessor : AbstractProcessor() {
                     superclass(superClass)
 
                     when (superClass) {
-                        LayerIntGrid::class, LayerIntGridAutoLayer::class -> {
-                            if (superClass == LayerIntGridAutoLayer::class) {
+                        baseLayerIntGridClass().kotlin, baseLayerIntGridAutoLayerClass().kotlin -> {
+                            if (superClass == baseLayerIntGridAutoLayerClass().kotlin) {
                                 layerConstructor.addParameter(
                                     "tilesetDefJson",
                                     TilesetDefJson::class.asTypeName().copy(nullable = true)
@@ -355,7 +370,7 @@ class ProjectProcessor : AbstractProcessor() {
                             )
                             addSuperclassConstructorParameter("%N", "intGridValues")
                         }
-                        LayerTiles::class -> {
+                        baseLayerTilesClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
                                 TilesetDefJson::class.asTypeName()
@@ -372,11 +387,11 @@ class ProjectProcessor : AbstractProcessor() {
                 "IntGrid" -> {
                     if (layerDef.autoTilesetDefUid == null) {
                         // IntGrid
-                        extendLayerClass(LayerIntGrid::class)
+                        extendLayerClass(baseLayerIntGridClass().kotlin)
 
                     } else {
                         // Auto-layer IntGrid
-                        extendLayerClass(LayerIntGridAutoLayer::class)
+                        extendLayerClass(baseLayerIntGridAutoLayerClass().kotlin)
                         val tileset = tilesets[layerDef.autoTilesetDefUid]
                         if (tileset != null) {
                             val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
@@ -394,7 +409,7 @@ class ProjectProcessor : AbstractProcessor() {
                     }
                 }
                 "AutoLayer" -> {
-                    extendLayerClass(LayerAutoLayer::class)
+                    extendLayerClass(baseLayerAutoLayerClass().kotlin)
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
@@ -431,7 +446,7 @@ class ProjectProcessor : AbstractProcessor() {
                     }
                 }
                 "Tiles" -> {
-                    extendLayerClass(LayerTiles::class)
+                    extendLayerClass(baseLayerTilesClass().kotlin)
 
                     val tileset = tilesets[layerDef.tilesetDefUid]
                         ?: error("Tiles layer ${layerDef.identifier} doesn't have a tileset!")
