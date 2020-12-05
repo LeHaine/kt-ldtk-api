@@ -13,5 +13,6 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))
-    kapt(project(":ldtk-processor"))
+    implementation(project(":libgdx-backend"))
+    kapt(project(":libgdx-ldtk-processor"))
 }

@@ -56,15 +56,8 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
 
     private fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
         val clazz = Class.forName("$classPath\$$LAYER_PREFIX${json.__identifier}")
-        return when (clazz.superclass.simpleName) {
-            "LayerIntGrid" -> {
-                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
-                clazz.getDeclaredConstructor(
-                    List::class.java,
-                    LayerInstanceJson::class.java
-                ).newInstance(intGridValues, json) as Layer
-            }
-            "LayerIntGridAutoLayer" -> {
+        return when {
+            LayerIntGridAutoLayer::class.java.isAssignableFrom(clazz) -> {
                 val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
                 val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
                 clazz.getDeclaredConstructor(
@@ -75,7 +68,14 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                     json
                 ) as Layer
             }
-            "LayerEntities" -> {
+            LayerIntGrid::class.java.isAssignableFrom(clazz) -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
+                clazz.getDeclaredConstructor(
+                    List::class.java,
+                    LayerInstanceJson::class.java
+                ).newInstance(intGridValues, json) as Layer
+            }
+            LayerEntities::class.java.isAssignableFrom(clazz) -> {
                 val entitiesLayer = clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
                         LayerEntities
                 entitiesLayer.entities.forEach {
@@ -87,14 +87,14 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                 }
                 entitiesLayer
             }
-            "LayerTiles" -> {
+            LayerTiles::class.java.isAssignableFrom(clazz) -> {
                 val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
                 clazz.getDeclaredConstructor(
                     TilesetDefJson::class.java, LayerInstanceJson::class.java
                 ).newInstance(tilesetDef, json) as
                         Layer
             }
-            "LayerAutoLayer" -> {
+            LayerAutoLayer::class.java.isAssignableFrom(clazz) -> {
                 clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
                         Layer
             }

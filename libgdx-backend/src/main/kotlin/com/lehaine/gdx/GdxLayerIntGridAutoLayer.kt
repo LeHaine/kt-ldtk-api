@@ -5,7 +5,7 @@ import com.lehaine.ldtk.LayerInstanceJson
 import com.lehaine.ldtk.LayerIntGridAutoLayer
 import com.lehaine.ldtk.TilesetDefJson
 
-class GdxLayerIntGridAutoLayer(
+open class GdxLayerIntGridAutoLayer(
     tilesetDefJson: TilesetDefJson?,
     intGridValues: List<IntGridValue>, json: LayerInstanceJson
 ) : LayerIntGridAutoLayer(tilesetDefJson, intGridValues, json) {
