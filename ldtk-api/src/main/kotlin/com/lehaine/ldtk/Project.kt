@@ -25,7 +25,7 @@ open class Project(val projectFilePath: String) {
 
     init {
         val jsonString =
-            javaClass.classLoader.getResource("sample.ldtk")?.readText() ?: error("Unable to load LDtk file content!")
+            javaClass.classLoader.getResource(projectFilePath)?.readText() ?: error("Unable to load LDtk file content!")
         parseJson(jsonString)
     }
 
