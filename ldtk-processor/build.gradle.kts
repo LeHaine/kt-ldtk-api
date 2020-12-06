@@ -7,9 +7,6 @@ plugins {
     id("com.github.johnrengelman.shadow")
 }
 
-group = "com.lehaine"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
