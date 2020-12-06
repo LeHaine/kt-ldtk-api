@@ -19,7 +19,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))
     implementation(project(":libgdx-backend"))
-    api(project(":ldtk-processor"))
+    implementation(project(":ldtk-processor"))
     implementation("com.google.auto.service:auto-service:1.0-rc7")
     kapt("com.google.auto.service:auto-service:1.0-rc7")
 }
