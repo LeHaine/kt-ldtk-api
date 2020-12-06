@@ -23,7 +23,7 @@ class GdxApp : ApplicationListener {
         spriteBatch = SpriteBatch()
         tiles = Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"))
         camera = OrthographicCamera()
-        viewport = FitViewport(480f, 270f, camera)
+        viewport = PixelPerfectViewport(480f, 270f, camera)
         camera.translate(testLevel.pxWidth / 2f, testLevel.pxHeight / -2f)
     }
 
