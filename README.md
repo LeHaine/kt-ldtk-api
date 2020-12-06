@@ -2,11 +2,12 @@
 [![Release](https://jitpack.io/v/com.lehaine/gdx-ldtk-api.svg)](https://jitpack.io/#com.lehaine/gdx-ldtk-api)
 
 # About
-**!! This project is currently in development and should not be used yet !!**
-
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
 
 This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
+
+
+![LibGDX Example](/screenshots/example_1.png "LibGDX rendering example")
 
 [LDtk official website](https://ldtk.io/)
 
