@@ -149,7 +149,7 @@ class GdxApp : ApplicationListener {
 
 **Java Example**
 
-For a full Java example check out the repository [here]https://github.com/LeHaine/gdx-ldtk-api-java-sample).
+For a full Java example check out the repository [here](https://github.com/LeHaine/gdx-ldtk-api-java-sample).
 ```Java
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
 public class GdxTest implements ApplicationListener {
