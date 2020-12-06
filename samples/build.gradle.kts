@@ -3,9 +3,6 @@ plugins {
     kotlin("kapt")
 }
 
-group = "com.lehaine"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }

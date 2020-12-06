@@ -2,11 +2,14 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.lehaine"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes("Automatic-Module-Name" to "com.lehaine.libgdx-backend")
+    }
 }
 
 dependencies {
