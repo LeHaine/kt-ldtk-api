@@ -6,7 +6,6 @@ This is a Kotlin and Java API to parse and load **LDtk project** files.
 
 This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
 
-
 ![LibGDX Example](/screenshots/example_1.png "LibGDX rendering example")
 
 [LDtk official website](https://ldtk.io/)
@@ -149,6 +148,8 @@ class GdxApp : ApplicationListener {
 ```
 
 **Java Example**
+
+For a full Java example check out the repository [here]https://github.com/LeHaine/gdx-ldtk-api-java-sample).
 ```Java
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
 public class GdxTest implements ApplicationListener {
