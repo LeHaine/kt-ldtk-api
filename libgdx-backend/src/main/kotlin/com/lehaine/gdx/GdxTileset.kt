@@ -18,7 +18,15 @@ open class GdxTileset(json: TilesetDefJson) : Tileset(json) {
             return null
         }
 
-        val region = tiles[getAtlasX(tileId)][getAtlasY(tileId)]
+        val tx = getAtlasX(tileId)
+        val ty = getAtlasY(tileId)
+        if(tx >= tiles.size) {
+            return null
+        }
+        if(ty >= tiles[tx].size) {
+            return null
+        }
+        val region = tiles[ty][tx]
         return when (flipBits) {
             0 -> region
             1 -> {

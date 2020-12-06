@@ -14,13 +14,13 @@ open class Tileset(val json: TilesetDefJson) {
      * Get the X pixel coordinate (in the atlas image) from a specified tile ID
      */
     fun getAtlasX(tileId: Int): Int {
-        return (tileId - (tileId / cWidth) * cWidth) * tileGridSize
+        return (tileId - (tileId / cWidth) * cWidth)
     }
 
     /**
      * Get the Y pixel coordinate (in the atlas image) from a specified tile ID
      */
     fun getAtlasY(tileId: Int): Int {
-        return (tileId / cWidth) * tileGridSize
+        return tileId / cWidth
     }
 }

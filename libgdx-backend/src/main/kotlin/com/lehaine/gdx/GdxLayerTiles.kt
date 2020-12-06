@@ -18,12 +18,14 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
         for (cy in 0..cHeight) {
             for (cx in 0..cWidth) {
                 if (hasAnyTileAt(cx, cy)) {
-                    getTileStackAt(cx, cy).forEach {
-                        batch.draw(
-                            tileset.getTextureRegion(tiles, it.tileId, it.flipBits),
-                            (cx * gridSize + pxTotalOffsetX).toFloat(),
-                            (cy * gridSize + pxTotalOffsetY).toFloat()
-                        )
+                    getTileStackAt(cx, cy).forEach { tileInfo ->
+                        tileset.getTextureRegion(tiles, tileInfo.tileId, tileInfo.flipBits)?.also {
+                            batch.draw(
+                                it,
+                                (cx * gridSize + pxTotalOffsetX).toFloat(),
+                                (cy * gridSize + pxTotalOffsetY).toFloat()
+                            )
+                        }
                     }
                 }
             }

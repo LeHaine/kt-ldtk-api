@@ -20,12 +20,14 @@ open class GdxLayerAutoLayer(
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
 
-        autoTiles.forEach {
-            batch.draw(
-                tileset.getAutoLayerTextureRegion(tiles, it),
-                (it.renderX + pxTotalOffsetX).toFloat(),
-                (it.renderY + pxTotalOffsetY).toFloat()
-            )
+        autoTiles.forEach { autoTile ->
+            tileset.getAutoLayerTextureRegion(tiles, autoTile)?.also {
+                batch.draw(
+                    it,
+                    (autoTile.renderX + pxTotalOffsetX).toFloat(),
+                    (autoTile.renderY + pxTotalOffsetY).toFloat()
+                )
+            }
         }
     }
 }
