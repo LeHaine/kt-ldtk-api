@@ -9,7 +9,6 @@ import com.lehaine.ldtk.TilesetDefJson
 
 open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson) : LayerTiles(tilesetDefJson, json) {
 
-
     fun render(batch: Batch, tilesTexture: Texture) {
         val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
@@ -19,7 +18,9 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
             for (cx in 0..cWidth) {
                 if (hasAnyTileAt(cx, cy)) {
                     getTileStackAt(cx, cy).forEach { tileInfo ->
-                        tileset.getLDtkTile(tiles, tileInfo.tileId, tileInfo.flipBits)?.also {
+                        tileset.getLDtkTile(
+                            tiles, tileInfo.tileId, tileInfo.flipBits
+                        )?.also {
                             batch.draw(
                                 it.region.texture,
                                 (cx * gridSize + pxTotalOffsetX).toFloat(),
