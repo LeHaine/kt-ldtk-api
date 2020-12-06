@@ -18,7 +18,7 @@ This library can be used for any JVM game engine/framework. It features a separa
 
 
 # Usage
-## Sample code
+## Sample code 
 Create any class and add an `@LDtkProject` annotation to it with the location to your LDtk file on your projects classpath.
 
 Build your project, and it is ready to be used.
@@ -98,6 +98,116 @@ public class SampleJava {
 }
 ```
 
+## Sample code for LibGDX modules
+
+**Kotlin Example**
+```Kotlin
+class GdxApp : ApplicationListener {
+
+    private lateinit var spriteBatch: SpriteBatch
+    private lateinit var tiles: Texture
+    private lateinit var camera: OrthographicCamera
+    private lateinit var viewport: FitViewport
+    private val world = World()
+    private val testLevel = world.allLevels[0]
+
+    override fun create() {
+        spriteBatch = SpriteBatch()
+        tiles = Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"))
+        camera = OrthographicCamera()
+        viewport = PixelPerfectViewport(480f, 270f, camera)
+        camera.translate(testLevel.pxWidth / 2f, testLevel.pxHeight / -2f)
+    }
+
+    override fun resize(width: Int, height: Int) {
+        viewport.update(width, height, false)
+    }
+
+    override fun render() {
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        camera.update()
+        spriteBatch.projectionMatrix = camera.combined
+        spriteBatch.begin()
+        testLevel.layerBackground.render(spriteBatch, tiles)
+        testLevel.layerCollisions.render(spriteBatch, tiles)
+        testLevel.layerCustom_tiles.render(spriteBatch, tiles)
+        spriteBatch.end()
+    }
+
+    override fun pause() {
+    }
+
+    override fun resume() {
+    }
+
+    override fun dispose() {
+    }
+
+}
+```
+
+**Java Example**
+```Java
+@LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
+public class GdxTest implements ApplicationListener {
+
+    private SpriteBatch spriteBatch;
+    private Texture tiles;
+    private Camera camera;
+    private PixelPerfectViewport viewport;
+    private final World world = new World();
+    private final World.WorldLevel testLevel = world.getAllLevels().get(0);
+
+    @Override
+    public void create() {
+        spriteBatch = new SpriteBatch();
+        tiles = new Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"));
+        camera = new OrthographicCamera();
+        viewport = new PixelPerfectViewport(480, 270, camera);
+        camera.translate(testLevel.getPxWidth() / 2f, testLevel.getPxHeight() / -2f, 0f);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, false);
+    }
+
+    @Override
+    public void render() {
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        camera.update();
+        spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+        testLevel.getLayerBackground().render(spriteBatch, tiles);
+        testLevel.getLayerCollisions().render(spriteBatch, tiles);
+        testLevel.getLayerCustom_tiles().render(spriteBatch, tiles);
+        spriteBatch.end();
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void dispose() {
+
+    }
+
+    public static void main(String[] args) {
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setWindowedMode(960, 540);
+        new Lwjgl3Application(new GdxTest(), config);
+    }
+}
+```
 You can check out a few samples in the [samples](samples) module.
 
 ## Documentation
@@ -120,18 +230,46 @@ plugins {
 }
 ```
 
-Add the libraries to your dependencies. 
-**The `ldtk-api` and `ldtk-processor` libraries are not yet published to any repositories for download.**
+### Dependencies for any framework
+**Note:** Check for latest version at the top.
+
+**build.gradle.kts**
+```Kotlin
+allprojects {
+    repositories {
+        maven(url="https://jitpack.io")
+    }
+}
+```
 
 ```Kotlin
 dependencies {
-    implementation("ldtk-api")
-    kapt("ldtk-processor")
+    implementation("com.lehaine.gdx-ldtk-api:ldtk-api:0.6.1")
+    kapt("com.lehaine.gdx-ldtk-api:ldtk-processor:0.6.1")
+}
+```
+
+### Dependencies for LibGDX modules
+**Note:** Check for latest version at the top.
+
+**build.gradle.kts**
+```Kotlin
+allprojects {
+    repositories {
+        maven(url="https://jitpack.io")
+    }
+}
+```
+
+```Kotlin
+dependencies {
+    implementation("com.lehaine.gdx-ldtk-api:ldtk-api:0.6.1")
+    implementation("com.lehaine.gdx-ldtk-api:libgdx-backend:0.6.1")
+    kapt("com.lehaine.gdx-ldtk-api:libgdx-ldtk-processor:0.6.1")
 }
 ```
 
 ## TODO
 
-- [ ] Add LibGDX module
 - [ ] Major code clean up
 - [ ] Add documentation
