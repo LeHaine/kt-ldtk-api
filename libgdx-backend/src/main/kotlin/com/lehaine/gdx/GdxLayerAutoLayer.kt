@@ -21,11 +21,24 @@ open class GdxLayerAutoLayer(
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
 
         autoTiles.forEach { autoTile ->
-            tileset.getAutoLayerTextureRegion(tiles, autoTile)?.also {
+            tileset.getAutoLayerLDtkTile(tiles, autoTile)?.also {
                 batch.draw(
-                    it,
+                    it.region.texture,
                     (autoTile.renderX + pxTotalOffsetX).toFloat(),
-                    -(autoTile.renderY + pxTotalOffsetY).toFloat() // LDtk is y-down, so invert it
+                    -(autoTile.renderY + pxTotalOffsetY).toFloat(), // LDtk is y-down, so invert it
+                    0f,
+                    0f,
+                    gridSize.toFloat(),
+                    gridSize.toFloat(),
+                    1f,
+                    1f,
+                    0f,
+                    it.region.regionX,
+                    it.region.regionY,
+                    it.region.regionWidth,
+                    it.region.regionHeight,
+                    it.flipX,
+                    it.flipY
                 )
             }
         }

@@ -19,11 +19,24 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
             for (cx in 0..cWidth) {
                 if (hasAnyTileAt(cx, cy)) {
                     getTileStackAt(cx, cy).forEach { tileInfo ->
-                        tileset.getTextureRegion(tiles, tileInfo.tileId, tileInfo.flipBits)?.also {
+                        tileset.getLDtkTile(tiles, tileInfo.tileId, tileInfo.flipBits)?.also {
                             batch.draw(
-                                it,
+                                it.region.texture,
                                 (cx * gridSize + pxTotalOffsetX).toFloat(),
-                                -(cy * gridSize + pxTotalOffsetY).toFloat() // LDtk is y-down, so invert it
+                                -(cy * gridSize + pxTotalOffsetY).toFloat(), // LDtk is y-down, so invert it
+                                0f,
+                                0f,
+                                gridSize.toFloat(),
+                                gridSize.toFloat(),
+                                1f,
+                                1f,
+                                0f,
+                                it.region.regionX,
+                                it.region.regionY,
+                                it.region.regionWidth,
+                                it.region.regionHeight,
+                                it.flipX,
+                                it.flipY
                             )
                         }
                     }
