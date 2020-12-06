@@ -2,10 +2,18 @@ package com.lehaine.ldtk
 
 open class Project(val projectFilePath: String) {
 
-    var bgColorInt: Int = 0x0
-    var bgColorHex: String = "#000000"
+    enum class WorldLayout {
+        Free,
+        GridVania,
+        LinearHorizontal,
+        LinearVertical
+    }
 
-    lateinit var defs: DefinitionJson
+    val bgColorInt: Int
+    val bgColorHex: String
+    val worldLayout: WorldLayout
+    val defs: DefinitionJson
+
     private val _allUntypedLevels = mutableListOf<Level>()
     val allUntypedLevels get() = _allUntypedLevels.toList()
 
@@ -26,14 +34,8 @@ open class Project(val projectFilePath: String) {
     init {
         val jsonString =
             javaClass.classLoader.getResource(projectFilePath)?.readText() ?: error("Unable to load LDtk file content!")
-        parseJson(jsonString)
-    }
-
-    fun parseJson(jsonString: String) {
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
         defs = json.defs
-        bgColorHex = json.bgColor
-        bgColorInt = hexToInt(json.bgColor)
 
         json.levels.forEach { levelJson ->
             val level = instantiateLevel(this, levelJson)
@@ -41,6 +43,9 @@ open class Project(val projectFilePath: String) {
                 _allUntypedLevels.add(it)
             }
         }
+        worldLayout = WorldLayout.valueOf(json.worldLayout)
+        bgColorHex = json.bgColor
+        bgColorInt = hexToInt(json.bgColor)
     }
 
     open fun instantiateLevel(project: Project, json: LevelJson): Level? {
