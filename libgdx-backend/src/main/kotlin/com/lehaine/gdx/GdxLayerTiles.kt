@@ -23,7 +23,7 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
                             batch.draw(
                                 it,
                                 (cx * gridSize + pxTotalOffsetX).toFloat(),
-                                (cy * gridSize + pxTotalOffsetY).toFloat()
+                                -(cy * gridSize + pxTotalOffsetY).toFloat() // LDtk is y-down, so invert it
                             )
                         }
                     }

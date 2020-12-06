@@ -17,13 +17,14 @@ class GdxApp : ApplicationListener {
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
     private val world = World()
-    private val testLevel = world.allLevels.find { it.identifier == "TileTest" }!!
+    private val testLevel = world.allLevels[0]
 
     override fun create() {
         spriteBatch = SpriteBatch()
         tiles = Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"))
         camera = OrthographicCamera()
         viewport = FitViewport(480f, 270f, camera)
+        camera.translate(testLevel.pxWidth / 2f, testLevel.pxHeight / -2f)
     }
 
     override fun resize(width: Int, height: Int) {
