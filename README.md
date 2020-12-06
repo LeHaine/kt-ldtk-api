@@ -1,4 +1,7 @@
 
+[![Release](https://jitpack.io/v/com.example/Repo.svg)]
+(https://jitpack.io/#com.lehaine/gdx-ldtk-api)
+
 # About
 **!! This project is currently in development and should not be used yet !!**
 
