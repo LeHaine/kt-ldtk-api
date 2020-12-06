@@ -1,5 +1,5 @@
 
-[![Release](https://jitpack.io/v/com.example/Repo.svg)]
+[![Release](https://jitpack.io/v/com.lehaine/gdx-ldtk-api.svg)]
 (https://jitpack.io/#com.lehaine/gdx-ldtk-api)
 
 # About
