@@ -95,7 +95,10 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                         Layer
             }
             LayerAutoLayer::class.java.isAssignableFrom(clazz) -> {
-                clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
+                clazz.getDeclaredConstructor(
+                    TilesetDefJson::class.java, LayerInstanceJson::class.java
+                ).newInstance(tilesetDef, json) as
                         Layer
             }
             else -> {

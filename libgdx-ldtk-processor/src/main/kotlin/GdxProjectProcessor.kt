@@ -1,15 +1,8 @@
 import com.google.auto.service.AutoService
-import com.lehaine.gdx.GdxLayerAutoLayer
-import com.lehaine.gdx.GdxLayerIntGrid
-import com.lehaine.gdx.GdxLayerIntGridAutoLayer
-import com.lehaine.gdx.GdxLayerTiles
-import com.lehaine.ldtk.LayerAutoLayer
-import com.lehaine.ldtk.LayerIntGrid
-import com.lehaine.ldtk.LayerIntGridAutoLayer
-import com.lehaine.ldtk.LayerTiles
+import com.lehaine.gdx.*
+import com.lehaine.ldtk.*
 import com.lehaine.ldtk.processor.ProjectProcessor
 import javax.annotation.processing.Processor
-
 
 @AutoService(Processor::class)
 class GdxProjectProcessor : ProjectProcessor() {
@@ -28,5 +21,9 @@ class GdxProjectProcessor : ProjectProcessor() {
 
     override fun baseLayerTilesClass(): Class<out LayerTiles> {
         return GdxLayerTiles::class.java
+    }
+
+    override fun baseTilesetClass(): Class<out Tileset> {
+        return GdxTileset::class.java
     }
 }

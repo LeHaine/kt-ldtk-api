@@ -21,12 +21,12 @@ open class Layer(val json: LayerInstanceJson) {
     /**
      * Grid-based layer width
      */
-    val cWid: Int = json.__cWid
+    val cWidth: Int = json.__cWid
 
     /**
      * Grid-based layer height
      */
-    val cHei: Int = json.__cHei
+    val cHeight: Int = json.__cHei
 
     /**
      * Pixel-based layer X offset (includes both instance and definition offsets)
@@ -45,17 +45,17 @@ open class Layer(val json: LayerInstanceJson) {
      * @return TRUE if grid-based coordinates are within layer bounds.
      */
     fun isCoordValid(cx: Int, cy: Int): Boolean {
-        return cx in 0 until cWid && cy >= 0 && cy < cHei
+        return cx in 0 until cWidth && cy >= 0 && cy < cHeight
     }
 
 
     fun getCx(coordId: Int): Int {
-        return coordId - coordId / cWid * cWid
+        return coordId - coordId / cWidth * cWidth
     }
 
     fun getCy(coordId: Int): Int {
-        return coordId / cWid
+        return coordId / cWidth
     }
 
-    fun getCoordId(cx: Int, cy: Int) = cx + cy * cWid
+    fun getCoordId(cx: Int, cy: Int) = cx + cy * cWidth
 }

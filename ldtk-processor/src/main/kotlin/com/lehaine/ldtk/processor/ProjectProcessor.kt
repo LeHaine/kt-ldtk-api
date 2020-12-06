@@ -38,6 +38,10 @@ open class ProjectProcessor : AbstractProcessor() {
         return LayerTiles::class.java
     }
 
+    open fun baseTilesetClass(): Class<out Tileset> {
+        return Tileset::class.java
+    }
+
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(LDtkProject::class.java.name)
     }
@@ -322,7 +326,7 @@ open class ProjectProcessor : AbstractProcessor() {
         tilesets.forEach {
             val name = "Tileset_${it.identifier}"
             val tilesetClassSpec = TypeSpec.classBuilder(name).apply {
-                superclass(Tileset::class)
+                superclass(baseTilesetClass())
                 addSuperclassConstructorParameter("%N", "json")
 
             }
@@ -370,6 +374,13 @@ open class ProjectProcessor : AbstractProcessor() {
                             )
                             addSuperclassConstructorParameter("%N", "intGridValues")
                         }
+                        baseLayerAutoLayerClass().kotlin -> {
+                            layerConstructor.addParameter(
+                                "tilesetDefJson",
+                                TilesetDefJson::class.asTypeName().copy(nullable = true)
+                            )
+                            addSuperclassConstructorParameter("%N", "tilesetDefJson")
+                        }
                         baseLayerTilesClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
@@ -401,7 +412,7 @@ open class ProjectProcessor : AbstractProcessor() {
                                     .build()
                             )
                             layerClassSpec.addFunction(
-                                FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
+                                FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
                                     .addModifiers(KModifier.OVERRIDE)
                                     .addStatement("return tileset").build()
                             )
@@ -410,6 +421,20 @@ open class ProjectProcessor : AbstractProcessor() {
                 }
                 "AutoLayer" -> {
                     extendLayerClass(baseLayerAutoLayerClass().kotlin)
+                    val tileset = tilesets[layerDef.autoTilesetDefUid]
+                    if (tileset != null) {
+                        val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
+                        layerClassSpec.addProperty(
+                            PropertySpec.builder("tileset", tilesetType)
+                                .initializer("%L(%N!!)", tileset.typeName, "tilesetDefJson")
+                                .build()
+                        )
+                        layerClassSpec.addFunction(
+                            FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
+                                .addModifiers(KModifier.OVERRIDE)
+                                .addStatement("return tileset").build()
+                        )
+                    }
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
@@ -457,7 +482,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             .build()
                     )
                     layerClassSpec.addFunction(
-                        FunSpec.builder("getTileset").returns(Tileset::class.asTypeName().copy(true))
+                        FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
                             .addModifiers(KModifier.OVERRIDE)
                             .addStatement("return tileset").build()
                     )

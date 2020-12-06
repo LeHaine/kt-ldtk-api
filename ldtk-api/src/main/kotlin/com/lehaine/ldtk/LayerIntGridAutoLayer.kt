@@ -4,10 +4,9 @@ open class LayerIntGridAutoLayer(
     val tilesetDefJson: TilesetDefJson?,
     intGridValues: List<IntGridValue>,
     json: LayerInstanceJson
-) :
-    LayerIntGrid(intGridValues, json) {
+) : LayerIntGrid(intGridValues, json) {
 
-    val layerAutoTiles: List<LayerAutoLayer.AutoTile> =
+    val autoTiles: List<LayerAutoLayer.AutoTile> =
         json.autoLayerTiles.map {
             LayerAutoLayer.AutoTile(
                 tileId = it.t,
