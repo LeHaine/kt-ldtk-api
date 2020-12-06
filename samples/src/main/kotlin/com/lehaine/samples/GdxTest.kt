@@ -27,7 +27,7 @@ class GdxApp : ApplicationListener {
     }
 
     override fun resize(width: Int, height: Int) {
-        viewport.update(width, height, true)
+        viewport.update(width, height, false)
     }
 
     override fun render() {
@@ -57,7 +57,7 @@ object GdxTest {
     @JvmStatic
     fun main(arg: Array<String>) {
         val config = Lwjgl3ApplicationConfiguration().apply {
-            setWindowedMode(480, 270)
+            setWindowedMode(960, 540)
         }
         Lwjgl3Application(GdxApp(), config)
     }

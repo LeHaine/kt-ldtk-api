@@ -20,10 +20,10 @@ open class GdxTileset(json: TilesetDefJson) : Tileset(json) {
 
         val tx = getAtlasX(tileId)
         val ty = getAtlasY(tileId)
-        if(tx >= tiles.size) {
+        if (tx >= tiles.size) {
             return null
         }
-        if(ty >= tiles[tx].size) {
+        if (ty >= tiles[tx].size) {
             return null
         }
         val region = tiles[ty][tx]

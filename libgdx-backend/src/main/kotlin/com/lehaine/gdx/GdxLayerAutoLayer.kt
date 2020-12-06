@@ -25,7 +25,7 @@ open class GdxLayerAutoLayer(
                 batch.draw(
                     it,
                     (autoTile.renderX + pxTotalOffsetX).toFloat(),
-                    (autoTile.renderY + pxTotalOffsetY).toFloat()
+                    -(autoTile.renderY + pxTotalOffsetY).toFloat() // LDtk is y-down, so invert it
                 )
             }
         }
