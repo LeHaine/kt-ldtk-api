@@ -270,7 +270,7 @@ open class ProjectProcessor : AbstractProcessor() {
                         }
                         "Point" -> {
                             val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)
-                            val defaultValue = fieldDefJson.defaultOverride?.params?.get(0)
+                            val defaultValue = fieldDefJson.defaultOverride?.params?.get(0) ?: "Point(0, 0)"
                             addToEntity(fieldDefJson.identifier, className, defaultValue)
                             fields.add(fieldDefJson.identifier)
                         }

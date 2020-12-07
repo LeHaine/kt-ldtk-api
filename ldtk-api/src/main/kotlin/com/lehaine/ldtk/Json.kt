@@ -307,7 +307,7 @@ data class LayerDefJson(
 
     /** Contains all the auto-layer rule definitions. **/
     @Only(["Auto-layers"])
-    val autoRuleGroups: List<AutoRuleGroup>,
+    val autoRuleGroups: List<AutoRuleGroup>?,
 
     @Only(["Auto-layers"])
     val autoSourceLayerDefUid: Int?,
