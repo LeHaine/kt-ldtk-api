@@ -7,6 +7,8 @@ import com.lehaine.ldtk.Point
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
 class _World
 
+@LDtkProject(ldtkFileLocation = "unitTest.ldtk", name = "UnitTestWorld")
+class _UnitTestWorld
 fun main(args: Array<String>) {
     // create new LDtk world
     val world = World()
