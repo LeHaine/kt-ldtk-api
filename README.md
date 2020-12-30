@@ -273,5 +273,6 @@ dependencies {
 
 ## TODO
 
+- [ ] Optimize rendering
 - [ ] Major code clean up
 - [ ] Add documentation
