@@ -99,7 +99,6 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         if (isLoaded()) {
             return true
         }
-        println("loading level $identifier")
         val relPath = externalRelPath ?: return false
         val json =
             LDtkApi.parseLDtkLevelFile(String(project.getAsset(relPath))) ?: error("Unable to parse Level JSON")
