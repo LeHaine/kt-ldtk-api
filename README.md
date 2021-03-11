@@ -1,6 +1,6 @@
 
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
-[![LDtk]https://img.shields.io/github/v/release/deepnight/ldtk?color=red&label=LDtk](https://ldtk.io/)
+[![LDtk](https://img.shields.io/github/v/release/deepnight/ldtk?color=red&label=LDtk)](https://ldtk.io/)
 
 # CURRENTLY OUT OF DATE - WIP
 
