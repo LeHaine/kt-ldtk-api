@@ -1,6 +1,8 @@
 
 [![Release](https://jitpack.io/v/com.lehaine/gdx-ldtk-api.svg)](https://jitpack.io/#com.lehaine/gdx-ldtk-api)
 
+# CURRENTLY OUT OF DATE - WIP
+
 # About
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
 
