@@ -1,5 +1,5 @@
 
-[![Release](https://jitpack.io/v/com.lehaine/gdx-ldtk-api.svg)](https://jitpack.io/#com.lehaine/gdx-ldtk-api)
+[![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
 
 # CURRENTLY OUT OF DATE - WIP
 
@@ -151,7 +151,7 @@ class GdxApp : ApplicationListener {
 
 **Java Example**
 
-For a full Java example check out the repository [here](https://github.com/LeHaine/gdx-ldtk-api-java-sample).
+For a full Java example check out the repository [here](https://github.com/LeHaine/kt-ldtk-api-java-sample).
 ```Java
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
 public class GdxTest implements ApplicationListener {
@@ -248,8 +248,8 @@ allprojects {
 
 ```Kotlin
 dependencies {
-    implementation("com.lehaine.gdx-ldtk-api:ldtk-api:0.6.1")
-    kapt("com.lehaine.gdx-ldtk-api:ldtk-processor:0.6.1")
+    implementation("com.lehaine.kt-ldtk-api:ldtk-api:0.6.1")
+    kapt("com.lehaine.kt-ldtk-api:ldtk-processor:0.6.1")
 }
 ```
 
@@ -267,9 +267,9 @@ allprojects {
 
 ```Kotlin
 dependencies {
-    implementation("com.lehaine.gdx-ldtk-api:ldtk-api:0.6.1")
-    implementation("com.lehaine.gdx-ldtk-api:libgdx-backend:0.6.1")
-    kapt("com.lehaine.gdx-ldtk-api:libgdx-ldtk-processor:0.6.1")
+    implementation("com.lehaine.kt-ldtk-api:ldtk-api:0.6.1")
+    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:0.6.1")
+    kapt("com.lehaine.kt-ldtk-api:libkt-ldtk-processor:0.6.1")
 }
 ```
 
