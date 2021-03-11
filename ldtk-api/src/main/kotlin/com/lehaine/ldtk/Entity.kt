@@ -15,16 +15,28 @@ open class Entity(val json: EntityInstanceJson) {
     /** Pixel-based Y coordinate **/
     val pixelY: Int = json.px[1]
 
+    /** Pivot X coord (0-1) **/
+    val pivotX: Float = if (json.__pivot.isNullOrEmpty()) 0f else json.__pivot[0]
+
+    /** Pivot Y coord (0-1) **/
+    val pivotY: Float = if (json.__pivot.isNullOrEmpty()) 0f else json.__pivot[1]
+
+    /** Width in pixels **/
+    val width: Int = json.width
+
+    /** Height in pixels**/
+    val height: Int = json.height
+
     /** Tile infos if the entity has one (it could have been overridden by a Field value, such as Enums) **/
-    val tileInfosJson: TileInfo? = if (json.__tileJson == null) {
+    val tileInfosJson: TileInfo? = if (json.__tile == null) {
         null
     } else {
         TileInfo(
-            tilesetUid = json.__tileJson.tilesetUid,
-            x = json.__tileJson.srcRect[0],
-            y = json.__tileJson.srcRect[1],
-            w = json.__tileJson.srcRect[2],
-            h = json.__tileJson.srcRect[3]
+            tilesetUid = json.__tile.tilesetUid,
+            x = json.__tile.srcRect[0],
+            y = json.__tile.srcRect[1],
+            w = json.__tile.srcRect[2],
+            h = json.__tile.srcRect[3]
         )
     }
 

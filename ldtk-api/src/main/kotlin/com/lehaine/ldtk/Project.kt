@@ -2,17 +2,12 @@ package com.lehaine.ldtk
 
 open class Project(val projectFilePath: String) {
 
-    enum class WorldLayout {
-        Free,
-        GridVania,
-        LinearHorizontal,
-        LinearVertical
-    }
-
     val bgColorInt: Int
     val bgColorHex: String
     val worldLayout: WorldLayout
     val defs: DefinitionJson
+
+    val tilesets = mutableMapOf<Int, Tileset>()
 
     private val _allUntypedLevels = mutableListOf<Level>()
     val allUntypedLevels get() = _allUntypedLevels.toList()
@@ -43,7 +38,12 @@ open class Project(val projectFilePath: String) {
                 _allUntypedLevels.add(it)
             }
         }
-        worldLayout = WorldLayout.valueOf(json.worldLayout)
+
+        json.defs.tilesets.forEach {
+            tilesets[it.uid] = Tileset(it)
+
+        }
+        worldLayout = json.worldLayout
         bgColorHex = json.bgColor
         bgColorInt = hexToInt(json.bgColor)
     }

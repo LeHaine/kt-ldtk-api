@@ -7,15 +7,6 @@ data class ProjectJson(
     /** File format version **/
     val jsonVersion: String,
 
-    /** Default X pivot (0 to 1) for new entities **/
-    val defaultPivotX: Float,
-
-    /** Default Y pivot (0 to 1) for new entities **/
-    val defaultPivotY: Float,
-
-    /** Default grid size for new layers **/
-    val defaultGridSize: Int,
-
     /** Project background color **/
     val bgColor: String,
 
@@ -27,7 +18,7 @@ data class ProjectJson(
     An enum that describes how levels are organized in this project (ie. linearly or in a 2D space). Possible values are: Free, GridVania, LinearHorizontal and LinearVertical,
      **/
     @Added("0.6.0")
-    val worldLayout: String,
+    val worldLayout: WorldLayout,
 
     /** Width of the world grid in pixels. **/
     @Only(["'GridVania' layouts"])
@@ -38,14 +29,6 @@ data class ProjectJson(
     @Only(["'GridVania' layouts"])
     @Added("0.6.0")
     val worldGridHeight: Int,
-
-    val nextUid: Int,
-
-    /** If TRUE, the Json is partially minified (no indentation, nor line breaks, default is FALSE) **/
-    val minifyJson: Boolean,
-
-    /** If TRUE, a Tiled compatible file will also be generated along with the LDtk JSON file (default is FALSE) **/
-    val exportTiled: Boolean,
 
     /** A structure containing all the definitions of this project **/
     val defs: DefinitionJson,
@@ -75,20 +58,62 @@ data class LevelJson(
     /** Height of the level in pixels **/
     val pxHei: Int,
 
-    /** Background color of the level. If `null`, the project `defaultLevelBgColor` should be used.**/
-    val bgColor: String?,
-
     /** Background color of the level (same as `bgColor`, except the default value is automatically used here if its value is `null`) **/
     val __bgColor: String,
 
     val layerInstances: List<LayerInstanceJson>,
 
+    val fieldInstances: List<FieldInstanceJson>,
+    /**
+     * This value is not null if the project option "*Save levels separately*" is enabled. In this case, this **relative** path points to the level Json file.
+     */
+    val externalRelPath: String?,
+
     /** A list of all other levels touching this one on the world map. The `dir` is a single lowercase character tipping on the level location (`n`orth, `s`outh, `w`est, `e`ast). In "linear" world layouts, this List is populated with previous/next levels in List, and `dir` depends on the linear horizontal/vertical layout. **/
-    val __neighbours: List<Neighbour>?,
+    val __neighbours: List<NeighbourLevel>?,
+
+    /**
+     * The *optional* relative path to the level background image.
+     */
+    val bgRelPath: String?,
+
+    /**
+     * Position informations of the background image, if there is one.
+     */
+    val __bgPos: LevelBgPosInfos?
 )
 
+/**
+ * Neighboring level info
+ */
 @JsonClass(generateAdapter = true)
-data class Neighbour(val levelUid: Int, val dir: String)
+data class NeighbourLevel(
+    val levelUid: Int,
+    /**
+     * A single lowercase character tipping on the level location (`n`orth, `s`outh, `w`est, `e`ast).
+     */
+    val dir: String
+)
+
+/**
+ * Level background image position info
+ */
+@JsonClass(generateAdapter = true)
+data class LevelBgPosInfos(
+    /**
+     * A list containing the `[x,y]` pixel coordinates of the top-left corner of the **cropped** background image, depending on `bgPos` option.
+     */
+    val topLeftPx: List<Int>,
+    /**
+     * A list containing the `[scaleX,scaleY]` values of the **cropped** background image, depending on `bgPos` option.
+     */
+    val scale: List<Float>,
+    /**
+     * An array of 4 float values describing the cropped sub-rectangle of the displayed background image.
+     * This cropping happens when original is larger than the level bounds. List format: `[ cropX, cropY, cropWidth, cropHeight ]`
+     */
+    val cropRect: List<Float>
+)
 
 @JsonClass(generateAdapter = true)
 data class LayerInstanceJson(
@@ -132,6 +157,11 @@ data class LayerInstanceJson(
     /** Reference the Layer definition UID **/
     val layerDefUid: Int,
 
+    /**
+     * Layer instance visibility
+     */
+    val visible: Boolean,
+
     /** X offset in pixels to render this layer, usually 0 (IMPORTANT: this should be added to the `LayerDef` optional offset, see `__pxTotalOffsetX`) **/
     @Changed("0.5.0")
     val pxOffsetX: Int,
@@ -144,15 +174,28 @@ data class LayerInstanceJson(
     @Only(["Auto-layers"])
     val seed: Int,
 
+    /**
+     * The list of IntGrid values, stored using coordinate ID system (refer to online documentation for more info about "Coordinate IDs")
+     */
     @Only(["IntGrid layers"])
-    val intGrid: List<IntGridInfo>,
+    val intGrid: List<IntGridValueInstance>,
+
+    /**
+     * A list of all values in the IntGrid layer, stored from left to right, and top to bottom (ie. first row from left to right, followed by second row, etc).
+     */
+    val intGridCsv: List<Int>,
 
     @Only(["Tile layers"])
     val gridTiles: List<Tile>,
 
     /**
-    An List containing all tiles generated by Auto-layer rules. The List is already sorted in display order (ie. 1st tile is beneath 2nd, which is beneath 3rd etc.).
-    Note: if multiple tiles are stacked in the same cell as the result of different rules, all tiles behind opaque ones will be discarded.
+     * This layer can use another tileset by overriding the tileset UID here.
+     */
+    val overrideTilesetUid: Int?,
+
+    /**
+     * An List containing all tiles generated by Auto-layer rules. The List is already sorted in display order (ie. 1st tile is beneath 2nd, which is beneath 3rd etc.).
+     * Note: if multiple tiles are stacked in the same cell as the result of different rules, all tiles behind opaque ones will be discarded.
      **/
     @Only(["Auto-layers"])
     @Added("0.4.0")
@@ -163,7 +206,7 @@ data class LayerInstanceJson(
 )
 
 @JsonClass(generateAdapter = true)
-data class IntGridInfo(
+data class IntGridValueInstance(
     /** Coordinate ID in the layer grid **/
     val coordId: Int,
     /** IntGrid value **/
@@ -181,23 +224,23 @@ data class Tile(
     val src: List<Int>,
 
     /**
-    "Flip bits", a 2-bits integer to represent the mirror transformations of the tile.
-    - Bit 0 = X flip
-    - Bit 1 = Y flip
-    Examples: f=0 (no flip), f=1 (X flip only), f=2 (Y flip only), f=3 (both flips)
+     * "Flip bits", a 2-bits integer to represent the mirror transformations of the tile.
+     * - Bit 0 = X flip
+     * - Bit 1 = Y flip
+     * Examples: f=0 (no flip), f=1 (X flip only), f=2 (Y flip only), f=3 (both flips)
      **/
     val f: Int,
 
     /**
-    The *Tile ID* in the corresponding tileset.
+     *The *Tile ID* in the corresponding tileset.
      **/
     @Added("0.6.0")
     val t: Int,
 
     /**
-    Internal data used by the editor.
-    For auto-layer tiles: `[ruleId, coordId]`.
-    For tile-layer tiles: `[coordId]`.
+     * Internal data used by the editor.
+     * For auto-layer tiles: `[ruleId, coordId]`.
+     * For tile-layer tiles: `[coordId]`.
      **/
     @Changed("0.6.0")
     val d: List<Int>
@@ -213,10 +256,21 @@ data class EntityInstanceJson(
     val __grid: List<Int>,
 
     /**
-    Optional Tile used to display this entity (it could either be the default Entity tile, or some tile provided by a field value, like an Enum).
+     * Pivot coordinates  (`[x,y]` format, values are from 0 to 1) of the Entity
+     */
+    val __pivot: List<Float>,
+
+    /** Entity width in pixels. For non-resizable entities, it will be the same as Entity definition. **/
+    val width: Int,
+
+    /** Entity height in pixels. For non-resizable entities, it will be the same as Entity definition. **/
+    val height: Int,
+
+    /**
+     * Optional Tile used to display this entity (it could either be the default Entity tile, or some tile provided by a field value, like an Enum).
      **/
     @Added("0.4.0")
-    val __tileJson: TileInfoJson?,
+    val __tile: EntityInstanceTile?,
 
     /** Reference of the **Entity definition** UID **/
     val defUid: Int,
@@ -225,11 +279,15 @@ data class EntityInstanceJson(
     @Changed("0.4.0")
     val px: List<Int>,
 
+    /** An array of all custom fields and their values. **/
     val fieldInstances: List<FieldInstanceJson>,
 )
 
+/**
+ * Tile data in an Entity instance
+ **/
 @JsonClass(generateAdapter = true)
-data class TileInfoJson(
+data class EntityInstanceTile(
     /** Tileset ID **/
     val tilesetUid: Int,
 
@@ -253,19 +311,22 @@ data class FieldInstanceJson(
 
     /** Reference of the **Field definition** UID **/
     val defUid: Int,
-
-    val realEditorValues: List<Any>
 )
 
 @JsonClass(generateAdapter = true)
 data class DefinitionJson(
     val layers: List<LayerDefJson>,
+    /** All entities, including their custom fields **/
     val entities: List<EntityDefJson>,
     val tilesets: List<TilesetDefJson>,
     val enums: List<EnumDefJson>,
+    /**
+     * A list containing all custom fields available to all levels.
+     */
+    val levelFields: List<FieldDefJson>,
 
     /**
-    Note: external enums are exactly the same as `enums`, except they have a `relPath` to point to an external source file.
+     * Note: external enums are exactly the same as `enums`, except they have a `relPath` to point to an external source file.
      **/
     val externalEnums: List<EnumDefJson>
 )
@@ -278,7 +339,7 @@ data class LayerDefJson(
     /** Type of the layer (*IntGrid, Entities, Tiles or AutoLayer*) **/
     val __type: String,
 
-    /** Type of the layer as Haxe Enum **/
+    /** Type of the layer **/
     val type: String,
 
     /** Unique Int identifier **/
@@ -305,96 +366,16 @@ data class LayerDefJson(
     @Only(["Auto-layers"])
     val autoTilesetDefUid: Int?,
 
-    /** Contains all the auto-layer rule definitions. **/
-    @Only(["Auto-layers"])
-    val autoRuleGroups: List<AutoRuleGroup>?,
-
     @Only(["Auto-layers"])
     val autoSourceLayerDefUid: Int?,
 
     /** Reference to the Tileset UID being used by this tile layer **/
     @Only(["Tile layers"])
-    val tilesetDefUid: Int?,
-
-    /** If the tiles are smaller or larger than the layer grid, the pivot value will be used to position the tile relatively its grid cell. **/
-    @Only(["Tile layers"])
-    val tilePivotX: Float,
-
-    /** If the tiles are smaller or larger than the layer grid, the pivot value will be used to position the tile relatively its grid cell. **/
-    @Only(["Tile layers"])
-    val tilePivotY: Float
+    val tilesetDefUid: Int?
 )
 
 @JsonClass(generateAdapter = true)
 data class IntGridValue(val identifier: String?, val color: String)
-
-@JsonClass(generateAdapter = true)
-data class AutoRuleGroup(
-    val uid: Int,
-    val name: String,
-    val active: Boolean,
-    val collapsed: Boolean,
-    val rules: List<AutoRuleDef>
-)
-
-@JsonClass(generateAdapter = true)
-data class AutoRuleDef(
-    /** Unique Int identifier **/
-    val uid: Int,
-
-    /** Pattern width & height. Should only be 1,3,5 or 7. **/
-    val size: Int,
-
-    /** Rule pattern (size x size) **/
-    val pattern: List<Int>,
-
-    /** Array of all the tile IDs. They are used randomly or as stamps, based on `tileMode` value. **/
-    val tileIds: List<Int>,
-
-    /** If FALSE, the rule effect isn't applied, and no tiles are generated. **/
-    val active: Boolean,
-
-    /** When TRUE, the rule will prevent other rules to be applied in the same cell if it matches (TRUE by default). **/
-    val breakOnMatch: Boolean,
-
-    /** Chances for this rule to be applied (0 to 1) **/
-    val chance: Float,
-
-    /** Defines how tileIds array is used **/
-    val tileMode: Any,
-
-    /** If TRUE, allow rule to be matched by flipping its pattern horizontally **/
-    val flipX: Boolean,
-
-    /** If TRUE, allow rule to be matched by flipping its pattern vertically **/
-    val flipY: Boolean,
-
-    /** If TRUE, enable checker mode **/
-    val checker: String,
-
-    /** X pivot of a tile stamp (0-1) **/
-    @Only(["'Stamp' tile mode"])
-    val pivotX: Float,
-
-    /** Y pivot of a tile stamp (0-1) **/
-    @Only(["'Stamp' tile mode"])
-    val pivotY: Float,
-
-    /** X cell coord modulo **/
-    val xModulo: Int,
-
-    /** Y cell coord modulo **/
-    val yModulo: Int,
-
-    /** If TRUE, enable Perlin filtering to only apply rule on specific random area **/
-    val perlinActive: Boolean,
-
-    val perlinScale: Float,
-
-    val perlinOctaves: Float,
-
-    val perlinSeed: Float,
-)
 
 @JsonClass(generateAdapter = true)
 data class EntityDefJson(
@@ -413,23 +394,11 @@ data class EntityDefJson(
     /** Base entity color **/
     val color: String,
 
-    val renderMode: Any,
-
-    @Added("0.4.0")
-    val showName: Boolean,
-
     /** Tileset ID used for optional tile display **/
     val tilesetId: Int?,
 
     /** Tile ID used for optional tile display **/
     val tileId: Int?,
-
-    val tileRenderMode: Any,
-
-    /** Max instances per level **/
-    val maxPerLevel: Int,
-
-    val limitBehavior: Any,
 
     /** Pivot X coordinate (from 0 to 1.0) **/
     val pivotX: Float,
@@ -483,16 +452,10 @@ data class FieldDefJson(
 
     /** Default value if selected value is null or invalid. **/
     val defaultOverride: DefaultOverrideInfo?,
-
-    val editorDisplayMode: Any,
-
-    val editorDisplayPos: Any,
-
-    val editorAlwaysShow: Boolean,
 )
 
 @JsonClass(generateAdapter = true)
-data class DefaultOverrideInfo(val id:String, val params:List<Any>)
+data class DefaultOverrideInfo(val id: String, val params: List<Any>)
 
 @JsonClass(generateAdapter = true)
 data class TilesetDefJson(
@@ -520,28 +483,13 @@ data class TilesetDefJson(
     val padding: Int,
 
     /** Array of group of tiles selections, only meant to be used in the editor **/
-    val savedSelections: List<SaveSelectionInfo>,
-
-    /** The following data is used internally for various optimizations. It's always synced with source image changes. **/
-    @Added("0.6.0")
-    val cachedPixelData: CachedPixel?,
+    val savedSelections: List<SaveSelectionInfo>
 )
 
 @JsonClass(generateAdapter = true)
 data class SaveSelectionInfo(
     val ids: List<Int>,
     val mode: Any
-)
-
-@JsonClass(generateAdapter = true)
-data class CachedPixel(
-    /** An array of 0/1 bytes, encoded in Base64, that tells if a specific TileID is fully opaque (1) or not (0) **/
-    @Changed("0.6.0")
-    val opaqueTiles: String,
-
-    /** Average color codes for each tileset tile (ARGB format) **/
-    @Added("0.6.0")
-    val averageColors: String?
 )
 
 @JsonClass(generateAdapter = true)
@@ -553,19 +501,17 @@ data class EnumDefJson(
     val identifier: String,
 
     /** All possible enum values, with their optional Tile infos. **/
-    val values: List<EnumData>,
+    val values: List<EnumDefValues>,
 
     /** Tileset UID if provided **/
     val iconTilesetUid: Int?,
 
     /** Relative path to the external file providing this Enum **/
-    val externalRelPath: String?,
-
-    val externalFileChecksum: String?,
+    val externalRelPath: String?
 )
 
 @JsonClass(generateAdapter = true)
-data class EnumData(
+data class EnumDefValues(
     /** Enum value **/
     val id: String,
 
@@ -576,3 +522,10 @@ data class EnumData(
     @Added("0.4.0")
     val __tileSrcRect: List<Int>?,
 )
+
+enum class WorldLayout {
+    Free,
+    GridVania,
+    LinearHorizontal,
+    LinearVertical
+}
