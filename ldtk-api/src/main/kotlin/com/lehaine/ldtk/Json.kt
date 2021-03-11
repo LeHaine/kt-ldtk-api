@@ -61,7 +61,7 @@ data class LevelJson(
     /** Background color of the level (same as `bgColor`, except the default value is automatically used here if its value is `null`) **/
     val __bgColor: String,
 
-    val layerInstances: List<LayerInstanceJson>,
+    val layerInstances: List<LayerInstanceJson>?,
 
     val fieldInstances: List<FieldInstanceJson>,
     /**
@@ -178,12 +178,12 @@ data class LayerInstanceJson(
      * The list of IntGrid values, stored using coordinate ID system (refer to online documentation for more info about "Coordinate IDs")
      */
     @Only(["IntGrid layers"])
-    val intGrid: List<IntGridValueInstance>,
+    val intGrid: List<IntGridValueInstance>?,
 
     /**
      * A list of all values in the IntGrid layer, stored from left to right, and top to bottom (ie. first row from left to right, followed by second row, etc).
      */
-    val intGridCsv: List<Int>,
+    val intGridCsv: List<Int>?,
 
     @Only(["Tile layers"])
     val gridTiles: List<Tile>,

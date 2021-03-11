@@ -256,6 +256,9 @@ open class ProjectProcessor : AbstractProcessor() {
                             fields.add(fieldDefJson.identifier)
                             addToEntity(fieldDefJson.identifier, className, defaultValue)
                         }
+                        "FilePath" -> {
+                            // TODO impl filepath?
+                        }
                         "Color" -> {
                             val defaultValue = (fieldDefJson.defaultOverride?.params?.get(0) as? Double)?.toInt()
                             val intDefaultValue = defaultValue ?: 0
@@ -524,7 +527,11 @@ open class ProjectProcessor : AbstractProcessor() {
                 PropertySpec.builder(
                     "layer${it.identifier.capitalize()}",
                     ClassName.bestGuess("$LAYER_PREFIX${it.identifier}")
-                ).initializer("resolveLayer(%S) as $LAYER_PREFIX%N", it.identifier, it.identifier).build()
+                ).getter(
+                    FunSpec.getterBuilder()
+                        .addStatement("return resolveLayer(%S) as $LAYER_PREFIX%N", it.identifier, it.identifier)
+                        .build()
+                ).build()
             )
         }
         projectClassSpec.addType(levelClassSpec.build())

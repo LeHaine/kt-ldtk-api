@@ -9,6 +9,7 @@ class _World
 
 @LDtkProject(ldtkFileLocation = "unitTest.ldtk", name = "UnitTestWorld")
 class _UnitTestWorld
+
 fun main(args: Array<String>) {
     // create new LDtk world
     val world = World()
@@ -17,7 +18,7 @@ fun main(args: Array<String>) {
     val level: World.WorldLevel = world.allLevels[0]
 
     // iterate over a layers tiles
-    level.layerBackground.autoTiles.forEach {
+    level.layerCavern_background.autoTiles.forEach {
         // logic for handling the tile
     }
 
@@ -25,16 +26,15 @@ fun main(args: Array<String>) {
     level.layerEntities.allMob.forEach { mob ->
         // access entity fields
         val type: World.MobType = mob.type // generated enum class
-        val patrolPoint: Point? = mob.patrol // points
+        // field arrays / lists
+        val patrolPoints: List<Point>? = mob.patrol // points
         val health: Int = mob.health
     }
 
-    level.layerEntities.allCart.forEach { cart ->
-        // field arrays / lists
-        cart.items.forEach { item ->
-            if (item == World.Items.Pickaxe) {
-                // spawn pickaxe
-            }
+    level.layerEntities.allItem.forEach { item ->
+        if (item.type == World.Items.Pickaxe) {
+            // spawn pickaxe
         }
+
     }
 }

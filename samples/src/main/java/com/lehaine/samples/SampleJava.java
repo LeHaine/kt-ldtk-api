@@ -17,7 +17,7 @@ public class SampleJava {
         JavaWorld.JavaWorldLevel level = world.getAllLevels().get(0);
 
         // iterate over a layers tiles
-        for (LayerAutoLayer.AutoTile tile : level.getLayerBackground().getAutoTiles()) {
+        for (LayerAutoLayer.AutoTile tile : level.getLayerCavern_background().getAutoTiles()) {
             // logic for handling the tile
             int x = tile.getRenderX();
         }
@@ -25,18 +25,14 @@ public class SampleJava {
         // iterate over entities
         for (JavaWorld.EntityMob mob : level.getLayerEntities().getAllMob()) {
             JavaWorld.MobType type = mob.type;
-            Point patrolPoint = mob.getPatrol();
+            // field arrays / lists
+            List<Point> patrolPoint = mob.getPatrol();
             int health = mob.getHealth();
         }
 
-        for (JavaWorld.EntityCart cart : level.getLayerEntities().getAllCart()) {
-            // field arrays / lists
-            List<JavaWorld.Items> items = cart.getItems();
-
-            for (JavaWorld.Items item : items) {
-                if (item == JavaWorld.Items.Pickaxe) {
-                    // spawn pickaxe
-                }
+        for (JavaWorld.EntityItem item : level.getLayerEntities().getAllItem()) {
+            if (item.type == JavaWorld.Items.Pickaxe) {
+                // spawn pickaxe
             }
         }
     }

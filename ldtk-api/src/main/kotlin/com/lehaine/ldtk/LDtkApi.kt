@@ -6,9 +6,20 @@ object LDtkApi {
 
     private val moshi = Moshi.Builder().build()
     private val projectAdapter = moshi.adapter(ProjectJson::class.java)
+    private val levelAdapter = moshi.adapter(LevelJson::class.java)
 
+    /**
+     * Parse an entire LDtk project file
+     */
     fun parseLDtkFile(json: String): ProjectJson? {
         return projectAdapter.fromJson(json)
+    }
+
+    /**
+     * Parse an entire LDtk level file
+     */
+    fun parseLDtkLevelFile(json: String): LevelJson? {
+        return levelAdapter.fromJson(json)
     }
 
 

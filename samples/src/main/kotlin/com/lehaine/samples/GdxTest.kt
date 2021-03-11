@@ -55,7 +55,7 @@ class GdxApp : ApplicationListener {
         shapeRenderer.projectionMatrix = camera.combined
         if (showWorld) {
             spriteBatch.begin()
-            worldLevel.layerBackground.render(spriteBatch, worldTiles)
+            worldLevel.layerCavern_background.render(spriteBatch, worldTiles)
             worldLevel.layerCollisions.render(spriteBatch, worldTiles)
             worldLevel.layerCustom_tiles.render(spriteBatch, worldTiles)
             spriteBatch.end()

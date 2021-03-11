@@ -6,11 +6,16 @@ open class LayerIntGrid(val intGridValues: List<IntGridValue>, json: LayerInstan
 
     private val valueInfos = intGridValues.map {
         ValueInfo(it.identifier, it.color.substring(1).toInt(16))
-
     }
     private val _intGrid = mutableMapOf<Int, Int>().apply {
-        json.intGrid.forEach {
-            put(it.coordId, it.v)
+        if(json.intGridCsv != null) {
+            json.intGridCsv.forEachIndexed { index, i ->
+                put(index, i)
+            }
+        } else {
+            json.intGrid?.forEach {
+                put(it.coordId, it.v)
+            }
         }
     }
 
