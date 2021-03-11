@@ -1,5 +1,6 @@
 
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
+[![LDtk](https://img.shields.io/badge/LDtk-0.8.1-red.svg)](https://ldtk.io/)
 
 # CURRENTLY OUT OF DATE - WIP
 
