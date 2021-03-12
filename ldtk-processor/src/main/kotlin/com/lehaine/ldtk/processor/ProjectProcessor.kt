@@ -86,7 +86,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     FunSpec.builder("instantiateLevel")
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("project", Project::class)
-                        .addParameter("json", LevelJson::class)
+                        .addParameter("json", LevelDefinition::class)
                         .returns(Level::class)
                         .addStatement("return %L$LEVEL_SUFFIX(project, json)", className)
                         .build()
@@ -149,7 +149,7 @@ open class ProjectProcessor : AbstractProcessor() {
     }
 
 
-    private fun generateEnums(projectClassSpec: TypeSpec.Builder, enums: List<EnumDefJson>) {
+    private fun generateEnums(projectClassSpec: TypeSpec.Builder, enums: List<EnumDefinition>) {
         enums.forEach { enumDef ->
             val typeSpec = TypeSpec.enumBuilder(enumDef.identifier)
             enumDef.values.forEach {
@@ -161,10 +161,10 @@ open class ProjectProcessor : AbstractProcessor() {
 
     private fun generateEntities(
         projectClassSpec: TypeSpec.Builder, pkg: String, projClassName: String,
-        entities: List<EntityDefJson>
+        entities: List<EntityDefinition>
     ): FunSpec.Builder {
         val instantiateLayerFun = FunSpec.builder("instantiateEntity")
-            .addParameter("json", EntityInstanceJson::class)
+            .addParameter("json", EntityInstance::class)
             .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
             .returns(Entity::class.asTypeName().copy(nullable = true))
 
@@ -176,7 +176,7 @@ open class ProjectProcessor : AbstractProcessor() {
             }
             val entityConstructor =
                 FunSpec.constructorBuilder()
-                    .addParameter("json", EntityInstanceJson::class)
+                    .addParameter("json", EntityInstance::class)
 
             fun addToEntity(id: String, typeName: TypeName, defaultOverride: Any?, lateinit: Boolean = false) {
                 entityClassSpec.addProperty(
@@ -195,15 +195,15 @@ open class ProjectProcessor : AbstractProcessor() {
             val fields = mutableListOf<String>()
             val arrayReg = "Array<(.*)>".toRegex()
             instantiateLayerFun
-                .beginControlFlow("if (\"${entityDef.identifier}\" == json.__identifier)")
+                .beginControlFlow("if (\"${entityDef.identifier}\" == json.identifier)")
                 .addStatement("val entity = %L.%L.${entityClassName}(json)", pkg, projClassName)
                 .beginControlFlow("json.fieldInstances.forEach")
             entityDef.fieldDefs.forEach { fieldDefJson ->
-                instantiateLayerFun.beginControlFlow("if(\"${fieldDefJson.identifier}\" == it.__identifier)")
+                instantiateLayerFun.beginControlFlow("if(\"${fieldDefJson.identifier}\" == it.identifier)")
                 val canBeNull = fieldDefJson.canBeNull
-                val isArray = arrayReg.matches(fieldDefJson.__type)
+                val isArray = arrayReg.matches(fieldDefJson.type)
                 val typeName =
-                    if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
+                    if (isArray) arrayReg.find(fieldDefJson.type)!!.groupValues[1] else fieldDefJson.type
                 val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
                 val entityFieldName = "entity.${fieldDefJson.identifier}"
                 val privateEntityFieldName = "entity._${fieldDefJson.identifier}"
@@ -211,24 +211,24 @@ open class ProjectProcessor : AbstractProcessor() {
                     val fieldClassType = when (name) {
                         "Int", "Double", "Boolean", "String" -> {
                             if (name == "Int") {
-                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<Double>")
+                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<Double>")
                                 instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList.map { it.toInt() })")
                             } else {
-                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<$name>")
+                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<$name>")
                                 instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList)")
                             }
                             ClassName("kotlin", name)
                         }
                         "Point", "Color" -> {
                             if (name == "Color") {
-                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<String>")
+                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<String>")
                                     .beginControlFlow("val result = arrList.map")
                                     .addStatement("val value = Project.hexToInt(it)")
                                     .addStatement("Color(value, it)")
                                     .endControlFlow()
                                     .addStatement("$privateEntityFieldName.addAll(result)")
                             } else {
-                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<Map<String, Double>>")
+                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<Map<String, Double>>")
                                     .beginControlFlow("val result = arrList.map")
                                     .addStatement("val cx = it[\"cx\"]!!.toInt()")
                                     .addStatement("val cy = it[\"cy\"]!!.toInt()")
@@ -242,7 +242,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             when {
                                 "LocalEnum." in name -> {
                                     val enumName = typeName.substring(typeName.indexOf(".") + 1)
-                                    instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<String>")
+                                    instantiateLayerFun.addStatement("val arrList = it.value as MutableList<String>")
                                         .beginControlFlow("val result = arrList.map")
                                         .addStatement("$enumName.valueOf(it)")
                                         .endControlFlow()
@@ -253,7 +253,7 @@ open class ProjectProcessor : AbstractProcessor() {
                                     error("ExternEnums are not supported!")
                                 }
                                 else -> {
-                                    error("Unsupported Array type ${fieldDefJson.__type}")
+                                    error("Unsupported Array type ${fieldDefJson.type}")
                                 }
                             }
                         }
@@ -283,9 +283,9 @@ open class ProjectProcessor : AbstractProcessor() {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
                             if (name == "Int") {
-                                instantiateLayerFun.addStatement("$entityFieldName = (it.__value as Double).toInt()")
+                                instantiateLayerFun.addStatement("$entityFieldName = (it.value as Double).toInt()")
                             } else {
-                                instantiateLayerFun.addStatement("$entityFieldName = it.__value as $name")
+                                instantiateLayerFun.addStatement("$entityFieldName = it.value as $name")
                             }
                             val className = ClassName("kotlin", name).copy(canBeNull)
                             val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
@@ -331,8 +331,8 @@ open class ProjectProcessor : AbstractProcessor() {
                             addToEntity(fieldDefJson.identifier, colorClass, colorDefault)
                             fields.add(fieldDefJson.identifier)
 
-                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.__value as String)")
-                                .addStatement("val hexValue = it.__value as String")
+                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.value as String)")
+                                .addStatement("val hexValue = it.value as String")
                                 .addStatement("$entityFieldName = Color(value, hexValue)")
 
                         }
@@ -343,8 +343,8 @@ open class ProjectProcessor : AbstractProcessor() {
                             fields.add(fieldDefJson.identifier)
 
                             instantiateLayerFun
-                                .beginControlFlow("if (it.__value != null)")
-                                .addStatement("val map = it.__value as Map<String, Double>")
+                                .beginControlFlow("if (it.value != null)")
+                                .addStatement("val map = it.value as Map<String, Double>")
                                 .addStatement("val cx = map[\"cx\"]!!.toInt()")
                                 .addStatement("val cy = map[\"cy\"]!!.toInt()")
                                 .addStatement("$entityFieldName = Point(cx, cy)")
@@ -363,7 +363,7 @@ open class ProjectProcessor : AbstractProcessor() {
                                         !canBeNull
                                     )
 
-                                    instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.__value as String)")
+                                    instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.value as String)")
                                 }
                                 "ExternEnum." in typeName -> {
                                     error("ExternEnums are not supported!")
@@ -403,11 +403,11 @@ open class ProjectProcessor : AbstractProcessor() {
         return instantiateLayerFun
     }
 
-    private data class TilesetInfo(val typeName: String, val json: TilesetDefJson)
+    private data class TilesetInfo(val typeName: String, val json: TilesetDefinition)
 
     private fun generateTilesets(
         projectClassSpec: TypeSpec.Builder,
-        tilesets: List<TilesetDefJson>
+        tilesets: List<TilesetDefinition>
     ): MutableMap<Int, TilesetInfo> {
         val allTilesets = mutableMapOf<Int, TilesetInfo>()
         tilesets.forEach {
@@ -419,7 +419,7 @@ open class ProjectProcessor : AbstractProcessor() {
             }
             val tilesetConstructor =
                 FunSpec.constructorBuilder()
-                    .addParameter("json", TilesetDefJson::class)
+                    .addParameter("json", TilesetDefinition::class)
 
 
             tilesetClassSpec.primaryConstructor(tilesetConstructor.build())
@@ -435,12 +435,12 @@ open class ProjectProcessor : AbstractProcessor() {
         pkg: String,
         className: String,
         tilesets: MutableMap<Int, TilesetInfo>,
-        entities: List<EntityDefJson>,
-        layers: List<LayerDefJson>,
+        entities: List<EntityDefinition>,
+        layers: List<LayerDefinition>,
         instantiateEntityFun: FunSpec.Builder
     ): FunSpec.Builder {
         val instantiateLayerFun = FunSpec.builder("instantiateLayer")
-            .addParameter("json", LayerInstanceJson::class)
+            .addParameter("json", LayerInstance::class)
             .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
             .returns(Layer::class.asTypeName().copy(nullable = true))
 
@@ -450,7 +450,7 @@ open class ProjectProcessor : AbstractProcessor() {
             val layerConstructor = FunSpec.constructorBuilder()
 
             instantiateLayerFun
-                .beginControlFlow("if (\"${layerDef.identifier}\" == json.__identifier)")
+                .beginControlFlow("if (\"${layerDef.identifier}\" == json.identifier)")
 
 
             fun extendLayerClass(superClass: KClass<*>) {
@@ -462,32 +462,32 @@ open class ProjectProcessor : AbstractProcessor() {
                             if (superClass == baseLayerIntGridAutoLayerClass().kotlin) {
                                 layerConstructor.addParameter(
                                     "tilesetDefJson",
-                                    TilesetDefJson::class.asTypeName().copy(nullable = true)
+                                    TilesetDefinition::class.asTypeName().copy(nullable = true)
                                 )
                                 addSuperclassConstructorParameter("%N", "tilesetDefJson")
                             }
                             layerConstructor.addParameter(
                                 "intGridValues",
-                                List::class.asTypeName().parameterizedBy(IntGridValue::class.asTypeName())
+                                List::class.asTypeName().parameterizedBy(IntGridValueDefinition::class.asTypeName())
                             )
                             addSuperclassConstructorParameter("%N", "intGridValues")
                         }
                         baseLayerAutoLayerClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
-                                TilesetDefJson::class.asTypeName().copy(nullable = true)
+                                TilesetDefinition::class.asTypeName().copy(nullable = true)
                             )
                             addSuperclassConstructorParameter("%N", "tilesetDefJson")
                         }
                         baseLayerTilesClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
-                                TilesetDefJson::class.asTypeName()
+                                TilesetDefinition::class.asTypeName()
                             )
                             addSuperclassConstructorParameter("%N", "tilesetDefJson")
                         }
                     }
-                    layerConstructor.addParameter("json", LayerInstanceJson::class)
+                    layerConstructor.addParameter("json", LayerInstance::class)
                     addSuperclassConstructorParameter("%N", "json")
                 }
             }
@@ -521,7 +521,7 @@ open class ProjectProcessor : AbstractProcessor() {
                         }
                         instantiateLayerFun
                             .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
-                            .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                            .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
                             .addStatement(
                                 "val layer = %L.%L.$layerName(tilesetDef, intGridValues, json)",
                                 pkg,
@@ -547,7 +547,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     }
 
                     instantiateLayerFun
-                        .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                        .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
                         .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
                 }
                 "Entities" -> {
@@ -606,7 +606,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     )
 
                     instantiateLayerFun
-                        .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                        .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
                         .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
                 }
                 else -> {
@@ -633,7 +633,7 @@ open class ProjectProcessor : AbstractProcessor() {
         projectClassSpec: TypeSpec.Builder,
         pkg: String,
         className: String,
-        layers: List<LayerDefJson>,
+        layers: List<LayerDefinition>,
         instantiateLayerFun: FunSpec.Builder
     ) {
         val levelClassSpec = TypeSpec.classBuilder("${className}$LEVEL_SUFFIX").apply {
@@ -645,7 +645,7 @@ open class ProjectProcessor : AbstractProcessor() {
         val levelConstructor =
             FunSpec.constructorBuilder()
                 .addParameter("project", Project::class)
-                .addParameter("json", LevelJson::class)
+                .addParameter("json", LevelDefinition::class)
 
         levelClassSpec.primaryConstructor(levelConstructor.build())
             .addFunction(instantiateLayerFun.build())

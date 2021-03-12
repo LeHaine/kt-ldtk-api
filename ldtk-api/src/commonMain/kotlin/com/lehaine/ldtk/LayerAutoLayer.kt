@@ -1,7 +1,7 @@
 package com.lehaine.ldtk
 
 open class LayerAutoLayer(
-    val tilesetDefJson: TilesetDefJson?, json: LayerInstanceJson
+    val tilesetDefJson: TilesetDefinition?, json: LayerInstance
 ) : Layer(json) {
 
     val autoTiles = json.autoLayerTiles.map {

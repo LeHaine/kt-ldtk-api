@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
+open class LayerEntities(json: LayerInstance) : Layer(json) {
 
     private val _entities = mutableListOf<Entity>()
     val entities get() = _entities.toList()
@@ -14,7 +14,7 @@ open class LayerEntities(json: LayerInstanceJson) : Layer(json) {
     /**
      * This function will be overridden in the ProjectProcessor if used.
      */
-    protected open fun instantiateEntity(json: EntityInstanceJson): Entity? {
+    protected open fun instantiateEntity(json: EntityInstance): Entity? {
         return null
     }
 

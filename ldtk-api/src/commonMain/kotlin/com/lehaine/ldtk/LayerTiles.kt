@@ -1,7 +1,7 @@
 package com.lehaine.ldtk
 
 open class LayerTiles(
-    val tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
+    val tilesetDefJson: TilesetDefinition, json: LayerInstance
 ) : Layer(json) {
     data class TileInfo(val tileId: Int, val flipBits: Int)
 

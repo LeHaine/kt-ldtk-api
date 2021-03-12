@@ -1,6 +1,6 @@
 package com.lehaine.ldtk
 
-open class Level(val classPath: String, val project: Project, val json: LevelJson) {
+open class Level(val classPath: String, val project: Project, val json: LevelDefinition) {
     enum class NeighborDirection {
         North,
         South,
@@ -15,7 +15,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
                     "s" -> South
                     "w" -> West
                     else -> {
-                        System.err.println("WARNING: unknown neighbor level direction: $dir")
+                        println("WARNING: unknown neighbor level direction: $dir")
                         North
                     }
                 }
@@ -48,24 +48,24 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         private set
     var worldY = json.worldY
         private set
-    var bgColor = Project.hexToInt(json.__bgColor)
+    var bgColor = Project.hexToInt(json.bgColor)
         private set
     val hasBgImage: Boolean
         get() = bgImageInfos != null
-    var bgImageInfos: LevelBgImage? = if (json.bgRelPath.isNullOrEmpty() || json.__bgPos == null) {
+    var bgImageInfos: LevelBgImage? = if (json.bgRelPath.isNullOrEmpty() || json.bgPos == null) {
         null
     } else {
         LevelBgImage(
             relFilePath = json.bgRelPath,
-            topLeftX = json.__bgPos.topLeftPx[0],
-            topLeftY = json.__bgPos.topLeftPx[1],
-            scaleX = json.__bgPos.scale[0],
-            scaleY = json.__bgPos.scale[1],
+            topLeftX = json.bgPos.topLeftPx[0],
+            topLeftY = json.bgPos.topLeftPx[1],
+            scaleX = json.bgPos.scale[0],
+            scaleY = json.bgPos.scale[1],
             cropRect = CropRect(
-                x = json.__bgPos.cropRect[0],
-                y = json.__bgPos.cropRect[1],
-                w = json.__bgPos.cropRect[2],
-                h = json.__bgPos.cropRect[3]
+                x = json.bgPos.cropRect[0],
+                y = json.bgPos.cropRect[1],
+                w = json.bgPos.cropRect[2],
+                h = json.bgPos.cropRect[3]
             )
         )
     }
@@ -86,7 +86,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         json.layerInstances?.forEach { layerInstanceJson ->
             instantiateLayer(layerInstanceJson)?.also { _allUntypedLayers.add(it) }
         }
-        json.__neighbours?.forEach {
+        json.neighbours?.forEach {
             _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
         }
     }
@@ -99,7 +99,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         }
         val relPath = externalRelPath ?: return false
         val json =
-            LDtkApi.parseLDtkLevelFile(String(project.getAsset(relPath))) ?: error("Unable to parse Level JSON")
+            LDtkApi.parseLDtkLevelFile(project.getAsset(relPath).toString()) ?: error("Unable to parse Level JSON")
 
         uid = json.uid
         identifier = json.identifier
@@ -107,22 +107,22 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         pxHeight = json.pxHei
         worldX = json.worldX
         worldY = json.worldY
-        bgColor = Project.hexToInt(json.__bgColor)
+        bgColor = Project.hexToInt(json.bgColor)
 
-        bgImageInfos = if (json.bgRelPath.isNullOrEmpty() || json.__bgPos == null) {
+        bgImageInfos = if (json.bgRelPath.isNullOrEmpty() || json.bgPos == null) {
             null
         } else {
             LevelBgImage(
                 relFilePath = json.bgRelPath,
-                topLeftX = json.__bgPos.topLeftPx[0],
-                topLeftY = json.__bgPos.topLeftPx[1],
-                scaleX = json.__bgPos.scale[0],
-                scaleY = json.__bgPos.scale[1],
+                topLeftX = json.bgPos.topLeftPx[0],
+                topLeftY = json.bgPos.topLeftPx[1],
+                scaleX = json.bgPos.scale[0],
+                scaleY = json.bgPos.scale[1],
                 cropRect = CropRect(
-                    x = json.__bgPos.cropRect[0],
-                    y = json.__bgPos.cropRect[1],
-                    w = json.__bgPos.cropRect[2],
-                    h = json.__bgPos.cropRect[3]
+                    x = json.bgPos.cropRect[0],
+                    y = json.bgPos.cropRect[1],
+                    w = json.bgPos.cropRect[2],
+                    h = json.bgPos.cropRect[3]
                 )
             )
         }
@@ -131,7 +131,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         json.layerInstances?.forEach { layerInstanceJson ->
             instantiateLayer(layerInstanceJson)?.also { _allUntypedLayers.add(it) }
         }
-        json.__neighbours?.forEach {
+        json.neighbours?.forEach {
             _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
         }
 
@@ -146,7 +146,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
     /**
      * This function will be overridden in the ProjectProcessor if used.
      */
-    protected open fun instantiateLayer(json: LayerInstanceJson): Layer? {
+    protected open fun instantiateLayer(json: LayerInstance): Layer? {
         return null
     }
 

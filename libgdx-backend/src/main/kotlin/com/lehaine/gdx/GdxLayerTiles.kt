@@ -3,11 +3,11 @@ package com.lehaine.gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.lehaine.ldtk.LayerInstanceJson
+import com.lehaine.ldtk.LayerInstance
 import com.lehaine.ldtk.LayerTiles
-import com.lehaine.ldtk.TilesetDefJson
+import com.lehaine.ldtk.TilesetDefinition
 
-open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson) : LayerTiles(tilesetDefJson, json) {
+open class GdxLayerTiles(tilesetDefJson: TilesetDefinition, json: LayerInstance) : LayerTiles(tilesetDefJson, json) {
 
     /**
      * Renders the layer. Due to LDtks coordinate system being flipped for LibGDX we need to negate the Y-pos and transform

@@ -2,7 +2,7 @@ package com.lehaine.ldtk
 
 import kotlin.math.ceil
 
-open class Tileset(val json: TilesetDefJson) {
+open class Tileset(val json: TilesetDefinition) {
     val identifier = json.identifier
     val relPath = json.relPath
     val tileGridSize = json.tileGridSize

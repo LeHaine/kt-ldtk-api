@@ -1,11 +1,14 @@
 package com.lehaine.ldtk
 
+import com.soywiz.korio.async.runBlockingNoSuspensions
+import com.soywiz.korio.file.std.resourcesVfs
+
 open class Project(val projectFilePath: String, val projectDir: String? = null) {
 
     val bgColorInt: Int
     val bgColorHex: String
     val worldLayout: WorldLayout
-    val defs: DefinitionJson
+    val defs: Definitions
 
     val tilesets = mutableMapOf<Int, Tileset>()
     private val assetCache = mutableMapOf<String, ByteArray>()
@@ -29,12 +32,14 @@ open class Project(val projectFilePath: String, val projectDir: String? = null) 
     }
 
     init {
-        val jsonString =
-            javaClass.classLoader.getResource(projectFilePath)?.readText() ?: error("Unable to load LDtk file content!")
+        val jsonString = runBlockingNoSuspensions {
+            resourcesVfs[projectFilePath].readString()
+        }
+
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
         defs = json.defs
 
-        json.levels.forEach { levelJson ->
+        json.levelDefinitions.forEach { levelJson ->
             val level = instantiateLevel(this, levelJson)
             level?.let {
                 _allUntypedLevels.add(it)
@@ -50,7 +55,7 @@ open class Project(val projectFilePath: String, val projectDir: String? = null) 
         bgColorInt = hexToInt(json.bgColor)
     }
 
-    open fun instantiateLevel(project: Project, json: LevelJson): Level? {
+    open fun instantiateLevel(project: Project, json: LevelDefinition): Level? {
         return null
     }
 
@@ -59,18 +64,19 @@ open class Project(val projectFilePath: String, val projectDir: String? = null) 
             return assetCache[relativePath] ?: error("Unable to load asset from asset cache!")
         }
 
-        return javaClass.classLoader.getResource(relativePath)?.readBytes()
-            ?: error("Unable to load LDtk file content!")
+        return runBlockingNoSuspensions {
+            resourcesVfs[relativePath].readBytes()
+        }
     }
 
-    fun getLayerDef(uid: Int?, identifier: String? = ""): LayerDefJson? {
+    fun getLayerDef(uid: Int?, identifier: String? = ""): LayerDefinition? {
         if (uid == null && identifier == null) {
             return null
         }
         return defs.layers.find { it.uid == uid || it.identifier == identifier }
     }
 
-    fun getTilesetDef(uid: Int?, identifier: String? = ""): TilesetDefJson? {
+    fun getTilesetDef(uid: Int?, identifier: String? = ""): TilesetDefinition? {
         if (uid == null && identifier == null) {
             return null
         }

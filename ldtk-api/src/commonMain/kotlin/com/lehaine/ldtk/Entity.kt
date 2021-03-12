@@ -1,13 +1,13 @@
 package com.lehaine.ldtk
 
-open class Entity(val json: EntityInstanceJson) {
-    val identifier: String = json.__identifier
+open class Entity(val json: EntityInstance) {
+    val identifier: String = json.identifier
 
     /** Grid-based X coordinate **/
-    val cx: Int = json.__grid[0]
+    val cx: Int = json.grid[0]
 
     /** Grid-based Y coordinate **/
-    val cy: Int = json.__grid[1]
+    val cy: Int = json.grid[1]
 
     /** Pixel-based X coordinate **/
     val pixelX: Int = json.px[0]
@@ -16,10 +16,10 @@ open class Entity(val json: EntityInstanceJson) {
     val pixelY: Int = json.px[1]
 
     /** Pivot X coord (0-1) **/
-    val pivotX: Float = if (json.__pivot.isNullOrEmpty()) 0f else json.__pivot[0]
+    val pivotX: Float = if (json.pivot.isNullOrEmpty()) 0f else json.pivot[0]
 
     /** Pivot Y coord (0-1) **/
-    val pivotY: Float = if (json.__pivot.isNullOrEmpty()) 0f else json.__pivot[1]
+    val pivotY: Float = if (json.pivot.isNullOrEmpty()) 0f else json.pivot[1]
 
     /** Width in pixels **/
     val width: Int = json.width
@@ -28,15 +28,15 @@ open class Entity(val json: EntityInstanceJson) {
     val height: Int = json.height
 
     /** Tile infos if the entity has one (it could have been overridden by a Field value, such as Enums) **/
-    val tileInfosJson: TileInfo? = if (json.__tile == null) {
+    val tileInfosJson: TileInfo? = if (json.tile == null) {
         null
     } else {
         TileInfo(
-            tilesetUid = json.__tile.tilesetUid,
-            x = json.__tile.srcRect[0],
-            y = json.__tile.srcRect[1],
-            w = json.__tile.srcRect[2],
-            h = json.__tile.srcRect[3]
+            tilesetUid = json.tile.tilesetUid,
+            x = json.tile.srcRect[0],
+            y = json.tile.srcRect[1],
+            w = json.tile.srcRect[2],
+            h = json.tile.srcRect[3]
         )
     }
 
