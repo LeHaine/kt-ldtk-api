@@ -1,6 +1,6 @@
 allprojects {
     group = "com.lehaine"
-    version = "0.6.1"
+    version = "0.8.1-b1"
 }
 
 

@@ -32,7 +32,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
     data class LevelBgImage(
         val relFilePath: String,
         val topLeftX: Int,
-        val topRightY: Int,
+        val topLeftY: Int,
         val scaleX: Float,
         val scaleY: Float,
         val cropRect: CropRect
@@ -60,7 +60,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         LevelBgImage(
             relFilePath = json.bgRelPath,
             topLeftX = json.__bgPos.topLeftPx[0],
-            topRightY = json.__bgPos.topLeftPx[1],
+            topLeftY = json.__bgPos.topLeftPx[1],
             scaleX = json.__bgPos.scale[0],
             scaleY = json.__bgPos.scale[1],
             cropRect = CropRect(
@@ -117,7 +117,7 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
             LevelBgImage(
                 relFilePath = json.bgRelPath,
                 topLeftX = json.__bgPos.topLeftPx[0],
-                topRightY = json.__bgPos.topLeftPx[1],
+                topLeftY = json.__bgPos.topLeftPx[1],
                 scaleX = json.__bgPos.scale[0],
                 scaleY = json.__bgPos.scale[1],
                 cropRect = CropRect(

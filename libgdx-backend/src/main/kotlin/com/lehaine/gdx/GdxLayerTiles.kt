@@ -9,7 +9,7 @@ import com.lehaine.ldtk.TilesetDefJson
 
 open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson) : LayerTiles(tilesetDefJson, json) {
 
-    fun render(batch: Batch, tilesTexture: Texture) {
+    fun render(batch: Batch, tilesTexture: Texture, pixelHeight:Int) {
         val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
@@ -24,7 +24,7 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefJson, json: LayerInstanceJson
                             batch.draw(
                                 it.region.texture,
                                 (cx * gridSize + pxTotalOffsetX).toFloat(),
-                                -(cy * gridSize + pxTotalOffsetY).toFloat(), // LDtk is y-down, so invert it
+                                -(cy * gridSize + pxTotalOffsetY - pixelHeight).toFloat(), // LDtk is y-down, so invert it
                                 0f,
                                 0f,
                                 gridSize.toFloat(),
