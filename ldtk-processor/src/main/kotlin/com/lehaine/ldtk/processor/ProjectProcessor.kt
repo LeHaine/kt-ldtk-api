@@ -283,8 +283,11 @@ open class ProjectProcessor : AbstractProcessor() {
                 } else {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
-
-                            instantiateLayerFun.addStatement("$entityFieldName = it.__value as $name")
+                            if (name == "Int") {
+                                instantiateLayerFun.addStatement("$entityFieldName = (it.__value as Double).toInt()")
+                            } else {
+                                instantiateLayerFun.addStatement("$entityFieldName = it.__value as $name")
+                            }
                             val className = ClassName("kotlin", name).copy(canBeNull)
                             val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
                             val hasOverride = defaultOverride != null

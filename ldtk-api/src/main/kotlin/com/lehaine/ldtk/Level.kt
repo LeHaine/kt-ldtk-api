@@ -146,57 +146,57 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
     }
 
     private fun instantiateLayer(classPath: String, json: LayerInstanceJson): Layer? {
-        return null
-//        val clazz = Class.forName("$classPath\$$LAYER_PREFIX${json.__identifier}")
-//        return when {
-//            LayerIntGridAutoLayer::class.java.isAssignableFrom(clazz) -> {
-//                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
-//                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
-//                clazz.getDeclaredConstructor(
-//                    TilesetDefJson::class.java, List::class.java,
-//                    LayerInstanceJson::class.java
-//                ).newInstance(
-//                    tilesetDef, intGridValues,
-//                    json
-//                ) as Layer
-//            }
-//            LayerIntGrid::class.java.isAssignableFrom(clazz) -> {
-//                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
-//                clazz.getDeclaredConstructor(
-//                    List::class.java,
-//                    LayerInstanceJson::class.java
-//                ).newInstance(intGridValues, json) as Layer
-//            }
-//            LayerEntities::class.java.isAssignableFrom(clazz) -> {
-//                val entitiesLayer = clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
-//                        LayerEntities
-//                entitiesLayer.entities.forEach {
-//                    val allListField = clazz.getDeclaredField("_all${it.identifier.capitalize()}")
-//                    allListField.isAccessible = true
-//                    @Suppress("UNCHECKED_CAST")
-//                    val allList = allListField.get(entitiesLayer) as MutableList<Any>
-//                    allList.add(it)
-//                }
-//                entitiesLayer
-//            }
-//            LayerTiles::class.java.isAssignableFrom(clazz) -> {
-//                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
-//                clazz.getDeclaredConstructor(
-//                    TilesetDefJson::class.java, LayerInstanceJson::class.java
-//                ).newInstance(tilesetDef, json) as
-//                        Layer
-//            }
-//            LayerAutoLayer::class.java.isAssignableFrom(clazz) -> {
-//                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
-//                clazz.getDeclaredConstructor(
-//                    TilesetDefJson::class.java, LayerInstanceJson::class.java
-//                ).newInstance(tilesetDef, json) as
-//                        Layer
-//            }
-//            else -> {
-//                null
-//            }
-//        }
+//        return null
+        val clazz = Class.forName("$classPath\$$LAYER_PREFIX${json.__identifier}")
+        return when {
+            LayerIntGridAutoLayer::class.java.isAssignableFrom(clazz) -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
+                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
+                clazz.getDeclaredConstructor(
+                    TilesetDefJson::class.java, List::class.java,
+                    LayerInstanceJson::class.java
+                ).newInstance(
+                    tilesetDef, intGridValues,
+                    json
+                ) as Layer
+            }
+            LayerIntGrid::class.java.isAssignableFrom(clazz) -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)?.intGridValues
+                clazz.getDeclaredConstructor(
+                    List::class.java,
+                    LayerInstanceJson::class.java
+                ).newInstance(intGridValues, json) as Layer
+            }
+            LayerEntities::class.java.isAssignableFrom(clazz) -> {
+                val entitiesLayer = clazz.getDeclaredConstructor(LayerInstanceJson::class.java).newInstance(json) as
+                        LayerEntities
+                entitiesLayer.entities.forEach {
+                    val allListField = clazz.getDeclaredField("_all${it.identifier.capitalize()}")
+                    allListField.isAccessible = true
+                    @Suppress("UNCHECKED_CAST")
+                    val allList = allListField.get(entitiesLayer) as MutableList<Any>
+                    allList.add(it)
+                }
+                entitiesLayer
+            }
+            LayerTiles::class.java.isAssignableFrom(clazz) -> {
+                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
+                clazz.getDeclaredConstructor(
+                    TilesetDefJson::class.java, LayerInstanceJson::class.java
+                ).newInstance(tilesetDef, json) as
+                        Layer
+            }
+            LayerAutoLayer::class.java.isAssignableFrom(clazz) -> {
+                val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)
+                clazz.getDeclaredConstructor(
+                    TilesetDefJson::class.java, LayerInstanceJson::class.java
+                ).newInstance(tilesetDef, json) as
+                        Layer
+            }
+            else -> {
+                null
+            }
+        }
     }
 
     override fun toString(): String {
