@@ -14,6 +14,7 @@ This library can be used for any JVM game engine/framework. It features a separa
 ## Features
 - **Annotation processing**: Adding a simple annotation will allow fully generated typesafe code to be used within your game.
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
+- **No runtime reflection**: All the reflection is done at compile time which is used to generate code.
 - **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
