@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "1.4.31"
     kotlin("plugin.serialization") version "1.4.31"
+    id("maven-publish")
 }
 
 repositories {
@@ -50,13 +50,21 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation("com.soywiz.korlibs.korio:korio-jvm:2.0.10")
+            }
+        }
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
             }
         }
-        val jsMain by getting
+        val jsMain by getting {
+            dependencies {
+                implementation("com.soywiz.korlibs.korio:korio-js:2.0.10")
+            }
+        }
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test-js"))

@@ -10,14 +10,20 @@ object LDtkApi {
      * Parse an entire LDtk project file
      */
     fun parseLDtkFile(json: String): ProjectJson? {
-        return Json.decodeFromString<ProjectJson>(json)
+        return Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }.decodeFromString<ProjectJson>(json)
     }
 
     /**
      * Parse an entire LDtk level file
      */
     fun parseLDtkLevelFile(json: String): LevelDefinition? {
-        return Json.decodeFromString<LevelDefinition>(json)
+        return Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }.decodeFromString<LevelDefinition>(json)
     }
 
 

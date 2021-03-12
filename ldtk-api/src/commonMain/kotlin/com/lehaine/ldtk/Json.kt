@@ -88,11 +88,6 @@ data class ProjectJson(
      */
     val externalLevels: Boolean,
 
-    /**
-     * An array containing various advanced flags (ie. options or other states). Possible
-     * values: `DiscardPreCsvIntGrid`, `IgnoreBackupSuggest`
-     */
-    val flags: List<Flag>,
 
     /**
      * File format version
@@ -104,6 +99,7 @@ data class ProjectJson(
      * `linearVertical` world layouts (see `worldLayout` value). Otherwise, you should refer to
      * the `worldX`,`worldY` coordinates of each Level.
      */
+    @SerialName("levels")
     val levelDefinitions: List<LevelDefinition>,
 
     /**
@@ -378,7 +374,7 @@ data class FieldDefinition(
      * Internal type enum
      */
     @SerialName("type")
-    val fieldDefinitionType: JsonObject?,
+    val fieldDefinitionType:  JsonElement?,
 
     /**
      * Unique Intidentifier
@@ -388,7 +384,7 @@ data class FieldDefinition(
 
 
 @Serializable
-data class DefaultOverrideInfo(val id: String, val params: List<@Polymorphic Any>)
+data class DefaultOverrideInfo(val id: String, val params: List<JsonElement>)
 
 /**
  * Possible values: `Hidden`, `ValueOnly`, `NameAndValue`, `EntityTile`, `PointStar`,
@@ -648,7 +644,7 @@ data class EnumValueDefinition(
      * height ]`
      */
     @SerialName("__tileSrcRect")
-    val tileSrcRect: List<Int>,
+    val tileSrcRect: List<Int>?,
 
     /**
      * Enum value
@@ -859,29 +855,6 @@ data class TilesetDefinition(
      */
     val uid: Int
 )
-
-@Serializable
-enum class Flag(val value: String) {
-    DiscardPreCSVIntGrid("DiscardPreCsvIntGrid"),
-    IgnoreBackupSuggest("IgnoreBackupSuggest");
-
-    companion object : KSerializer<Flag> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("quicktype.Flag", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): Flag = when (val value = decoder.decodeString()) {
-            "DiscardPreCsvIntGrid" -> DiscardPreCSVIntGrid
-            "IgnoreBackupSuggest" -> IgnoreBackupSuggest
-            else -> throw IllegalArgumentException("Flag could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: Flag) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
 
 /**
  * This section contains all the level data. It can be found in 2 distinct forms, depending
