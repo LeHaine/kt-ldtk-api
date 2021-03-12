@@ -55,7 +55,7 @@
 					"height": 10,
 					"defUid": 27,
 					"px": [84,192],
-					"fieldInstances": []
+					"fieldInstances": [{ "__identifier": "Color", "__value": "#000000", "__type": "Color", "defUid": 63, "realEditorValues": [] }]
 				},
 				{
 					"__identifier": "Item",
