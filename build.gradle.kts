@@ -1,5 +1,5 @@
 allprojects {
-    group = "com.lehaine"
+    group = "com.lehaine.kt-ldtk-api"
     version = "0.8.1-b3"
 }
 

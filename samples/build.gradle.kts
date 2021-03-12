@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 configurations.all {
