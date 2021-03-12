@@ -36,7 +36,6 @@ open class Project(val projectFilePath: String, val projectDir: String? = null) 
             resourcesVfs[projectFilePath].readString()
         }
 
-        println(jsonString)
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
         defs = json.defs
 

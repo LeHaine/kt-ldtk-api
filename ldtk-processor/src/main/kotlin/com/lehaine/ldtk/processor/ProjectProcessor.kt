@@ -7,6 +7,8 @@ import com.lehaine.ldtk.LDtkApi.LAYER_PREFIX
 import com.lehaine.ldtk.LDtkApi.LEVEL_SUFFIX
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -79,6 +81,7 @@ open class ProjectProcessor : AbstractProcessor() {
             require(json != null) { "LDtk project file is empty or or missing! Please check to ensure it exists." }
 
             val fileSpec = FileSpec.builder(pkg, className).indent(FILE_INDENT)
+            fileSpec.addImport("kotlinx.serialization.json", ".jsonPrimitive", "jsonObject", "jsonArray")
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
                 superclass(Project::class)
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
@@ -210,28 +213,29 @@ open class ProjectProcessor : AbstractProcessor() {
                 if (isArray) {
                     val fieldClassType = when (name) {
                         "Int", "Double", "Boolean", "String" -> {
-                            if (name == "Int") {
-                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<Double>")
-                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList.map { it.toInt() })")
+
+                            instantiateLayerFun.addStatement("val arrList = it.value!!.jsonArray")
+                            if (name == "String") {
+                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList.map { it.jsonPrimitive.content })")
                             } else {
-                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<$name>")
-                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList)")
+                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList.map { it.jsonPrimitive.content.to$name() })")
                             }
                             ClassName("kotlin", name)
                         }
                         "Point", "Color" -> {
                             if (name == "Color") {
-                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<String>")
+                                instantiateLayerFun.addStatement("val arrList = it.value!!.jsonArray")
                                     .beginControlFlow("val result = arrList.map")
-                                    .addStatement("val value = Project.hexToInt(it)")
-                                    .addStatement("Color(value, it)")
+                                    .addStatement("val value = Project.hexToInt(it.jsonPrimitive.content)")
+                                    .addStatement("Color(value, it.jsonPrimitive.content)")
                                     .endControlFlow()
                                     .addStatement("$privateEntityFieldName.addAll(result)")
                             } else {
-                                instantiateLayerFun.addStatement("val arrList = it.value as MutableList<Map<String, Double>>")
+                                instantiateLayerFun.addStatement("val arrList = it.value!!.jsonArray")
                                     .beginControlFlow("val result = arrList.map")
-                                    .addStatement("val cx = it[\"cx\"]!!.toInt()")
-                                    .addStatement("val cy = it[\"cy\"]!!.toInt()")
+                                    .addStatement("val map = it.jsonObject")
+                                    .addStatement("val cx = map[\"cx\"]!!.jsonPrimitive.content.toInt()")
+                                    .addStatement("val cy = map[\"cy\"]!!.jsonPrimitive.content.toInt()")
                                     .addStatement("Point(cx, cy)")
                                     .endControlFlow()
                                     .addStatement("$privateEntityFieldName.addAll(result)")
@@ -242,9 +246,9 @@ open class ProjectProcessor : AbstractProcessor() {
                             when {
                                 "LocalEnum." in name -> {
                                     val enumName = typeName.substring(typeName.indexOf(".") + 1)
-                                    instantiateLayerFun.addStatement("val arrList = it.value as MutableList<String>")
+                                    instantiateLayerFun.addStatement("val arrList = it.value!!.jsonArray")
                                         .beginControlFlow("val result = arrList.map")
-                                        .addStatement("$enumName.valueOf(it)")
+                                        .addStatement("$enumName.valueOf(it.jsonPrimitive.content)")
                                         .endControlFlow()
                                         .addStatement("$privateEntityFieldName.addAll(result)")
                                     ClassName.bestGuess(enumName)
@@ -282,19 +286,21 @@ open class ProjectProcessor : AbstractProcessor() {
                 } else {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
-                            if (name == "Int") {
-                                instantiateLayerFun.addStatement("$entityFieldName = (it.value as Double).toInt()")
+                            if (name == "String") {
+                                instantiateLayerFun.addStatement("$entityFieldName = it.value!!.jsonPrimitive.content")
                             } else {
-                                instantiateLayerFun.addStatement("$entityFieldName = it.value as $name")
+                                instantiateLayerFun.addStatement("$entityFieldName = it.value!!.jsonPrimitive.content.to$name()")
                             }
                             val className = ClassName("kotlin", name).copy(canBeNull)
-                            val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
-                            val hasOverride = defaultOverride != null
+                            val defaultOverride =
+                                fieldDefJson.defaultOverride?.params?.get(0)?.jsonPrimitive?.contentOrNull
                             val defaultValue = when {
-                                hasOverride -> {
+                                defaultOverride != null -> {
                                     when (name) {
-                                        "Int" -> (defaultOverride as? Double)?.toInt()
-                                        "Double", "Boolean", "String" -> defaultOverride
+                                        "Int" -> defaultOverride.toInt()
+                                        "Double" -> defaultOverride.toDouble()
+                                        "Boolean" -> defaultOverride.toBoolean()
+                                        "String" -> defaultOverride
                                         else -> error("Unsupported primitive field $typeName!")
                                     }
                                 }
@@ -321,7 +327,8 @@ open class ProjectProcessor : AbstractProcessor() {
                             // TODO impl filepath?
                         }
                         "Color" -> {
-                            val defaultValue = (fieldDefJson.defaultOverride?.params?.get(0) as? Double)?.toInt()
+                            val defaultValue =
+                                fieldDefJson.defaultOverride?.params?.get(0)?.jsonPrimitive?.contentOrNull?.toIntOrNull()
                             val intDefaultValue = defaultValue ?: 0
                             val hexDefaultValue = defaultValue?.let { "\"${Project.intToHex(it)}\"" }
                                 ?: "\"#000000\""
@@ -331,8 +338,8 @@ open class ProjectProcessor : AbstractProcessor() {
                             addToEntity(fieldDefJson.identifier, colorClass, colorDefault)
                             fields.add(fieldDefJson.identifier)
 
-                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.value as String)")
-                                .addStatement("val hexValue = it.value as String")
+                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.value!!.jsonPrimitive.content)")
+                                .addStatement("val hexValue = it.value!!.jsonPrimitive.content")
                                 .addStatement("$entityFieldName = Color(value, hexValue)")
 
                         }
@@ -344,9 +351,9 @@ open class ProjectProcessor : AbstractProcessor() {
 
                             instantiateLayerFun
                                 .beginControlFlow("if (it.value != null)")
-                                .addStatement("val map = it.value as Map<String, Double>")
-                                .addStatement("val cx = map[\"cx\"]!!.toInt()")
-                                .addStatement("val cy = map[\"cy\"]!!.toInt()")
+                                .addStatement("val map = it.value!!.jsonObject")
+                                .addStatement("val cx = map[\"cx\"]!!.jsonPrimitive.content.toInt()")
+                                .addStatement("val cy = map[\"cy\"]!!.jsonPrimitive.content.toInt()")
                                 .addStatement("$entityFieldName = Point(cx, cy)")
                                 .endControlFlow()
                         }
@@ -363,7 +370,7 @@ open class ProjectProcessor : AbstractProcessor() {
                                         !canBeNull
                                     )
 
-                                    instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.value as String)")
+                                    instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.value!!.jsonPrimitive.content)")
                                 }
                                 "ExternEnum." in typeName -> {
                                     error("ExternEnums are not supported!")

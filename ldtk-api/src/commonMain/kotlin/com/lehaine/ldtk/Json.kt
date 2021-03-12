@@ -374,7 +374,7 @@ data class FieldDefinition(
      * Internal type enum
      */
     @SerialName("type")
-    val fieldDefinitionType:  JsonElement?,
+    val fieldDefinitionType: JsonElement?,
 
     /**
      * Unique Intidentifier
@@ -404,7 +404,7 @@ enum class EditorDisplayMode(val value: String) {
     companion object : KSerializer<EditorDisplayMode> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.EditorDisplayMode", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.EditorDisplayMode", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): EditorDisplayMode = when (val value = decoder.decodeString()) {
@@ -437,7 +437,7 @@ enum class EditorDisplayPos(val value: String) {
     companion object : KSerializer<EditorDisplayPos> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.EditorDisplayPos", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.EditorDisplayPos", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): EditorDisplayPos = when (val value = decoder.decodeString()) {
@@ -468,7 +468,7 @@ enum class TextLangageMode(val value: String) {
     companion object : KSerializer<TextLangageMode> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.TextLangageMode", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.TextLangageMode", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): TextLangageMode = when (val value = decoder.decodeString()) {
@@ -502,7 +502,7 @@ enum class LimitBehavior(val value: String) {
     companion object : KSerializer<LimitBehavior> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.LimitBehavior", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.LimitBehavior", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): LimitBehavior = when (val value = decoder.decodeString()) {
@@ -531,7 +531,7 @@ enum class LimitScope(val value: String) {
     companion object : KSerializer<LimitScope> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.LimitScope", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.LimitScope", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): LimitScope = when (val value = decoder.decodeString()) {
@@ -560,7 +560,7 @@ enum class RenderMode(val value: String) {
     companion object : KSerializer<RenderMode> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.RenderMode", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.RenderMode", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): RenderMode = when (val value = decoder.decodeString()) {
@@ -590,7 +590,7 @@ enum class TileRenderMode(val value: String) {
     companion object : KSerializer<TileRenderMode> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.TileRenderMode", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.TileRenderMode", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): TileRenderMode = when (val value = decoder.decodeString()) {
@@ -783,7 +783,7 @@ enum class Type(val value: String) {
     companion object : KSerializer<Type> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.Type", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.Type", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): Type = when (val value = decoder.decodeString()) {
@@ -807,11 +807,6 @@ enum class Type(val value: String) {
  */
 @Serializable
 data class TilesetDefinition(
-    /**
-     * The following data is used internally for various optimizations. It's always synced with
-     * source image changes.
-     */
-    val cachedPixelData: JsonObject? = null,
 
     /**
      * Unique String identifier
@@ -837,11 +832,6 @@ data class TilesetDefinition(
      * Path to the source file, relative to the current project JSON file
      */
     val relPath: String,
-
-    /**
-     * Array of group of tiles selections, only meant to be used in the editor
-     */
-    val savedSelections: JsonArray,
 
     /**
      * Space in pixels between all tiles
@@ -1012,17 +1002,12 @@ data class FieldInstance(
      * (Integer, Boolean, String etc.)<br/>  It can also be an `Array` of those same types.
      */
     @SerialName("__value")
-    val value: JsonObject?,
+    val value: JsonElement?,
 
     /**
      * Reference of the **Field definition** UID
      */
     val defUid: Int,
-
-    /**
-     * Editor internal raw values
-     */
-    val realEditorValues: JsonArray
 )
 
 @Serializable
@@ -1286,7 +1271,7 @@ enum class BgPos(val value: String) {
     companion object : KSerializer<BgPos> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.BgPos", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.BgPos", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): BgPos = when (val value = decoder.decodeString()) {
@@ -1331,7 +1316,7 @@ enum class WorldLayout(val value: String) {
     companion object : KSerializer<WorldLayout> {
         override val descriptor: SerialDescriptor
             get() {
-                return PrimitiveSerialDescriptor("quicktype.WorldLayout", PrimitiveKind.STRING)
+                return PrimitiveSerialDescriptor("com.lehaine.ldtk.WorldLayout", PrimitiveKind.STRING)
             }
 
         override fun deserialize(decoder: Decoder): WorldLayout = when (val value = decoder.decodeString()) {

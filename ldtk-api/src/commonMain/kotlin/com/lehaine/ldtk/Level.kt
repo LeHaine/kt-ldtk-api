@@ -1,5 +1,8 @@
 package com.lehaine.ldtk
 
+import com.soywiz.korio.lang.Charsets
+import com.soywiz.korio.lang.toString
+
 open class Level(val classPath: String, val project: Project, val json: LevelDefinition) {
     enum class NeighborDirection {
         North,
@@ -98,8 +101,9 @@ open class Level(val classPath: String, val project: Project, val json: LevelDef
             return true
         }
         val relPath = externalRelPath ?: return false
+        val jsonString = project.getAsset(relPath).toString(Charsets.UTF8)
         val json =
-            LDtkApi.parseLDtkLevelFile(project.getAsset(relPath).toString()) ?: error("Unable to parse Level JSON")
+            LDtkApi.parseLDtkLevelFile(jsonString) ?: error("Unable to parse Level JSON")
 
         uid = json.uid
         identifier = json.identifier
