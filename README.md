@@ -2,8 +2,6 @@
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
 [![LDtk](https://img.shields.io/github/v/release/deepnight/ldtk?color=red&label=LDtk)](https://ldtk.io/)
 
-# CURRENTLY OUT OF DATE - WIP
-
 # About
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
 
@@ -249,8 +247,8 @@ allprojects {
 
 ```Kotlin
 dependencies {
-    implementation("com.lehaine.kt-ldtk-api:ldtk-api:0.6.1")
-    kapt("com.lehaine.kt-ldtk-api:ldtk-processor:0.6.1")
+    implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
+    kapt("com.lehaine.kt-ldtk-api:ldtk-processor:$version")
 }
 ```
 
@@ -268,9 +266,9 @@ allprojects {
 
 ```Kotlin
 dependencies {
-    implementation("com.lehaine.kt-ldtk-api:ldtk-api:0.6.1")
-    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:0.6.1")
-    kapt("com.lehaine.kt-ldtk-api:libkt-ldtk-processor:0.6.1")
+    implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
+    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:$version")
+    kapt("com.lehaine.kt-ldtk-api:libkt-ldtk-processor:$version")
 }
 ```
 
