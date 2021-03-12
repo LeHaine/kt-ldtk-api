@@ -12,7 +12,6 @@ object LDtkApi {
     fun parseLDtkFile(json: String): ProjectJson? {
         return Json {
             ignoreUnknownKeys = true
-            isLenient = true
         }.decodeFromString<ProjectJson>(json)
     }
 
@@ -22,7 +21,6 @@ object LDtkApi {
     fun parseLDtkLevelFile(json: String): LevelDefinition? {
         return Json {
             ignoreUnknownKeys = true
-            isLenient = true
         }.decodeFromString<LevelDefinition>(json)
     }
 
