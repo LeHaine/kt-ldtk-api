@@ -2,6 +2,7 @@ plugins {
     kotlin("plugin.serialization") version "1.4.31"
     id("maven-publish")
 }
+group = "com.lehaine.kt-ldtk-api"
 
 repositories {
     mavenCentral()
