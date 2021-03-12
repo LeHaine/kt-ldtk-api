@@ -1,21 +1,18 @@
 package com.lehaine.ldtk
 
-open class Project(val projectFilePath: String) {
-
-    enum class WorldLayout {
-        Free,
-        GridVania,
-        LinearHorizontal,
-        LinearVertical
-    }
+open class Project(val projectFilePath: String, val projectDir: String? = null) {
 
     val bgColorInt: Int
     val bgColorHex: String
     val worldLayout: WorldLayout
     val defs: DefinitionJson
 
+    val tilesets = mutableMapOf<Int, Tileset>()
+    private val assetCache = mutableMapOf<String, ByteArray>()
+
     private val _allUntypedLevels = mutableListOf<Level>()
     val allUntypedLevels get() = _allUntypedLevels.toList()
+
 
     companion object {
         fun intToHex(color: Int, leadingZeros: Int = 6): String {
@@ -43,7 +40,12 @@ open class Project(val projectFilePath: String) {
                 _allUntypedLevels.add(it)
             }
         }
-        worldLayout = WorldLayout.valueOf(json.worldLayout)
+
+        json.defs.tilesets.forEach {
+            tilesets[it.uid] = Tileset(it)
+
+        }
+        worldLayout = json.worldLayout
         bgColorHex = json.bgColor
         bgColorInt = hexToInt(json.bgColor)
     }
@@ -52,6 +54,14 @@ open class Project(val projectFilePath: String) {
         return null
     }
 
+    fun getAsset(relativePath: String): ByteArray {
+        if (assetCache.contains(relativePath)) {
+            return assetCache[relativePath] ?: error("Unable to load asset from asset cache!")
+        }
+
+        return javaClass.classLoader.getResource(relativePath)?.readBytes()
+            ?: error("Unable to load LDtk file content!")
+    }
 
     fun getLayerDef(uid: Int?, identifier: String? = ""): LayerDefJson? {
         if (uid == null && identifier == null) {

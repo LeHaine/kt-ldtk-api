@@ -27,13 +27,51 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
 
     data class Neighbor(val levelUid: Int, val dir: NeighborDirection)
 
-    val uid = json.uid
-    val identifier = json.identifier
-    val pxWidth = json.pxWid
-    val pxHeight = json.pxHei
-    val worldX = json.worldX
-    val worldY = json.worldY
-    val bgColor = Project.hexToInt(json.__bgColor)
+    data class CropRect(val x: Float, val y: Float, val w: Float, val h: Float);
+
+    data class LevelBgImage(
+        val relFilePath: String,
+        val topLeftX: Int,
+        val topLeftY: Int,
+        val scaleX: Float,
+        val scaleY: Float,
+        val cropRect: CropRect
+    )
+
+    var uid = json.uid
+        private set
+    var identifier = json.identifier
+        private set
+    var pxWidth = json.pxWid
+        private set
+    var pxHeight = json.pxHei
+        private set
+    var worldX = json.worldX
+        private set
+    var worldY = json.worldY
+        private set
+    var bgColor = Project.hexToInt(json.__bgColor)
+        private set
+    val hasBgImage: Boolean
+        get() = bgImageInfos != null
+    var bgImageInfos: LevelBgImage? = if (json.bgRelPath.isNullOrEmpty() || json.__bgPos == null) {
+        null
+    } else {
+        LevelBgImage(
+            relFilePath = json.bgRelPath,
+            topLeftX = json.__bgPos.topLeftPx[0],
+            topLeftY = json.__bgPos.topLeftPx[1],
+            scaleX = json.__bgPos.scale[0],
+            scaleY = json.__bgPos.scale[1],
+            cropRect = CropRect(
+                x = json.__bgPos.cropRect[0],
+                y = json.__bgPos.cropRect[1],
+                w = json.__bgPos.cropRect[2],
+                h = json.__bgPos.cropRect[3]
+            )
+        )
+    }
+        private set
 
     private val _allUntypedLayers = mutableListOf<Layer>()
     val allUntypedLayers get() = _allUntypedLayers
@@ -41,8 +79,13 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
     private val _neighbors = mutableListOf<Neighbor>()
     val neighors get() = _neighbors.toList()
 
+    /**
+     * Only exists if levels are stored in separate level files.
+     */
+    private var externalRelPath = json.externalRelPath
+
     init {
-        json.layerInstances.forEach { layerInstanceJson ->
+        json.layerInstances?.forEach { layerInstanceJson ->
             instantiateLayer(classPath, layerInstanceJson)?.also { _allUntypedLayers.add(it) }
         }
         json.__neighbours?.forEach {
@@ -50,7 +93,55 @@ open class Level(val classPath: String, val project: Project, val json: LevelJso
         }
     }
 
+    fun isLoaded() = externalRelPath == null || !allUntypedLayers.isNullOrEmpty()
+
+    fun load(): Boolean {
+        if (isLoaded()) {
+            return true
+        }
+        val relPath = externalRelPath ?: return false
+        val json =
+            LDtkApi.parseLDtkLevelFile(String(project.getAsset(relPath))) ?: error("Unable to parse Level JSON")
+
+        uid = json.uid
+        identifier = json.identifier
+        pxWidth = json.pxWid
+        pxHeight = json.pxHei
+        worldX = json.worldX
+        worldY = json.worldY
+        bgColor = Project.hexToInt(json.__bgColor)
+
+        bgImageInfos = if (json.bgRelPath.isNullOrEmpty() || json.__bgPos == null) {
+            null
+        } else {
+            LevelBgImage(
+                relFilePath = json.bgRelPath,
+                topLeftX = json.__bgPos.topLeftPx[0],
+                topLeftY = json.__bgPos.topLeftPx[1],
+                scaleX = json.__bgPos.scale[0],
+                scaleY = json.__bgPos.scale[1],
+                cropRect = CropRect(
+                    x = json.__bgPos.cropRect[0],
+                    y = json.__bgPos.cropRect[1],
+                    w = json.__bgPos.cropRect[2],
+                    h = json.__bgPos.cropRect[3]
+                )
+            )
+        }
+        externalRelPath = json.externalRelPath
+
+        json.layerInstances?.forEach { layerInstanceJson ->
+            instantiateLayer(classPath, layerInstanceJson)?.also { _allUntypedLayers.add(it) }
+        }
+        json.__neighbours?.forEach {
+            _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
+        }
+
+        return true
+    }
+
     fun resolveLayer(id: String): Layer {
+        load()
         return allUntypedLayers.find { it.identifier == id } ?: error("Unable to find $id layer")
     }
 

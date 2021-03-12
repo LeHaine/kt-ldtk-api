@@ -15,7 +15,7 @@ open class GdxLayerAutoLayer(
     json
 ) {
 
-    fun render(batch: Batch, tilesTexture: Texture) {
+    fun render(batch: Batch, tilesTexture: Texture, pixelHeight:Int) {
         val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
@@ -25,7 +25,7 @@ open class GdxLayerAutoLayer(
                 batch.draw(
                     it.region.texture,
                     (autoTile.renderX + pxTotalOffsetX).toFloat(),
-                    -(autoTile.renderY + pxTotalOffsetY).toFloat(), // LDtk is y-down, so invert it
+                    -(autoTile.renderY + pxTotalOffsetY - pixelHeight).toFloat(), // LDtk is y-down, so invert it
                     0f,
                     0f,
                     gridSize.toFloat(),
