@@ -160,14 +160,15 @@ open class ProjectProcessor : AbstractProcessor() {
     }
 
     private fun generateEntities(
-        projectClassSpec: TypeSpec.Builder, pkg: String, className: String,
+        projectClassSpec: TypeSpec.Builder, pkg: String, projClassName: String,
         entities: List<EntityDefJson>
     ): FunSpec.Builder {
         val instantiateLayerFun = FunSpec.builder("instantiateEntity")
             .addParameter("json", EntityInstanceJson::class)
             .addModifiers(KModifier.OVERRIDE)
             .addModifiers(KModifier.PROTECTED)
-            .returns(Entity::class)
+            .returns(Entity::class.asTypeName().copy(nullable = true))
+
         entities.forEach { entityDef ->
             val entityClassName = "$ENTITY_PREFIX${entityDef.identifier}"
             val entityClassSpec = TypeSpec.classBuilder(entityClassName).apply {
@@ -196,28 +197,58 @@ open class ProjectProcessor : AbstractProcessor() {
             val arrayReg = "Array<(.*)>".toRegex()
             instantiateLayerFun
                 .beginControlFlow("if (\"${entityDef.identifier}\" == json.__identifier)")
-                .addStatement("val entity = %L.%L.${entityClassName}(json)", pkg, className)
+                .addStatement("val entity = %L.%L.${entityClassName}(json)", pkg, projClassName)
                 .beginControlFlow("json.fieldInstances.forEach")
             entityDef.fieldDefs.forEach { fieldDefJson ->
+                instantiateLayerFun.beginControlFlow("if(\"${fieldDefJson.identifier}\" == it.__identifier)")
                 val canBeNull = fieldDefJson.canBeNull
                 val isArray = arrayReg.matches(fieldDefJson.__type)
                 val typeName =
                     if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
                 val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
+                val entityFieldName = "entity.${fieldDefJson.identifier}"
+                val privateEntityFieldName = "entity._${fieldDefJson.identifier}"
                 if (isArray) {
-                    instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<*>")
                     val fieldClassType = when (name) {
                         "Int", "Double", "Boolean", "String" -> {
                             if (name == "Int") {
-                                instantiateLayerFun.addStatement("arrList.map { (it as Double).toInt()")
+                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<Double>")
+                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList.map { it.toInt() })")
+                            } else {
+                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<$name>")
+                                instantiateLayerFun.addStatement("$privateEntityFieldName.addAll(arrList)")
                             }
                             ClassName("kotlin", name)
                         }
-                        "Point", "Color" -> ClassName("com.lehaine.ldtk", name)
+                        "Point", "Color" -> {
+                            if (name == "Color") {
+                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<String>")
+                                    .beginControlFlow("val result = arrList.map")
+                                    .addStatement("val value = Project.hexToInt(it)")
+                                    .addStatement("Color(value, it)")
+                                    .endControlFlow()
+                                    .addStatement("$privateEntityFieldName.addAll(result)")
+                            } else {
+                                instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<Map<String, Double>>")
+                                    .beginControlFlow("val result = arrList.map")
+                                    .addStatement("val cx = it[\"cx\"]!!.toInt()")
+                                    .addStatement("val cy = it[\"cy\"]!!.toInt()")
+                                    .addStatement("Point(cx, cy)")
+                                    .endControlFlow()
+                                    .addStatement("$privateEntityFieldName.addAll(result)")
+                            }
+                            ClassName("com.lehaine.ldtk", name)
+                        }
                         else -> {
                             when {
                                 "LocalEnum." in name -> {
-                                    ClassName.bestGuess(typeName.substring(typeName.indexOf(".") + 1))
+                                    val enumName = typeName.substring(typeName.indexOf(".") + 1)
+                                    instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<String>")
+                                        .beginControlFlow("val result = arrList.map")
+                                        .addStatement("$enumName.valueOf(it)")
+                                        .endControlFlow()
+                                        .addStatement("$privateEntityFieldName.addAll(result)")
+                                    ClassName.bestGuess(enumName)
                                 }
                                 "ExternEnum." in name -> {
                                     error("ExternEnums are not supported!")
@@ -236,7 +267,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             CodeBlock.builder()
                                 .addStatement("mutableListOf()")
                                 .build()
-                        ).addModifiers(KModifier.PRIVATE).build()
+                        ).build()
                     )
                     entityClassSpec.addProperty(
                         PropertySpec.builder(
@@ -252,6 +283,8 @@ open class ProjectProcessor : AbstractProcessor() {
                 } else {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
+
+                            instantiateLayerFun.addStatement("$entityFieldName = it.__value as $name")
                             val className = ClassName("kotlin", name).copy(canBeNull)
                             val defaultOverride = fieldDefJson.defaultOverride?.params?.get(0)
                             val hasOverride = defaultOverride != null
@@ -296,12 +329,24 @@ open class ProjectProcessor : AbstractProcessor() {
                             addToEntity(fieldDefJson.identifier, colorClass, colorDefault)
                             fields.add(fieldDefJson.identifier)
 
+                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.__value as String)")
+                                .addStatement("val hexValue = it.__value as String")
+                                .addStatement("$entityFieldName = Color(value, hexValue)")
+
                         }
                         "Point" -> {
                             val className = ClassName("com.lehaine.ldtk", "Point").copy(canBeNull)
                             val defaultValue = fieldDefJson.defaultOverride?.params?.get(0) ?: "Point(0, 0)"
                             addToEntity(fieldDefJson.identifier, className, defaultValue)
                             fields.add(fieldDefJson.identifier)
+
+                            instantiateLayerFun
+                                .beginControlFlow("if (it.__value != null)")
+                                .addStatement("val map = it.__value as Map<String, Double>")
+                                .addStatement("val cx = map[\"cx\"]!!.toInt()")
+                                .addStatement("val cy = map[\"cy\"]!!.toInt()")
+                                .addStatement("$entityFieldName = Point(cx, cy)")
+                                .endControlFlow()
                         }
                         else -> { // field type is an enum
                             when {
@@ -315,6 +360,8 @@ open class ProjectProcessor : AbstractProcessor() {
                                         fieldDefJson.defaultOverride?.params?.get(0),
                                         !canBeNull
                                     )
+
+                                    instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.__value as String)")
                                 }
                                 "ExternEnum." in typeName -> {
                                     error("ExternEnums are not supported!")
@@ -326,8 +373,14 @@ open class ProjectProcessor : AbstractProcessor() {
                         }
                     }
                 }
+                instantiateLayerFun
+                    .endControlFlow()
             }
-            instantiateLayerFun.endControlFlow().endControlFlow()
+
+            instantiateLayerFun
+                .endControlFlow()
+                .addStatement("return entity")
+                .endControlFlow()
             var stringStatment = ""
             fields.forEachIndexed { index, s ->
                 stringStatment += "$s=\${$s}"
@@ -343,6 +396,7 @@ open class ProjectProcessor : AbstractProcessor() {
             entityClassSpec.primaryConstructor(entityConstructor.build())
             projectClassSpec.addType(entityClassSpec.build())
         }
+        instantiateLayerFun.addStatement("return null")
         return instantiateLayerFun
     }
 
