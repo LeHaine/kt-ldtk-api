@@ -94,9 +94,17 @@ open class ProjectProcessor : AbstractProcessor() {
             }
 
             generateEnums(projectClassSpec, json.defs.enums)
-            generateEntities(projectClassSpec, json.defs.entities)
+            val instantiateLayerFun = generateEntities(projectClassSpec, pkg, className, json.defs.entities)
             val tilesets = generateTilesets(projectClassSpec, json.defs.tilesets)
-            generateLayers(projectClassSpec, pkg, className, tilesets, json.defs.entities, json.defs.layers)
+            generateLayers(
+                projectClassSpec,
+                pkg,
+                className,
+                tilesets,
+                json.defs.entities,
+                json.defs.layers,
+                instantiateLayerFun
+            )
             generateLevel(projectClassSpec, pkg, className, json.defs.layers)
 
             val levelClassType = ClassName.bestGuess("${className}$LEVEL_SUFFIX")
@@ -151,7 +159,15 @@ open class ProjectProcessor : AbstractProcessor() {
         }
     }
 
-    private fun generateEntities(projectClassSpec: TypeSpec.Builder, entities: List<EntityDefJson>) {
+    private fun generateEntities(
+        projectClassSpec: TypeSpec.Builder, pkg: String, className: String,
+        entities: List<EntityDefJson>
+    ): FunSpec.Builder {
+        val instantiateLayerFun = FunSpec.builder("instantiateEntity")
+            .addParameter("json", EntityInstanceJson::class)
+            .addModifiers(KModifier.OVERRIDE)
+            .addModifiers(KModifier.PROTECTED)
+            .returns(Entity::class)
         entities.forEach { entityDef ->
             val entityClassName = "$ENTITY_PREFIX${entityDef.identifier}"
             val entityClassSpec = TypeSpec.classBuilder(entityClassName).apply {
@@ -178,6 +194,10 @@ open class ProjectProcessor : AbstractProcessor() {
 
             val fields = mutableListOf<String>()
             val arrayReg = "Array<(.*)>".toRegex()
+            instantiateLayerFun
+                .beginControlFlow("if (\"${entityDef.identifier}\" == json.__identifier)")
+                .addStatement("val entity = %L.%L.${entityClassName}(json)", pkg, className)
+                .beginControlFlow("json.fieldInstances.forEach")
             entityDef.fieldDefs.forEach { fieldDefJson ->
                 val canBeNull = fieldDefJson.canBeNull
                 val isArray = arrayReg.matches(fieldDefJson.__type)
@@ -185,8 +205,14 @@ open class ProjectProcessor : AbstractProcessor() {
                     if (isArray) arrayReg.find(fieldDefJson.__type)!!.groupValues[1] else fieldDefJson.__type
                 val name = if (typeName == "Bool") "Boolean" else if (typeName == "Float") "Double" else typeName
                 if (isArray) {
+                    instantiateLayerFun.addStatement("val arrList = it.__value as MutableList<*>")
                     val fieldClassType = when (name) {
-                        "Int", "Double", "Boolean", "String" -> ClassName("kotlin", name)
+                        "Int", "Double", "Boolean", "String" -> {
+                            if (name == "Int") {
+                                instantiateLayerFun.addStatement("arrList.map { (it as Double).toInt()")
+                            }
+                            ClassName("kotlin", name)
+                        }
                         "Point", "Color" -> ClassName("com.lehaine.ldtk", name)
                         else -> {
                             when {
@@ -301,6 +327,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     }
                 }
             }
+            instantiateLayerFun.endControlFlow().endControlFlow()
             var stringStatment = ""
             fields.forEachIndexed { index, s ->
                 stringStatment += "$s=\${$s}"
@@ -316,8 +343,8 @@ open class ProjectProcessor : AbstractProcessor() {
             entityClassSpec.primaryConstructor(entityConstructor.build())
             projectClassSpec.addType(entityClassSpec.build())
         }
+        return instantiateLayerFun
     }
-
 
     private data class TilesetInfo(val typeName: String, val json: TilesetDefJson)
 
@@ -352,7 +379,8 @@ open class ProjectProcessor : AbstractProcessor() {
         className: String,
         tilesets: MutableMap<Int, TilesetInfo>,
         entities: List<EntityDefJson>,
-        layers: List<LayerDefJson>
+        layers: List<LayerDefJson>,
+        instantiateLayerFun: FunSpec.Builder
     ) {
         layers.forEach { layerDef ->
             val layerClassSpec = TypeSpec.classBuilder("$LAYER_PREFIX${layerDef.identifier}")
@@ -441,10 +469,11 @@ open class ProjectProcessor : AbstractProcessor() {
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
-
+                    layerClassSpec.addFunction(instantiateLayerFun.build())
                     layerClassSpec.addInitializerBlock(
-                        CodeBlock.builder().addStatement("instantiateEntities(\"%L.%L\")", pkg, className).build()
+                        CodeBlock.builder().addStatement("instantiateEntities()").build()
                     )
+
 
                     entities.forEach {
                         val levelClassType = ClassName.bestGuess("$ENTITY_PREFIX${it.identifier}")
