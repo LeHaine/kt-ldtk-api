@@ -94,18 +94,18 @@ open class ProjectProcessor : AbstractProcessor() {
             }
 
             generateEnums(projectClassSpec, json.defs.enums)
-            val instantiateLayerFun = generateEntities(projectClassSpec, pkg, className, json.defs.entities)
+            val instantiateEntityFun = generateEntities(projectClassSpec, pkg, className, json.defs.entities)
             val tilesets = generateTilesets(projectClassSpec, json.defs.tilesets)
-            generateLayers(
+            val instantiateLayerFun = generateLayers(
                 projectClassSpec,
                 pkg,
                 className,
                 tilesets,
                 json.defs.entities,
                 json.defs.layers,
-                instantiateLayerFun
+                instantiateEntityFun
             )
-            generateLevel(projectClassSpec, pkg, className, json.defs.layers)
+            generateLevel(projectClassSpec, pkg, className, json.defs.layers, instantiateLayerFun)
 
             val levelClassType = ClassName.bestGuess("${className}$LEVEL_SUFFIX")
             // all levels list property
@@ -165,8 +165,7 @@ open class ProjectProcessor : AbstractProcessor() {
     ): FunSpec.Builder {
         val instantiateLayerFun = FunSpec.builder("instantiateEntity")
             .addParameter("json", EntityInstanceJson::class)
-            .addModifiers(KModifier.OVERRIDE)
-            .addModifiers(KModifier.PROTECTED)
+            .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
             .returns(Entity::class.asTypeName().copy(nullable = true))
 
         entities.forEach { entityDef ->
@@ -382,6 +381,7 @@ open class ProjectProcessor : AbstractProcessor() {
 
             instantiateLayerFun
                 .endControlFlow()
+                .addStatement("_all${entityDef.identifier}.add(entity)")
                 .addStatement("return entity")
                 .endControlFlow()
             var stringStatment = ""
@@ -437,11 +437,21 @@ open class ProjectProcessor : AbstractProcessor() {
         tilesets: MutableMap<Int, TilesetInfo>,
         entities: List<EntityDefJson>,
         layers: List<LayerDefJson>,
-        instantiateLayerFun: FunSpec.Builder
-    ) {
+        instantiateEntityFun: FunSpec.Builder
+    ): FunSpec.Builder {
+        val instantiateLayerFun = FunSpec.builder("instantiateLayer")
+            .addParameter("json", LayerInstanceJson::class)
+            .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+            .returns(Layer::class.asTypeName().copy(nullable = true))
+
         layers.forEach { layerDef ->
-            val layerClassSpec = TypeSpec.classBuilder("$LAYER_PREFIX${layerDef.identifier}")
+            val layerName = "$LAYER_PREFIX${layerDef.identifier}"
+            val layerClassSpec = TypeSpec.classBuilder(layerName)
             val layerConstructor = FunSpec.constructorBuilder()
+
+            instantiateLayerFun
+                .beginControlFlow("if (\"${layerDef.identifier}\" == json.__identifier)")
+
 
             fun extendLayerClass(superClass: KClass<*>) {
                 layerClassSpec.run {
@@ -487,6 +497,10 @@ open class ProjectProcessor : AbstractProcessor() {
                     if (layerDef.autoTilesetDefUid == null) {
                         // IntGrid
                         extendLayerClass(baseLayerIntGridClass().kotlin)
+                        instantiateLayerFun
+                            .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
+                            .addStatement("val layer = %L.%L.$layerName(intGridValues, json)", pkg, className)
+
 
                     } else {
                         // Auto-layer IntGrid
@@ -505,6 +519,14 @@ open class ProjectProcessor : AbstractProcessor() {
                                     .addStatement("return tileset").build()
                             )
                         }
+                        instantiateLayerFun
+                            .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
+                            .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                            .addStatement(
+                                "val layer = %L.%L.$layerName(tilesetDef, intGridValues, json)",
+                                pkg,
+                                className
+                            )
                     }
                 }
                 "AutoLayer" -> {
@@ -523,13 +545,14 @@ open class ProjectProcessor : AbstractProcessor() {
                                 .addStatement("return tileset").build()
                         )
                     }
+
+                    instantiateLayerFun
+                        .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                        .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
-                    layerClassSpec.addFunction(instantiateLayerFun.build())
-                    layerClassSpec.addInitializerBlock(
-                        CodeBlock.builder().addStatement("instantiateEntities()").build()
-                    )
+                    layerClassSpec.addFunction(instantiateEntityFun.build())
 
 
                     entities.forEach {
@@ -558,6 +581,12 @@ open class ProjectProcessor : AbstractProcessor() {
                         )
 
                     }
+                    layerClassSpec.addInitializerBlock(
+                        CodeBlock.builder().addStatement("instantiateEntities()").build()
+                    )
+
+                    instantiateLayerFun
+                        .addStatement("val layer = %L.%L.$layerName(json)", pkg, className)
                 }
                 "Tiles" -> {
                     extendLayerClass(baseLayerTilesClass().kotlin)
@@ -576,6 +605,9 @@ open class ProjectProcessor : AbstractProcessor() {
                             .addStatement("return tileset").build()
                     )
 
+                    instantiateLayerFun
+                        .addStatement("val tilesetDef = project.getTilesetDef(json.__tilesetDefUid)!!")
+                        .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
                 }
                 else -> {
                     error("Unknown layer type ${layerDef.type}")
@@ -585,7 +617,15 @@ open class ProjectProcessor : AbstractProcessor() {
 
             layerClassSpec.primaryConstructor(layerConstructor.build())
             projectClassSpec.addType(layerClassSpec.build())
+
+            instantiateLayerFun
+                .addStatement("return layer")
+                .endControlFlow()
         }
+
+        instantiateLayerFun.addStatement("return null")
+
+        return instantiateLayerFun
     }
 
 
@@ -593,7 +633,8 @@ open class ProjectProcessor : AbstractProcessor() {
         projectClassSpec: TypeSpec.Builder,
         pkg: String,
         className: String,
-        layers: List<LayerDefJson>
+        layers: List<LayerDefJson>,
+        instantiateLayerFun: FunSpec.Builder
     ) {
         val levelClassSpec = TypeSpec.classBuilder("${className}$LEVEL_SUFFIX").apply {
             superclass(Level::class)
@@ -607,6 +648,7 @@ open class ProjectProcessor : AbstractProcessor() {
                 .addParameter("json", LevelJson::class)
 
         levelClassSpec.primaryConstructor(levelConstructor.build())
+            .addFunction(instantiateLayerFun.build())
 
         layers.forEach {
             levelClassSpec.addProperty(
