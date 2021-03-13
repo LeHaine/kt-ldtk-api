@@ -1,7 +1,4 @@
-// To parse the JSON, install kotlin's serialization plugin and do:
-//
-// val json       = Json(JsonConfiguration.Stable)
-// val coordinate = json.parse(Coordinate.serializer(), jsonString)
+@file:Suppress("EXPERIMENTAL_API_USAGE")
 
 package com.lehaine.ldtk
 
@@ -19,16 +16,6 @@ import kotlinx.serialization.json.*
  */
 @Serializable
 data class ProjectJson(
-    /**
-     * Number of backup files to keep, if the `backupOnSave` is TRUE
-     */
-    val backupLimit: Int,
-
-    /**
-     * If TRUE, an extra copy of the project will be created in a sub folder, when saving.
-     */
-    val backupOnSave: Boolean,
-
     /**
      * Project background color
      */
@@ -203,17 +190,6 @@ data class EntityDefinition(
      */
     val keepAspectRatio: Boolean,
 
-    /**
-     * Possible values: `DiscardOldOnes`, `PreventAdding`, `MoveLastOne`
-     */
-    val limitBehavior: LimitBehavior,
-
-    /**
-     * If TRUE, the maxCount is a "per world" limit, if FALSE, it's a "per level". Possible
-     * values: `PerLayer`, `PerLevel`, `PerWorld`
-     */
-    val limitScope: LimitScope,
-
     val lineOpacity: Float,
 
     /**
@@ -230,11 +206,6 @@ data class EntityDefinition(
      * Pivot Y coordinate (from 0 to 1.0)
      */
     val pivotY: Float,
-
-    /**
-     * Possible values: `Rectangle`, `Ellipse`, `Tile`, `Cross`
-     */
-    val renderMode: RenderMode,
 
     /**
      * If TRUE, the entity instances will be resizable horizontally
@@ -261,11 +232,6 @@ data class EntityDefinition(
      */
     @SerialName("tileId")
     val tileID: Int? = null,
-
-    /**
-     * Possible values: `Cover`, `FitInside`, `Repeat`, `Stretch`
-     */
-    val tileRenderMode: TileRenderMode,
 
     /**
      * Tileset ID used for optional tile display
@@ -324,20 +290,6 @@ data class FieldDefinition(
      */
     val defaultOverride: DefaultOverrideInfo? = null,
 
-    val editorAlwaysShow: Boolean,
-    val editorCutLongValues: Boolean,
-
-    /**
-     * Possible values: `Hidden`, `ValueOnly`, `NameAndValue`, `EntityTile`, `PointStar`,
-     * `PointPath`, `RadiusPx`, `RadiusGrid`
-     */
-    val editorDisplayMode: EditorDisplayMode,
-
-    /**
-     * Possible values: `Above`, `Center`, `Beneath`
-     */
-    val editorDisplayPos: EditorDisplayPos,
-
     /**
      * Unique String identifier
      */
@@ -365,18 +317,6 @@ data class FieldDefinition(
     val regex: String? = null,
 
     /**
-     * Possible values: &lt;`null`&gt;, `LangPython`, `LangRuby`, `LangJS`, `LangLua`, `LangC`,
-     * `LangHaxe`, `LangMarkdown`, `LangJson`, `LangXml`
-     */
-    val textLangageMode: TextLangageMode? = null,
-
-    /**
-     * Internal type enum
-     */
-    @SerialName("type")
-    val fieldDefinitionType: JsonElement?,
-
-    /**
      * Unique Intidentifier
      */
     val uid: Int
@@ -384,228 +324,8 @@ data class FieldDefinition(
 
 
 @Serializable
-data class DefaultOverrideInfo(val id: String, val params: List<JsonElement>)
+data class DefaultOverrideInfo(val id: String, val params: List<MultiAssociatedValue>)
 
-/**
- * Possible values: `Hidden`, `ValueOnly`, `NameAndValue`, `EntityTile`, `PointStar`,
- * `PointPath`, `RadiusPx`, `RadiusGrid`
- */
-@Serializable
-enum class EditorDisplayMode(val value: String) {
-    EntityTile("EntityTile"),
-    Hidden("Hidden"),
-    NameAndValue("NameAndValue"),
-    PointPath("PointPath"),
-    PointStar("PointStar"),
-    RadiusGrid("RadiusGrid"),
-    RadiusPx("RadiusPx"),
-    ValueOnly("ValueOnly");
-
-    companion object : KSerializer<EditorDisplayMode> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.EditorDisplayMode", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): EditorDisplayMode = when (val value = decoder.decodeString()) {
-            "EntityTile" -> EntityTile
-            "Hidden" -> Hidden
-            "NameAndValue" -> NameAndValue
-            "PointPath" -> PointPath
-            "PointStar" -> PointStar
-            "RadiusGrid" -> RadiusGrid
-            "RadiusPx" -> RadiusPx
-            "ValueOnly" -> ValueOnly
-            else -> throw IllegalArgumentException("EditorDisplayMode could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: EditorDisplayMode) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-/**
- * Possible values: `Above`, `Center`, `Beneath`
- */
-@Serializable
-enum class EditorDisplayPos(val value: String) {
-    Above("Above"),
-    Beneath("Beneath"),
-    Center("Center");
-
-    companion object : KSerializer<EditorDisplayPos> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.EditorDisplayPos", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): EditorDisplayPos = when (val value = decoder.decodeString()) {
-            "Above" -> Above
-            "Beneath" -> Beneath
-            "Center" -> Center
-            else -> throw IllegalArgumentException("EditorDisplayPos could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: EditorDisplayPos) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-@Serializable
-enum class TextLangageMode(val value: String) {
-    LangC("LangC"),
-    LangHaxe("LangHaxe"),
-    LangJS("LangJS"),
-    LangJSON("LangJson"),
-    LangLua("LangLua"),
-    LangMarkdown("LangMarkdown"),
-    LangPython("LangPython"),
-    LangRuby("LangRuby"),
-    LangXML("LangXml");
-
-    companion object : KSerializer<TextLangageMode> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.TextLangageMode", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): TextLangageMode = when (val value = decoder.decodeString()) {
-            "LangC" -> LangC
-            "LangHaxe" -> LangHaxe
-            "LangJS" -> LangJS
-            "LangJson" -> LangJSON
-            "LangLua" -> LangLua
-            "LangMarkdown" -> LangMarkdown
-            "LangPython" -> LangPython
-            "LangRuby" -> LangRuby
-            "LangXml" -> LangXML
-            else -> throw IllegalArgumentException("TextLangageMode could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: TextLangageMode) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-/**
- * Possible values: `DiscardOldOnes`, `PreventAdding`, `MoveLastOne`
- */
-@Serializable
-enum class LimitBehavior(val value: String) {
-    DiscardOldOnes("DiscardOldOnes"),
-    MoveLastOne("MoveLastOne"),
-    PreventAdding("PreventAdding");
-
-    companion object : KSerializer<LimitBehavior> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.LimitBehavior", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): LimitBehavior = when (val value = decoder.decodeString()) {
-            "DiscardOldOnes" -> DiscardOldOnes
-            "MoveLastOne" -> MoveLastOne
-            "PreventAdding" -> PreventAdding
-            else -> throw IllegalArgumentException("LimitBehavior could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: LimitBehavior) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-/**
- * If TRUE, the maxCount is a "per world" limit, if FALSE, it's a "per level". Possible
- * values: `PerLayer`, `PerLevel`, `PerWorld`
- */
-@Serializable
-enum class LimitScope(val value: String) {
-    PerLayer("PerLayer"),
-    PerLevel("PerLevel"),
-    PerWorld("PerWorld");
-
-    companion object : KSerializer<LimitScope> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.LimitScope", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): LimitScope = when (val value = decoder.decodeString()) {
-            "PerLayer" -> PerLayer
-            "PerLevel" -> PerLevel
-            "PerWorld" -> PerWorld
-            else -> throw IllegalArgumentException("LimitScope could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: LimitScope) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-/**
- * Possible values: `Rectangle`, `Ellipse`, `Tile`, `Cross`
- */
-@Serializable
-enum class RenderMode(val value: String) {
-    Cross("Cross"),
-    Ellipse("Ellipse"),
-    Rectangle("Rectangle"),
-    Tile("Tile");
-
-    companion object : KSerializer<RenderMode> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.RenderMode", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): RenderMode = when (val value = decoder.decodeString()) {
-            "Cross" -> Cross
-            "Ellipse" -> Ellipse
-            "Rectangle" -> Rectangle
-            "Tile" -> Tile
-            else -> throw IllegalArgumentException("RenderMode could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: RenderMode) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
-
-/**
- * Possible values: `Cover`, `FitInside`, `Repeat`, `Stretch`
- */
-@Serializable
-enum class TileRenderMode(val value: String) {
-    Cover("Cover"),
-    FitInside("FitInside"),
-    Repeat("Repeat"),
-    Stretch("Stretch");
-
-    companion object : KSerializer<TileRenderMode> {
-        override val descriptor: SerialDescriptor
-            get() {
-                return PrimitiveSerialDescriptor("com.lehaine.ldtk.TileRenderMode", PrimitiveKind.STRING)
-            }
-
-        override fun deserialize(decoder: Decoder): TileRenderMode = when (val value = decoder.decodeString()) {
-            "Cover" -> Cover
-            "FitInside" -> FitInside
-            "Repeat" -> Repeat
-            "Stretch" -> Stretch
-            else -> throw IllegalArgumentException("TileRenderMode could not parse: $value")
-        }
-
-        override fun serialize(encoder: Encoder, value: TileRenderMode) {
-            return encoder.encodeString(value.value)
-        }
-    }
-}
 
 @Serializable
 data class EnumDefinition(
@@ -1002,7 +722,7 @@ data class FieldInstance(
      * (Integer, Boolean, String etc.)<br/>  It can also be an `Array` of those same types.
      */
     @SerialName("__value")
-    val value: JsonElement?,
+    val value: MultiAssociatedValue?,
 
     /**
      * Reference of the **Field definition** UID
@@ -1010,12 +730,57 @@ data class FieldInstance(
     val defUid: Int,
 )
 
-@Serializable
-data class FieldInstanceValue(
+@Serializable(with = MultiAssociatedValueSerializer::class)
+data class MultiAssociatedValue(
     val stringList: List<String>? = null,
     val stringMapList: List<Map<String, String>>? = null,
+    val stringMap: Map<String, String>? = null,
     val content: String? = null
 )
+
+object MultiAssociatedValueSerializer : KSerializer<MultiAssociatedValue> {
+    override val descriptor: SerialDescriptor =
+        buildClassSerialDescriptor("com.lehaine.ldtk.FieldInstanceValue") {
+            element<List<String>>("stringList", isOptional = true)
+            element<List<Map<String, String>>>("stringMapList", isOptional = true)
+            element<Map<String, String>>("stringMap", isOptional = true)
+            element<String>("content", isOptional = true)
+        }
+
+    override fun serialize(encoder: Encoder, value: MultiAssociatedValue) {
+        throw NotImplementedError("FieldInstanceValueSerializer serialization is not supported!")
+    }
+
+    override fun deserialize(decoder: Decoder): MultiAssociatedValue {
+        val input = decoder as? JsonDecoder ?: error("Unable to cast to JsonDecoder")
+        val json = input.decodeJsonElement()
+        if (json is JsonArray) {
+            val arrList = json.jsonArray
+            val isMap = arrList.isNotEmpty() && arrList[0] is JsonObject
+            if (isMap) {
+                val newList = arrList.map { jsonMap ->
+                    val map = mutableMapOf<String, String>()
+                    jsonMap.jsonObject.forEach {
+                        map[it.key] = it.value.jsonPrimitive.content
+                    }
+                    map
+                }
+                return MultiAssociatedValue(stringMapList = newList)
+            }
+
+            return MultiAssociatedValue(stringList = arrList.map { it.toString() })
+        } else if (json is JsonObject) {
+            val map = mutableMapOf<String, String>()
+            json.jsonObject.forEach {
+                if (it.value is JsonPrimitive) {
+                    map[it.key] = it.value.jsonPrimitive.content
+                }
+            }
+            return MultiAssociatedValue(stringMap = map)
+        }
+        return MultiAssociatedValue(content = json.jsonPrimitive.contentOrNull)
+    }
+}
 
 @Serializable
 data class LayerInstance(
