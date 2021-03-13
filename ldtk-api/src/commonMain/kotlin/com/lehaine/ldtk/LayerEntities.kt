@@ -6,6 +6,7 @@ open class LayerEntities(json: LayerInstance) : Layer(json) {
     val entities get() = _entities.toList()
 
     internal fun instantiateEntities() {
+        _entities.clear()
         json.entityInstances.forEach { entityInstanceJson ->
             instantiateEntity(entityInstanceJson)?.also { _entities.add(it) }
         }
