@@ -289,7 +289,7 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
 
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
-    kapt("com.lehaine.kt-ldtk-api:ldtk-processor:$version")
+    kapt("com.lehaine.kt-ldtk-api-extras:ldtk-processor:$version")
 }
 ```
 
@@ -318,8 +318,8 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
 
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
-    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:$version")
-    kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:$version")
+    implementation("com.lehaine.kt-ldtk-api-extras:libgdx-backend:$ersion")
+    kapt("com.lehaine.kt-ldtk-api-extras:libgdx-ldtk-processor:$version")
 }
 ```
 
