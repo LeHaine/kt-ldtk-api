@@ -21,6 +21,5 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.12")
     implementation("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx:1.9.12")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
     kapt(project(":libgdx-ldtk-processor"))
 }
