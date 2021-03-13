@@ -1,7 +1,6 @@
 
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
 [![Version](https://img.shields.io/github/v/tag/lehaine/kt-ldtk-api?label=version)](https://github.com/LeHaine/kt-ldtk-api/releases)
-[![Extras](https://img.shields.io/github/v/tag/lehaine/kt-ldtk-api-extras?label=Extras)](https://github.com/LeHaine/kt-ldtk-api-extras/releases)
 [![LDtk](https://img.shields.io/github/v/release/deepnight/ldtk?color=red&label=LDtk)](https://ldtk.io/)
 
 # About
@@ -21,8 +20,6 @@ This library can be used for any JVM game engine/framework. It features a separa
 - **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
-## Note
-This repo is just the LDtk API and does not include the extra libraries. The repo to find the extra libraries (annotation processing, LibGDX module, etc) are located [here](https://github.com/LeHaine/kt-ldtk-api-extras).
 
 # Usage
 ## Sample code 
@@ -290,7 +287,7 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
 
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
-    kapt("com.lehaine.kt-ldtk-api-extras:ldtk-processor:$version")
+    kapt("com.lehaine.kt-ldtk-api:ldtk-processor:$version")
 }
 ```
 
@@ -319,8 +316,8 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
 
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
-    implementation("com.lehaine.kt-ldtk-api-extras:libgdx-backend:$ersion")
-    kapt("com.lehaine.kt-ldtk-api-extras:libgdx-ldtk-processor:$version")
+    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:$version")
+    kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:$version")
 }
 ```
 
