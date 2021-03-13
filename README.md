@@ -5,6 +5,7 @@
 
 # About
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
+The Kotlin LDtk API library is built for Kotlin Multiplatform which mean it *should* work for JVM and JS targets.
 
 This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
 
@@ -13,9 +14,9 @@ This library can be used for any JVM game engine/framework. It features a separa
 [LDtk official website](https://ldtk.io/)
 
 ## Features
-- **Annotation processing**: Adding a simple annotation will allow fully generated typesafe code to be used within your game.
+- **Annotation processing**: An **optional** annotation that will allow fully generated typesafe code to be used within your game.
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
-- **No runtime reflection**: All the reflection is done at compile time which is used to generate code.
+- **No runtime reflection**: Reflection is used at compile time which is used to generate code.
 - **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
@@ -213,6 +214,32 @@ public class GdxTest implements ApplicationListener {
     }
 }
 ```
+
+## Sample code when NOT using the annotation to generate code
+
+```Kotlin 
+val proj = Project("sample.ldtk")
+val level = proj.allUntypedLevels[0]
+level.load() // this is only needed if levels are saved in separate files!
+val gridSize = 16
+level.allUntypedEntities?.forEach { entity ->
+    val x = entity.cx * gridSize
+    val y = entity.cy * gridSize
+    entity.json.fieldInstances.forEach {
+        if (it.identifier == "Color") {
+            val color = it.value!!.content
+        }
+
+    }
+}
+level.allUntypedLayers.forEach { layer ->
+    if (layer.type == LayerType.IntGrid) {
+        val intGridLayer = layer as LayerIntGrid
+        intGridLayer.getInt(0, 5)
+    }
+}
+```
+
 You can check out a few samples in the [samples](samples) module.
 
 ## Documentation
@@ -230,8 +257,8 @@ If you are using **Java** then they need to be enabled. **Warning**: This will m
 
 ```Kotlin
 plugins {
-    kotlin("jvm") version "1.4.20"
-    kotlin("kapt") version "1.4.20"
+    kotlin("jvm") version "1.4.31"
+    kotlin("kapt") version "1.4.31"
 }
 ```
 
@@ -248,6 +275,16 @@ allprojects {
 ```
 
 ```Kotlin
+configurations.all { // kapt has an issue with determining the correct KMM library, so we need to help it
+    if (name.contains("kapt")) {
+        attributes.attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.jvm // pass in the JVM 
+        )
+        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
+    }
+}
+
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
     kapt("com.lehaine.kt-ldtk-api:ldtk-processor:$version")
@@ -267,10 +304,20 @@ allprojects {
 ```
 
 ```Kotlin
+configurations.all { // kapt has an issue with determining the correct KMM library, so we need to help it
+    if (name.contains("kapt")) {
+        attributes.attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.jvm // pass in the JVM 
+        )
+        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
+    }
+}
+
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
     implementation("com.lehaine.kt-ldtk-api:libgdx-backend:$version")
-    kapt("com.lehaine.kt-ldtk-api:libkt-ldtk-processor:$version")
+    kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:$version")
 }
 ```
 
