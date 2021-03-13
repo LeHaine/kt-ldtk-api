@@ -20,6 +20,8 @@ This library can be used for any JVM game engine/framework. It features a separa
 - **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
+## Note
+This repo is just the LDtk API and does not include the extra libraries. The repo to find the extra libraries (annotation processing, LibGDX module, etc) are located [here](https://github.com/LeHaine/kt-ldtk-api-extras).
 
 # Usage
 ## Sample code 
