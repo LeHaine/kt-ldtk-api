@@ -12,12 +12,14 @@ plugins {
 
 subprojects {
     apply<JavaPlugin>()
+    apply {
+        plugin("maven-publish")
+    }
     if (name == "ldtk-api") {
         apply(plugin = "org.jetbrains.kotlin.multiplatform")
     } else {
         apply {
             plugin("kotlin")
-            plugin("maven")
             plugin("java-library")
             plugin("kotlin-kapt")
         }
