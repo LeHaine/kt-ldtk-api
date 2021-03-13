@@ -1011,6 +1011,13 @@ data class FieldInstance(
 )
 
 @Serializable
+data class FieldInstanceValue(
+    val stringList: List<String>? = null,
+    val stringMapList: List<Map<String, String>>? = null,
+    val content: String? = null
+)
+
+@Serializable
 data class LayerInstance(
     /**
      * Grid-based height

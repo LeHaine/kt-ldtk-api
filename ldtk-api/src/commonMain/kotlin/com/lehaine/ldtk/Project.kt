@@ -3,7 +3,7 @@ package com.lehaine.ldtk
 import com.soywiz.korio.async.runBlockingNoSuspensions
 import com.soywiz.korio.file.std.resourcesVfs
 
-open class Project(val projectFilePath: String, val projectDir: String? = null) {
+open class Project(val projectFilePath: String) {
 
     val bgColorInt: Int
     val bgColorHex: String
@@ -56,7 +56,7 @@ open class Project(val projectFilePath: String, val projectDir: String? = null) 
     }
 
     open fun instantiateLevel(project: Project, json: LevelDefinition): Level? {
-        return null
+        return Level(project, json)
     }
 
     fun getAsset(relativePath: String): ByteArray {

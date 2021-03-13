@@ -3,7 +3,7 @@ package com.lehaine.ldtk
 import com.soywiz.korio.lang.Charsets
 import com.soywiz.korio.lang.toString
 
-open class Level(val classPath: String, val project: Project, val json: LevelDefinition) {
+open class Level(val project: Project, val json: LevelDefinition) {
     enum class NeighborDirection {
         North,
         South,
@@ -151,7 +151,22 @@ open class Level(val classPath: String, val project: Project, val json: LevelDef
      * This function will be overridden in the ProjectProcessor if used.
      */
     protected open fun instantiateLayer(json: LayerInstance): Layer? {
-        return null
+        return when (json.type) { //IntGrid, Entities, Tiles or AutoLayer
+            "IntGrid" -> {
+                val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues
+                LayerIntGrid(intGridValues, json)
+            }
+            "Entities" -> LayerEntities(json)
+            "Tiles" -> {
+                val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!
+                LayerTiles(tilesetDef, json)
+            }
+            "AutoLayer" -> {
+                val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!
+                LayerAutoLayer(tilesetDef, json)
+            }
+            else -> error("Unable to instantiate layer for level $identifier")
+        }
     }
 
     override fun toString(): String {

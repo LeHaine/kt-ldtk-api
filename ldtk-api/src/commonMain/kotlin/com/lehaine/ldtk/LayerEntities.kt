@@ -15,7 +15,7 @@ open class LayerEntities(json: LayerInstance) : Layer(json) {
      * This function will be overridden in the ProjectProcessor if used.
      */
     protected open fun instantiateEntity(json: EntityInstance): Entity? {
-        return null
+        return Entity(json)
     }
 
     override fun toString(): String {
