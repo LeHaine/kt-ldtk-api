@@ -1,4 +1,4 @@
-rootProject.name = "gdx-ldtk-api"
+rootProject.name = "kt-ldtk-api"
 include("ldtk-api")
 if (System.getenv()["JITPACK"] == null)
     include("samples")
