@@ -5,7 +5,7 @@ open class LayerEntities(json: LayerInstance) : Layer(json) {
     private val _entities = mutableListOf<Entity>()
     val entities get() = _entities.toList()
 
-    protected fun instantiateEntities() {
+    internal fun instantiateEntities() {
         json.entityInstances.forEach { entityInstanceJson ->
             instantiateEntity(entityInstanceJson)?.also { _entities.add(it) }
         }
@@ -15,7 +15,7 @@ open class LayerEntities(json: LayerInstance) : Layer(json) {
      * This function will be overridden in the ProjectProcessor if used.
      */
     protected open fun instantiateEntity(json: EntityInstance): Entity? {
-        return Entity(json)
+        return Entity(json).also { _entities.add(it) }
     }
 
     override fun toString(): String {

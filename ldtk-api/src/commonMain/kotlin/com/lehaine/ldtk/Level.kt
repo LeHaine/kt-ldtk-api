@@ -77,6 +77,10 @@ open class Level(val project: Project, val json: LevelDefinition) {
     private val _allUntypedLayers = mutableListOf<Layer>()
     val allUntypedLayers get() = _allUntypedLayers
 
+    private var entityLayer: LayerEntities? = null
+
+    val allUntypedEntities get() = entityLayer?.entities
+
     private val _neighbors = mutableListOf<Neighbor>()
     val neighors get() = _neighbors.toList()
 
@@ -156,7 +160,12 @@ open class Level(val project: Project, val json: LevelDefinition) {
                 val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues
                 LayerIntGrid(intGridValues, json)
             }
-            "Entities" -> LayerEntities(json)
+            "Entities" -> {
+                entityLayer = LayerEntities(json).apply {
+                    instantiateEntities()
+                }
+                entityLayer
+            }
             "Tiles" -> {
                 val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!
                 LayerTiles(tilesetDef, json)
