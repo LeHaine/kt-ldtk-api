@@ -3,7 +3,7 @@ package com.lehaine.ldtk
 import com.soywiz.korio.lang.Charsets
 import com.soywiz.korio.lang.toString
 
-open class Level(val project: Project, val json: LevelDefinition) {
+open class Level(val project: Project, val definition: LevelDefinition) {
     enum class NeighborDirection {
         North,
         South,
@@ -39,36 +39,36 @@ open class Level(val project: Project, val json: LevelDefinition) {
         val cropRect: CropRect
     )
 
-    var uid = json.uid
+    var uid = definition.uid
         private set
-    var identifier = json.identifier
+    var identifier = definition.identifier
         private set
-    var pxWidth = json.pxWid
+    var pxWidth = definition.pxWid
         private set
-    var pxHeight = json.pxHei
+    var pxHeight = definition.pxHei
         private set
-    var worldX = json.worldX
+    var worldX = definition.worldX
         private set
-    var worldY = json.worldY
+    var worldY = definition.worldY
         private set
-    var bgColor = Project.hexToInt(json.bgColor)
+    var bgColor = Project.hexToInt(definition.bgColor)
         private set
     val hasBgImage: Boolean
         get() = bgImageInfos != null
-    var bgImageInfos: LevelBgImage? = if (json.bgRelPath.isNullOrEmpty() || json.bgPos == null) {
+    var bgImageInfos: LevelBgImage? = if (definition.bgRelPath.isNullOrEmpty() || definition.bgPos == null) {
         null
     } else {
         LevelBgImage(
-            relFilePath = json.bgRelPath,
-            topLeftX = json.bgPos.topLeftPx[0],
-            topLeftY = json.bgPos.topLeftPx[1],
-            scaleX = json.bgPos.scale[0],
-            scaleY = json.bgPos.scale[1],
+            relFilePath = definition.bgRelPath,
+            topLeftX = definition.bgPos.topLeftPx[0],
+            topLeftY = definition.bgPos.topLeftPx[1],
+            scaleX = definition.bgPos.scale[0],
+            scaleY = definition.bgPos.scale[1],
             cropRect = CropRect(
-                x = json.bgPos.cropRect[0],
-                y = json.bgPos.cropRect[1],
-                w = json.bgPos.cropRect[2],
-                h = json.bgPos.cropRect[3]
+                x = definition.bgPos.cropRect[0],
+                y = definition.bgPos.cropRect[1],
+                w = definition.bgPos.cropRect[2],
+                h = definition.bgPos.cropRect[3]
             )
         )
     }
@@ -87,13 +87,13 @@ open class Level(val project: Project, val json: LevelDefinition) {
     /**
      * Only exists if levels are stored in separate level files.
      */
-    private var externalRelPath = json.externalRelPath
+    private var externalRelPath = definition.externalRelPath
 
     init {
-        json.layerInstances?.forEach { layerInstanceJson ->
+        definition.layerInstances?.forEach { layerInstanceJson ->
             instantiateLayer(layerInstanceJson)?.also { _allUntypedLayers.add(it) }
         }
-        json.neighbours?.forEach {
+        definition.neighbours?.forEach {
             _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
         }
     }

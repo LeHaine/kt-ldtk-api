@@ -28,7 +28,7 @@ open class Entity(val json: EntityInstance) {
     val height: Int = json.height
 
     /** Tile infos if the entity has one (it could have been overridden by a Field value, such as Enums) **/
-    val tileInfosJson: TileInfo? = if (json.tile == null) {
+    val tileInfo: TileInfo? = if (json.tile == null) {
         null
     } else {
         TileInfo(
@@ -43,11 +43,11 @@ open class Entity(val json: EntityInstance) {
     data class TileInfo(val tilesetUid: Int, val x: Int, val y: Int, val w: Int, val h: Int)
 
     override fun toString(): String {
-        return "Entity(identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfosJson)"
+        return "Entity(identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfo)"
     }
 
     protected fun entityInfoString(): String {
-        return "identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfosJson"
+        return "identifier='$identifier', cx=$cx, cy=$cy, pixelX=$pixelX, pixelY=$pixelY, tileInfosJson=$tileInfo"
     }
 
 
