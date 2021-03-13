@@ -5,7 +5,7 @@ open class LayerEntities(json: LayerInstance) : Layer(json) {
     private val _entities = mutableListOf<Entity>()
     val entities get() = _entities.toList()
 
-    internal fun instantiateEntities() {
+    fun instantiateEntities() {
         _entities.clear()
         json.entityInstances.forEach { entityInstanceJson ->
             instantiateEntity(entityInstanceJson)?.also { _entities.add(it) }
