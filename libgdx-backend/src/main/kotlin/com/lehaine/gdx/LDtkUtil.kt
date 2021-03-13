@@ -6,7 +6,9 @@ object LDtkUtil {
 
     @JvmStatic
     fun toGdxPos(cx: Int, cy: Int, gridSize: Int, levelHeight: Int): Vector2 {
-        return Vector2((cx * gridSize).toFloat(), -(cy * gridSize - levelHeight).toFloat())
+        val result = Vector2()
+        toGdxPos(cx, cy, gridSize, levelHeight, result)
+        return result
     }
 
     @JvmStatic
