@@ -1,6 +1,7 @@
 
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
 [![Version](https://img.shields.io/github/v/tag/lehaine/kt-ldtk-api?label=version)](https://github.com/LeHaine/kt-ldtk-api/releases)
+[![Extras](https://img.shields.io/github/v/tag/lehaine/kt-ldtk-api-extras?label=Extras)](https://github.com/LeHaine/kt-ldtk-api-extras/releases)
 [![LDtk](https://img.shields.io/github/v/release/deepnight/ldtk?color=red&label=LDtk)](https://ldtk.io/)
 
 # About
