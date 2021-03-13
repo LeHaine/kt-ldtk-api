@@ -1,11 +1,9 @@
 package com.lehaine.gdx
 
-import com.lehaine.ldtk.IntGridValue
-import com.lehaine.ldtk.LayerInstanceJson
-import com.lehaine.ldtk.LayerIntGrid
+import com.lehaine.ldtk.*
 
 open class GdxLayerIntGrid(
-    intGridValues: List<IntGridValue>,
-    json: LayerInstanceJson
+    intGridValues: List<IntGridValueDefinition>,
+    json: LayerInstance
 ) : LayerIntGrid(intGridValues, json) {
 }

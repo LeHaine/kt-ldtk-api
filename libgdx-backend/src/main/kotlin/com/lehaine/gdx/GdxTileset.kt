@@ -3,9 +3,9 @@ package com.lehaine.gdx
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.lehaine.ldtk.LayerAutoLayer
 import com.lehaine.ldtk.Tileset
-import com.lehaine.ldtk.TilesetDefJson
+import com.lehaine.ldtk.TilesetDefinition
 
-open class GdxTileset(json: TilesetDefJson) : Tileset(json) {
+open class GdxTileset(json: TilesetDefinition) : Tileset(json) {
 
     data class LDtkTile(val region: TextureRegion, val flipX: Boolean = false, val flipY: Boolean = false)
 

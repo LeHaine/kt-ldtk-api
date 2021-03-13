@@ -9,37 +9,37 @@ enum class LayerType {
     Unknown
 }
 
-open class Layer(val json: LayerInstanceJson) {
-    val identifier: String = json.__identifier
-    val type: LayerType = LayerType.valueOf(json.__type)
+open class Layer(val json: LayerInstance) {
+    val identifier: String = json.identifier
+    val type: LayerType = LayerType.valueOf(json.type)
 
     /**
      * Grid size in pixels
      */
-    val gridSize: Int = json.__gridSize
+    val gridSize: Int = json.gridSize
 
     /**
      * Grid-based layer width
      */
-    val cWidth: Int = json.__cWid
+    val cWidth: Int = json.cWid
 
     /**
      * Grid-based layer height
      */
-    val cHeight: Int = json.__cHei
+    val cHeight: Int = json.cHei
 
     /**
      * Pixel-based layer X offset (includes both instance and definition offsets)
      */
-    val pxTotalOffsetX: Int = json.__pxTotalOffsetX
+    val pxTotalOffsetX: Int = json.pxTotalOffsetX
 
     /**
      * Pixel-based layer Y offset (includes both instance and definition offsets)
      */
-    val pxTotalOffsetY: Int = json.__pxTotalOffsetY
+    val pxTotalOffsetY: Int = json.pxTotalOffsetY
 
     /** Layer opacity (0-1) **/
-    val opacity: Float = json.__opacity
+    val opacity: Float = json.opacity
 
     /**
      * @return TRUE if grid-based coordinates are within layer bounds.

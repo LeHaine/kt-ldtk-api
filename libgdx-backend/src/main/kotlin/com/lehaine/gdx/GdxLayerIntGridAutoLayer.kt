@@ -3,14 +3,14 @@ package com.lehaine.gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.lehaine.ldtk.IntGridValue
-import com.lehaine.ldtk.LayerInstanceJson
+import com.lehaine.ldtk.IntGridValueDefinition
+import com.lehaine.ldtk.LayerInstance
 import com.lehaine.ldtk.LayerIntGridAutoLayer
-import com.lehaine.ldtk.TilesetDefJson
+import com.lehaine.ldtk.TilesetDefinition
 
 open class GdxLayerIntGridAutoLayer(
-    tilesetDefJson: TilesetDefJson?,
-    intGridValues: List<IntGridValue>, json: LayerInstanceJson
+    tilesetDefJson: TilesetDefinition?,
+    intGridValues: List<IntGridValueDefinition>, json: LayerInstance
 ) : LayerIntGridAutoLayer(tilesetDefJson, intGridValues, json) {
 
     /**
@@ -20,7 +20,7 @@ open class GdxLayerIntGridAutoLayer(
      * @param tilesTexture the tile texture
      * @param pixelHeight the height of the level `level.pxHei`
      */
-    fun render(batch: Batch, tilesTexture: Texture, pixelHeight:Int) {
+    fun render(batch: Batch, tilesTexture: Texture, pixelHeight: Int) {
         val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)

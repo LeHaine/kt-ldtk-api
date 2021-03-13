@@ -1,10 +1,17 @@
-plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-}
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 repositories {
     mavenCentral()
+}
+
+configurations.all {
+    if (name.contains("kapt")) {
+        attributes.attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.jvm
+        )
+        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
+    }
 }
 
 dependencies {
