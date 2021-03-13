@@ -12,16 +12,6 @@ class _UnitTestWorld
 
 fun main(args: Array<String>) {
     // create new LDtk world
-//    val proj = Project("sample.ldtk")
-//    val level = proj.allUntypedLevels[0]
-//    level.load()
-//    level.allUntypedEntities?.forEach {
-//        println(it)
-//    }
-//    level.json.fieldInstances.forEach {
-//        println(it.value)
-//    }
-
     val world = World()
 
     // get a level

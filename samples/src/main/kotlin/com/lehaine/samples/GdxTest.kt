@@ -14,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.lehaine.gdx.convertToGdxPos
+import com.lehaine.ldtk.Entity
 import com.lehaine.ldtk.LayerIntGrid
 import com.lehaine.ldtk.Level
 
@@ -26,19 +28,16 @@ class GdxApp : ApplicationListener {
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
     private val world = World()
-    private val unitTestWorld = UnitTestWorld()
 
     private var currentWorldIdx = 0
     private var worldBgImage: TextureRegion? = null
     private lateinit var worldLevel: World.WorldLevel
 
-    private var currentUnitTestWorldIdx = 0
-    private var unitTWorldBgImage: TextureRegion? = null
-    private lateinit var unitTestWorldLevel: UnitTestWorld.UnitTestWorldLevel
-    private var showWorld = true
-
     private val velocity = Vector2()
     private val speed = 5f
+
+    private val gridSize = 8;
+    private val temp = Vector2()
 
     override fun create() {
         spriteBatch = SpriteBatch()
@@ -55,18 +54,11 @@ class GdxApp : ApplicationListener {
     }
 
     override fun render() {
-        val bgColorHex = if (showWorld) world.bgColorHex else unitTestWorld.bgColorHex
+        val bgColorHex = world.bgColorHex
         val bgColor = Color.valueOf(bgColorHex)
         Gdx.gl.glClearColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            showWorld = !showWorld
-            if (showWorld) {
-                loadLevel(currentWorldIdx)
-            } else {
-                loadLevel(currentUnitTestWorldIdx)
-            }
-        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
             loadLevel(0)
         }
@@ -98,90 +90,49 @@ class GdxApp : ApplicationListener {
         camera.update()
         spriteBatch.projectionMatrix = camera.combined
         shapeRenderer.projectionMatrix = camera.combined
-        if (showWorld) {
-            spriteBatch.begin()
-            renderBgImage(spriteBatch, worldLevel)
-            worldLevel.layerCavern_background.render(spriteBatch, worldTiles, worldLevel.pxHeight)
-            worldLevel.layerCollisions.render(spriteBatch, worldTiles, worldLevel.pxHeight)
-            worldLevel.layerCustom_tiles.render(spriteBatch, worldTiles, worldLevel.pxHeight)
-            spriteBatch.end()
-        } else {
-//            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-//            renderIntGrid(shapeRenderer, unitTestWorldLevel.layerIntGrid8)
-//            renderIntGrid(shapeRenderer, unitTestWorldLevel.layerIntGridTest)
-//            shapeRenderer.end()
-            spriteBatch.begin()
-            unitTestWorldLevel.layerTileTest.render(spriteBatch, unitTestWorldTiles, unitTestWorldLevel.pxHeight)
-            unitTestWorldLevel.layerPure_AutoLayer.render(spriteBatch, worldTiles, unitTestWorldLevel.pxHeight)
-            unitTestWorldLevel.layerIntGrid_AutoLayer.render(spriteBatch, worldTiles, unitTestWorldLevel.pxHeight)
-            spriteBatch.end()
+        spriteBatch.begin()
+        renderBgImage(spriteBatch, worldLevel)
+        worldLevel.layerCavern_background.render(spriteBatch, worldTiles, worldLevel.pxHeight)
+        worldLevel.layerCollisions.render(spriteBatch, worldTiles, worldLevel.pxHeight)
+        worldLevel.layerCustom_tiles.render(spriteBatch, worldTiles, worldLevel.pxHeight)
+        spriteBatch.end()
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        worldLevel.layerEntities.allPlayer.forEach {
+            renderEntity(shapeRenderer, it, Color.GREEN, gridSize, worldLevel.pxHeight)
         }
+
+        worldLevel.layerEntities.allMob.forEach {
+            renderEntity(shapeRenderer, it, Color.RED, gridSize, worldLevel.pxHeight)
+        }
+
+        worldLevel.layerEntities.allItem.forEach {
+            renderEntity(shapeRenderer, it, Color.GOLD, gridSize, worldLevel.pxHeight)
+        }
+        shapeRenderer.end()
+
+        temp.setZero()
     }
 
     private fun loadLevel(levelIdx: Int) {
-        if (showWorld) {
-            if (levelIdx <= world.allLevels.size - 1) {
-                worldLevel = world.allLevels[levelIdx]
-                if (worldLevel.hasBgImage) {
-                    worldBgImage?.texture?.dispose()
-                    val crop = worldLevel.bgImageInfos!!.cropRect
-                    worldBgImage = TextureRegion(
-                        Texture(Gdx.files.internal(worldLevel.bgImageInfos!!.relFilePath))
-                    ).apply {
-                        setRegion(crop.x.toInt(), crop.y.toInt(), crop.w.toInt(), crop.h.toInt())
-                    }
+        if (levelIdx <= world.allLevels.size - 1) {
+            worldLevel = world.allLevels[levelIdx]
+            if (worldLevel.hasBgImage) {
+                worldBgImage?.texture?.dispose()
+                val crop = worldLevel.bgImageInfos!!.cropRect
+                worldBgImage = TextureRegion(
+                    Texture(Gdx.files.internal(worldLevel.bgImageInfos!!.relFilePath))
+                ).apply {
+                    setRegion(crop.x.toInt(), crop.y.toInt(), crop.w.toInt(), crop.h.toInt())
                 }
             }
-            camera.position.set(worldLevel.pxWidth / 2f, worldLevel.pxHeight / 2f + 20f, camera.position.z)
-        } else {
-            if (levelIdx <= unitTestWorld.allLevels.size - 1) {
-                unitTestWorldLevel = unitTestWorld.allLevels[levelIdx]
-                if (unitTestWorldLevel.hasBgImage) {
-                    unitTWorldBgImage?.texture?.dispose()
-                    val crop = unitTestWorldLevel.bgImageInfos!!.cropRect
-                    unitTWorldBgImage = TextureRegion(
-                        Texture(Gdx.files.internal(unitTestWorldLevel.bgImageInfos!!.relFilePath))
-                    ).apply {
-                        setRegion(crop.x, texture.height - crop.y, crop.w, crop.h)
-                    }
-                }
-            }
-            camera.position.set(
-                unitTestWorldLevel.pxWidth / 2f,
-                unitTestWorldLevel.pxHeight / 2f + 20f,
-                camera.position.z
-            )
         }
+        camera.position.set(worldLevel.pxWidth / 2f, worldLevel.pxHeight / 2f + 20f, camera.position.z)
     }
 
     private fun renderBgImage(spriteBatch: SpriteBatch, level: Level) {
         level.bgImageInfos?.let { bgImageInfo ->
-            val bgTexture = if (showWorld) worldBgImage else unitTWorldBgImage
-            bgTexture?.let {
-//                spriteBatch.draw(
-//                    it,
-//                    bgImageInfo.topLeftX.toFloat(),
-//                    bgImageInfo.topLeftY.toFloat() - bgImageInfo.cropRect.h, // need to move down due to differing coord systems
-//                    0f,
-//                    0f,
-//                    it.regionWidth.toFloat(),
-//                    it.regionHeight.toFloat(),
-//                    bgImageInfo.scaleX,
-//                    bgImageInfo.scaleY,
-//                    0f
-                //       )
-
-//                spriteBatch.draw(
-//                    it.texture,
-//                    bgImageInfo.topLeftX.toFloat(),
-//                    bgImageInfo.topLeftY.toFloat() - bgImageInfo.cropRect.h, // need to move down due to differing coord systems
-//                    it.regionWidth.toFloat(),
-//                    it.regionHeight.toFloat(),
-//                    it.u,
-//                    it.v,
-//                    it.u2,
-//                    it.v2)
-
+            worldBgImage?.let {
                 spriteBatch.draw(
                     it.texture,
                     bgImageInfo.topLeftX.toFloat(),
@@ -204,14 +155,32 @@ class GdxApp : ApplicationListener {
         }
     }
 
-    private fun renderIntGrid(shapeRenderer: ShapeRenderer, layerIntGrid: LayerIntGrid) {
+    private fun renderEntity(
+        shapeRenderer: ShapeRenderer,
+        entity: Entity,
+        color: Color,
+        entitySize: Int,
+        pxHeight: Int
+    ) {
+        temp.convertToGdxPos(entity.cx, entity.cy, gridSize, pxHeight)
+        shapeRenderer.color = color
+        shapeRenderer.rect(
+            temp.x,
+            temp.y,
+            entitySize.toFloat(),
+            entitySize.toFloat()
+        )
+    }
+
+    private fun renderIntGrid(shapeRenderer: ShapeRenderer, layerIntGrid: LayerIntGrid, pxHeight: Int) {
         for (cx in 0..layerIntGrid.cWidth) {
             for (cy in 0..layerIntGrid.cHeight) {
                 if (layerIntGrid.hasValue(cx, cy)) {
                     val colorHex = layerIntGrid.getColorHex(cx, cy)
-                    val gridSize = layerIntGrid.gridSize.toFloat()
+                    val gridSize = layerIntGrid.gridSize
+                    temp.convertToGdxPos(cx, cy, gridSize, pxHeight)
                     shapeRenderer.color = Color.valueOf(colorHex)
-                    shapeRenderer.rect(cx * gridSize, -cy * gridSize, gridSize, gridSize)
+                    shapeRenderer.rect(temp.x, temp.y, gridSize.toFloat(), gridSize.toFloat())
                 }
             }
         }
