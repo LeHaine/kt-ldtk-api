@@ -9,6 +9,14 @@ tasks.named<Jar>("jar") {
     }
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("ldtk-processor") {
+            artifactId = "ldtk-processor"
+        }
+    }
+}
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))

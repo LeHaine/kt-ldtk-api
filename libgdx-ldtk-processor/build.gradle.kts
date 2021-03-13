@@ -9,6 +9,14 @@ tasks.named<Jar>("jar") {
     }
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("libgdx-ldtk-processor") {
+            artifactId = "libgdx-ldtk-processor"
+        }
+    }
+}
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))
