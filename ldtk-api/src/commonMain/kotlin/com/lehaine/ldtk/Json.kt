@@ -768,7 +768,7 @@ object MultiAssociatedValueSerializer : KSerializer<MultiAssociatedValue> {
                 return MultiAssociatedValue(stringMapList = newList)
             }
 
-            return MultiAssociatedValue(stringList = arrList.map { it.toString() })
+            return MultiAssociatedValue(stringList = arrList.map { it.jsonPrimitive.content})
         } else if (json is JsonObject) {
             val map = mutableMapOf<String, String>()
             json.jsonObject.forEach {
