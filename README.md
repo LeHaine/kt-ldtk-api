@@ -36,9 +36,12 @@ class _World
 fun main(args: Array<String>) {
     // create new LDtk world
     val world = World()
+    world.load() // loads the file and parses it
 
     // get a level
     val level: World.WorldLevel = world.allLevels[0]
+    level.load() // force load a level
+    // levels are loaded automatically when accessing any layer of that level
 
     // iterate over a layers tiles
     level.layerBackground.autoTiles.forEach {
@@ -71,9 +74,12 @@ public class SampleJava {
     public static void main(String[] args) {
         // create new LDtk world
         JavaWorld world = new JavaWorld();
+        world.load(); // loads the file and parses it
 
         // get a level
         JavaWorld.JavaWorldLevel level = world.getAllLevels().get(0);
+        level.load(); // force load a level
+        // levels are loaded automatically when accessing any layer of that level
 
         // iterate over a layers tiles
         for (LayerAutoLayer.AutoTile tile : level.getLayerBackground().getAutoTiles()) {
@@ -112,7 +118,7 @@ class GdxApp : ApplicationListener {
     private lateinit var tiles: Texture
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
-    private val world = World()
+    private val world = World().apply { load() }
     private val testLevel = world.allLevels[0]
 
     override fun create() {
@@ -163,10 +169,12 @@ public class GdxTest implements ApplicationListener {
     private Camera camera;
     private PixelPerfectViewport viewport;
     private final World world = new World();
-    private final World.WorldLevel testLevel = world.getAllLevels().get(0);
+    private final World.WorldLevel testLevel;
 
     @Override
     public void create() {
+        world.load();
+        testLevel = world.getAllLevels().get(0);
         spriteBatch = new SpriteBatch();
         tiles = new Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"));
         camera = new OrthographicCamera();
@@ -218,7 +226,7 @@ public class GdxTest implements ApplicationListener {
 ## Sample code when NOT using the annotation to generate code
 
 ```Kotlin 
-val proj = Project("sample.ldtk")
+val proj = Project("sample.ldtk").apply { load() }
 val level = proj.allUntypedLevels[0]
 level.load() // this is only needed if levels are saved in separate files!
 val gridSize = 16
