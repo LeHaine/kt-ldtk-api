@@ -27,7 +27,7 @@ class GdxApp : ApplicationListener {
     private lateinit var unitTestWorldTiles: Texture
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
-    private val world = World()
+    private val world = World().apply { load() }
 
     private var currentWorldIdx = 0
     private var worldBgImage: TextureRegion? = null

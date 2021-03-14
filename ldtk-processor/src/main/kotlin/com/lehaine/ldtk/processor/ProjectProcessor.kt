@@ -7,6 +7,7 @@ import com.lehaine.ldtk.LDtkApi.LAYER_PREFIX
 import com.lehaine.ldtk.LDtkApi.LEVEL_SUFFIX
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -16,6 +17,7 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.MirroredTypeException
 import javax.tools.StandardLocation
 import kotlin.reflect.KClass
 
@@ -50,10 +52,18 @@ open class ProjectProcessor : AbstractProcessor() {
         return SourceVersion.latest()
     }
 
+    @KotlinPoetMetadataPreview
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         roundEnv.getElementsAnnotatedWith(LDtkProject::class.java)
             .forEach {
                 val ldtkProject = it.getAnnotation(LDtkProject::class.java)
+                var extendClass: TypeName? = null
+                try {
+                    ldtkProject.extendClass
+                } catch (ex: MirroredTypeException) {
+                    extendClass = ex.typeMirror.asTypeName()
+                }
+
                 val ldtkFileLocation = ldtkProject.ldtkFileLocation
                 val className = if (ldtkProject.name.isBlank()) {
                     "${it.simpleName}_"
@@ -61,12 +71,12 @@ open class ProjectProcessor : AbstractProcessor() {
                     ldtkProject.name
                 }
                 val pkg = processingEnv.elementUtils.getPackageOf(it).toString()
-                generateProject(className, pkg, ldtkFileLocation)
+                generateProject(className, pkg, ldtkFileLocation, extendClass!!)
             }
         return true
     }
 
-    private fun generateProject(className: String, pkg: String, ldtkFileLocation: String) {
+    private fun generateProject(className: String, pkg: String, ldtkFileLocation: String, extendClass: TypeName) {
         try {
             val resource =
                 processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp_${className}", null)
@@ -80,15 +90,14 @@ open class ProjectProcessor : AbstractProcessor() {
 
             val fileSpec = FileSpec.builder(pkg, className).indent(FILE_INDENT)
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
-                superclass(Project::class)
+                superclass(extendClass)
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
                 addFunction(
                     FunSpec.builder("instantiateLevel")
                         .addModifiers(KModifier.OVERRIDE)
-                        .addParameter("project", Project::class)
                         .addParameter("json", LevelDefinition::class)
                         .returns(Level::class)
-                        .addStatement("return %L$LEVEL_SUFFIX(project, json)", className)
+                        .addStatement("return %L$LEVEL_SUFFIX(this, json)", className)
                         .build()
                 )
             }
@@ -113,12 +122,15 @@ open class ProjectProcessor : AbstractProcessor() {
                 PropertySpec.builder(
                     "allLevels",
                     List::class.asTypeName().parameterizedBy(levelClassType)
-                ).initializer(
-                    CodeBlock.builder()
-                        .beginControlFlow("allUntypedLevels.map")
-                        .addStatement("it as %T", levelClassType)
-                        .endControlFlow()
-                        .build()
+                ).getter(
+                    FunSpec.getterBuilder().addCode(
+                        CodeBlock.builder()
+//                            .beginControlFlow("allUntypedLevels.map")
+//                            .addStatement("it as %T", levelClassType)
+//                            .endControlFlow()
+                            .addStatement("return allUntypedLevels as List<%T>", levelClassType)
+                            .build()
+                    ).build()
                 ).build()
             )
 

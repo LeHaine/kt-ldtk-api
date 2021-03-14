@@ -2,10 +2,14 @@ package com.lehaine.samples
 
 import com.lehaine.ldtk.LDtkProject
 import com.lehaine.ldtk.Point
+import com.lehaine.ldtk.Project
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 
 // designate class for loading and attaching LDtk file to
 @LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
-class _World
+open class _World(projectFilePath: String)
 
 @LDtkProject(ldtkFileLocation = "unitTest.ldtk", name = "UnitTestWorld")
 class _UnitTestWorld
@@ -13,6 +17,8 @@ class _UnitTestWorld
 fun main(args: Array<String>) {
     // create new LDtk world
     val world = World()
+    world.load()
+
 
     // get a level
     val level: World.WorldLevel = world.allLevels[0]
@@ -27,7 +33,7 @@ fun main(args: Array<String>) {
         // access entity fields
         val type: World.MobType = mob.type // generated enum class
         // field arrays / lists
-        val patrolPoints: List<Point>? = mob.patrol // points
+        val patrolPoints: List<Point> = mob.patrol // points
         val health: Int = mob.health
     }
 

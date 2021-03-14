@@ -5,10 +5,14 @@ import com.soywiz.korio.file.std.resourcesVfs
 
 open class Project(val projectFilePath: String) {
 
-    val bgColorInt: Int
-    val bgColorHex: String
-    val worldLayout: WorldLayout
-    val defs: Definitions
+    var bgColorInt: Int = 0
+        protected set
+    var bgColorHex: String = "#000000"
+        protected set
+    var worldLayout: WorldLayout? = null
+        protected set
+    var defs: Definitions? = null
+        protected set
 
     val tilesets = mutableMapOf<Int, Tileset>()
     private val assetCache = mutableMapOf<String, ByteArray>()
@@ -31,16 +35,18 @@ open class Project(val projectFilePath: String) {
         }
     }
 
-    init {
-        val jsonString = runBlockingNoSuspensions {
-            resourcesVfs[projectFilePath].readString()
+    fun load() {
+        val jsonString = loadLDtkJson()
+
+        if (jsonString.isEmpty()) {
+            error("An empty file was passed in.")
         }
 
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
         defs = json.defs
 
         json.levelDefinitions.forEach { levelJson ->
-            val level = instantiateLevel(this, levelJson)
+            val level = instantiateLevel(levelJson)
             level?.let {
                 _allUntypedLevels.add(it)
             }
@@ -55,17 +61,23 @@ open class Project(val projectFilePath: String) {
         bgColorInt = hexToInt(json.bgColor)
     }
 
-    open fun instantiateLevel(project: Project, json: LevelDefinition): Level? {
-        return Level(project, json)
+    open fun instantiateLevel(json: LevelDefinition): Level? {
+        return Level(this, json)
     }
 
-    fun getAsset(relativePath: String): ByteArray {
-        if (assetCache.contains(relativePath)) {
-            return assetCache[relativePath] ?: error("Unable to load asset from asset cache!")
+    protected open fun loadLDtkJson(): String {
+        return runBlockingNoSuspensions {
+            resourcesVfs[projectFilePath].readString()
+        }
+    }
+
+    open fun getAsset(assetPath: String): ByteArray {
+        if (assetCache.contains(assetPath)) {
+            return assetCache[assetPath] ?: error("Unable to load asset from asset cache!")
         }
 
         return runBlockingNoSuspensions {
-            resourcesVfs[relativePath].readBytes()
+            resourcesVfs[assetPath].readBytes()
         }
     }
 
@@ -73,13 +85,13 @@ open class Project(val projectFilePath: String) {
         if (uid == null && identifier == null) {
             return null
         }
-        return defs.layers.find { it.uid == uid || it.identifier == identifier }
+        return defs?.layers?.find { it.uid == uid || it.identifier == identifier }
     }
 
     fun getTilesetDef(uid: Int?, identifier: String? = ""): TilesetDefinition? {
         if (uid == null && identifier == null) {
             return null
         }
-        return defs.tilesets.find { it.uid == uid || it.identifier == identifier }
+        return defs?.tilesets?.find { it.uid == uid || it.identifier == identifier }
     }
 }
