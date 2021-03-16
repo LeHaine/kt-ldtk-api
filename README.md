@@ -328,9 +328,3 @@ dependencies {
     kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:$version")
 }
 ```
-
-## TODO
-
-- [ ] Optimize rendering
-- [ ] Major code clean up
-- [ ] Add documentation
