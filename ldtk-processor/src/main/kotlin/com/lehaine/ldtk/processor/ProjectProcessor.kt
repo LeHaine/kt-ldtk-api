@@ -18,7 +18,6 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
-import javax.tools.StandardLocation
 import kotlin.reflect.KClass
 
 @AutoService(Processor::class)
@@ -70,6 +69,7 @@ open class ProjectProcessor : AbstractProcessor() {
                 } else {
                     ldtkProject.name
                 }
+
                 val pkg = processingEnv.elementUtils.getPackageOf(it).toString()
                 generateProject(className, pkg, ldtkFileLocation, extendClass!!)
             }
@@ -79,10 +79,10 @@ open class ProjectProcessor : AbstractProcessor() {
     private fun generateProject(className: String, pkg: String, ldtkFileLocation: String, extendClass: TypeName) {
         try {
             val resource =
-                processingEnv.filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp_${className}", null)
-            val resourcePath = findResourcePath(Paths.get(resource.toUri()), ldtkFileLocation)
-            resource.delete()
-            val fileContent = resourcePath.toFile().readText()
+                processingEnv.options["kapt.kotlin.generated"] ?: error("Unable to find kotlin generated path")
+            val resourcePath = Paths.get(resource)
+            val filePath = findResourcePath(resourcePath, resourcePath, ldtkFileLocation)
+            val fileContent = filePath.toFile().readText()
 
             val json = LDtkApi.parseLDtkFile(fileContent)
 
@@ -145,18 +145,42 @@ open class ProjectProcessor : AbstractProcessor() {
         }
     }
 
-    private fun findResourcePath(path: Path, ldtkFileLocation: String, maxPath: Int = 15, currentPath: Int = 0): Path {
-        val newPath = path.resolve("./resources/main/${ldtkFileLocation}")
+    private val resourcePaths = listOf("resources/main/", "processedResources/jvm/main/", "processedResources/js/main/")
+
+    private fun findResourcePath(
+        currenPath: Path,
+        originalPath: Path,
+        ldtkFileLocation: String,
+        maxPath: Int = 15,
+        currentPathIdx: Int = 0,
+        pathCheckIdx: Int = 0
+    ): Path {
+        if (pathCheckIdx >= resourcePaths.size) {
+            val fileName = ldtkFileLocation.split("/").last()
+            error("Unable to find resource file $fileName in any of these locations: $resourcePaths. Aborting...")
+        }
+        val newPath = currenPath.resolve("./${resourcePaths[pathCheckIdx]}${ldtkFileLocation}")
         if (!Files.exists(newPath)) {
             newPath.resolve("./$ldtkFileLocation")
         }
         return if (Files.exists(newPath)) {
             newPath
         } else {
-            if (currentPath >= maxPath) {
-                error("Unable to find resource file $ldtkFileLocation. Aborting...")
+            var newPathIdx = pathCheckIdx
+            var newCurrentPathIdx = currentPathIdx + 1
+            var newCurrentPath = currenPath.resolve("../")
+            if (currentPathIdx >= maxPath) {
+                newPathIdx += 1
+                newCurrentPathIdx = 0
+                newCurrentPath = originalPath
             }
-            findResourcePath(path.resolve("../"), ldtkFileLocation, currentPath = currentPath + 1)
+            findResourcePath(
+                newCurrentPath,
+                originalPath,
+                ldtkFileLocation,
+                currentPathIdx = newCurrentPathIdx,
+                pathCheckIdx = newPathIdx
+            )
         }
     }
 
