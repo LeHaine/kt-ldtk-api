@@ -501,7 +501,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             if (superClass == baseLayerIntGridAutoLayerClass().kotlin) {
                                 layerConstructor.addParameter(
                                     "tilesetDefJson",
-                                    TilesetDefinition::class.asTypeName().copy(nullable = true)
+                                    TilesetDefinition::class
                                 )
                                 addSuperclassConstructorParameter("%N", "tilesetDefJson")
                             }
@@ -514,14 +514,14 @@ open class ProjectProcessor : AbstractProcessor() {
                         baseLayerAutoLayerClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
-                                TilesetDefinition::class.asTypeName().copy(nullable = true)
+                                TilesetDefinition::class
                             )
                             addSuperclassConstructorParameter("%N", "tilesetDefJson")
                         }
                         baseLayerTilesClass().kotlin -> {
                             layerConstructor.addParameter(
                                 "tilesetDefJson",
-                                TilesetDefinition::class.asTypeName()
+                                TilesetDefinition::class
                             )
                             addSuperclassConstructorParameter("%N", "tilesetDefJson")
                         }
@@ -546,14 +546,14 @@ open class ProjectProcessor : AbstractProcessor() {
                         extendLayerClass(baseLayerIntGridAutoLayerClass().kotlin)
                         val tileset = tilesets[layerDef.autoTilesetDefUid]
                         if (tileset != null) {
-                            val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
+                            val tilesetType = ClassName.bestGuess(tileset.typeName)
                             layerClassSpec.addProperty(
                                 PropertySpec.builder("tileset", tilesetType)
-                                    .initializer("%L(%N!!)", tileset.typeName, "tilesetDefJson")
+                                    .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
                                     .build()
                             )
                             layerClassSpec.addFunction(
-                                FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
+                                FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                                     .addModifiers(KModifier.OVERRIDE)
                                     .addStatement("return tileset").build()
                             )
@@ -572,14 +572,14 @@ open class ProjectProcessor : AbstractProcessor() {
                     extendLayerClass(baseLayerAutoLayerClass().kotlin)
                     val tileset = tilesets[layerDef.autoTilesetDefUid]
                     if (tileset != null) {
-                        val tilesetType = ClassName.bestGuess(tileset.typeName).copy(nullable = true)
+                        val tilesetType = ClassName.bestGuess(tileset.typeName)
                         layerClassSpec.addProperty(
                             PropertySpec.builder("tileset", tilesetType)
-                                .initializer("%L(%N!!)", tileset.typeName, "tilesetDefJson")
+                                .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
                                 .build()
                         )
                         layerClassSpec.addFunction(
-                            FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
+                            FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                                 .addModifiers(KModifier.OVERRIDE)
                                 .addStatement("return tileset").build()
                         )
@@ -639,7 +639,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             .build()
                     )
                     layerClassSpec.addFunction(
-                        FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName().copy(true))
+                        FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                             .addModifiers(KModifier.OVERRIDE)
                             .addStatement("return tileset").build()
                     )

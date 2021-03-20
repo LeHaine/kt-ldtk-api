@@ -5,6 +5,8 @@ open class LayerTiles(
 ) : Layer(json) {
     data class TileInfo(val tileId: Int, val flipBits: Int)
 
+    val untypedTileset = Tileset(tilesetDefJson)
+
     private val _tiles = mutableMapOf<Int, List<TileInfo>>()
     val tiles get() = _tiles.toMap()
 
@@ -31,8 +33,8 @@ open class LayerTiles(
         return _tiles.contains(getCoordId(cx, cy))
     }
 
-    protected open fun getTileset(): Tileset? {
-        return null
+    protected open fun getTileset(): Tileset {
+        return untypedTileset
     }
 
 }

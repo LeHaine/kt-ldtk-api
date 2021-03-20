@@ -8,7 +8,7 @@ import com.lehaine.ldtk.LayerInstance
 import com.lehaine.ldtk.TilesetDefinition
 
 open class GdxLayerAutoLayer(
-    tilesetDefJson: TilesetDefinition?,
+    tilesetDefJson: TilesetDefinition,
     json: LayerInstance
 ) : LayerAutoLayer(
     tilesetDefJson,

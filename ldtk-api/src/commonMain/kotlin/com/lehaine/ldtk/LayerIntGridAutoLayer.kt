@@ -1,11 +1,12 @@
 package com.lehaine.ldtk
 
 open class LayerIntGridAutoLayer(
-    val tilesetDefJson: TilesetDefinition?,
+    val tilesetDefJson: TilesetDefinition,
     intGridValues: List<IntGridValueDefinition>,
     json: LayerInstance
 ) : LayerIntGrid(intGridValues, json) {
 
+    val untypedTileset = Tileset(tilesetDefJson)
     val autoTiles: List<LayerAutoLayer.AutoTile> =
         json.autoLayerTiles.map {
             LayerAutoLayer.AutoTile(
@@ -16,7 +17,7 @@ open class LayerIntGridAutoLayer(
             )
         }
 
-    protected open fun getTileset(): Tileset? {
-        return null
+    protected open fun getTileset(): Tileset {
+        return untypedTileset
     }
 }
