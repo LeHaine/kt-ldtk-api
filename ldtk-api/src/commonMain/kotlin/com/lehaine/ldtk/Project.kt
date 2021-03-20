@@ -35,9 +35,17 @@ open class Project(val projectFilePath: String) {
         }
     }
 
+    suspend fun loadAsync() {
+        val jsonString = loadLDtkJsonAsync()
+        initJson(jsonString)
+    }
+
     fun load() {
         val jsonString = loadLDtkJson()
+        initJson(jsonString)
+    }
 
+    private fun initJson(jsonString: String) {
         if (jsonString.isEmpty()) {
             error("An empty file was passed in.")
         }
@@ -71,6 +79,10 @@ open class Project(val projectFilePath: String) {
         }
     }
 
+    protected open suspend fun loadLDtkJsonAsync(): String {
+        return resourcesVfs[projectFilePath].readString()
+    }
+
     open fun getAsset(assetPath: String): ByteArray {
         if (assetCache.contains(assetPath)) {
             return assetCache[assetPath] ?: error("Unable to load asset from asset cache!")
@@ -79,6 +91,14 @@ open class Project(val projectFilePath: String) {
         return runBlockingNoSuspensions {
             resourcesVfs[assetPath].readBytes()
         }
+    }
+
+    open suspend fun getAssetAsync(assetPath: String): ByteArray {
+        if (assetCache.contains(assetPath)) {
+            return assetCache[assetPath] ?: error("Unable to load asset from asset cache!")
+        }
+
+        return resourcesVfs[assetPath].readBytes()
     }
 
     fun getLayerDef(uid: Int?, identifier: String? = ""): LayerDefinition? {

@@ -106,6 +106,23 @@ open class Level(val project: Project, val definition: LevelDefinition) {
         }
         val relPath = externalRelPath ?: return false
         val jsonString = project.getAsset(relPath).toString(Charsets.UTF8)
+
+        initJson(jsonString)
+        return true
+    }
+
+    suspend fun loadAsync(): Boolean {
+        if (isLoaded()) {
+            return true
+        }
+        val relPath = externalRelPath ?: return false
+        val jsonString = project.getAssetAsync(relPath).toString(Charsets.UTF8)
+
+        initJson(jsonString)
+        return true
+    }
+
+    private fun initJson(jsonString: String) {
         val json =
             LDtkApi.parseLDtkLevelFile(jsonString) ?: error("Unable to parse Level JSON")
 
@@ -142,8 +159,6 @@ open class Level(val project: Project, val definition: LevelDefinition) {
         json.neighbours?.forEach {
             _neighbors.add(Neighbor(it.levelUid, NeighborDirection.fromDir(it.dir)))
         }
-
-        return true
     }
 
     fun resolveLayer(id: String): Layer {
