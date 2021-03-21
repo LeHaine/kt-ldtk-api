@@ -33,7 +33,7 @@ open class LayerTiles(
         return _tiles.contains(getCoordId(cx, cy))
     }
 
-    protected open fun getTileset(): Tileset {
+    open fun getTileset(): Tileset {
         return untypedTileset
     }
 

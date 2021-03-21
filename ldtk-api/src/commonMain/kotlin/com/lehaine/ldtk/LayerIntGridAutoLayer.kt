@@ -17,7 +17,7 @@ open class LayerIntGridAutoLayer(
             )
         }
 
-    protected open fun getTileset(): Tileset {
+    open fun getTileset(): Tileset {
         return untypedTileset
     }
 }

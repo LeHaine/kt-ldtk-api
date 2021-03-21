@@ -11,7 +11,7 @@ open class LayerAutoLayer(
     data class AutoTile(val tileId: Int, val flips: Int, val renderX: Int, val renderY: Int)
 
 
-    protected open fun getTileset(): Tileset {
+    open fun getTileset(): Tileset {
         return untypedTileset
     }
 }
