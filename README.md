@@ -13,6 +13,10 @@ This library can be used for any JVM game engine/framework. It features a separa
 
 [LDtk official website](https://ldtk.io/)
 
+**Helpful links:**
+
+[Korge Kotlin Multiplatform Example](https://github.com/LeHaine/korge-ldtk-example)
+
 ## Features
 - **Annotation processing**: An **optional** annotation that will allow fully generated typesafe code to be used within your game.
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
