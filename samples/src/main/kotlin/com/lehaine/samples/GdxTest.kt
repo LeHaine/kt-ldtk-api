@@ -8,7 +8,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -17,7 +16,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.lehaine.gdx.convertToGdxPos
 import com.lehaine.ldtk.Entity
 import com.lehaine.ldtk.LayerIntGrid
-import com.lehaine.ldtk.Level
 
 class GdxApp : ApplicationListener {
 
@@ -87,6 +85,7 @@ class GdxApp : ApplicationListener {
         spriteBatch.projectionMatrix = camera.combined
         shapeRenderer.projectionMatrix = camera.combined
         spriteBatch.begin()
+        worldLevel.renderBgImage(spriteBatch)
         worldLevel.layerCavern_background.render(spriteBatch)
         worldLevel.layerCollisions.render(spriteBatch)
         worldLevel.layerCustom_tiles.render(spriteBatch)
