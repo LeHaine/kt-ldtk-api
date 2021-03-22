@@ -55,7 +55,7 @@ open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: L
         return if (!hasValue(cx, cy)) {
             null
         } else {
-            valueInfos[getInt(cx, cy)].identifier
+            valueInfos[getInt(cx, cy) - 1].identifier
         }
     }
 
@@ -67,7 +67,7 @@ open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: L
         return if (!hasValue(cx, cy)) {
             null
         } else {
-            valueInfos[getInt(cx, cy)].color
+            valueInfos[getInt(cx, cy) - 1].color
         }
     }
 
@@ -79,7 +79,7 @@ open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: L
         return if (!hasValue(cx, cy)) {
             null
         } else {
-            Project.intToHex(valueInfos[getInt(cx, cy)].color)
+            Project.intToHex(valueInfos[getInt(cx, cy) - 1].color)
         }
     }
 }
