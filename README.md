@@ -127,7 +127,6 @@ class GdxApp : ApplicationListener {
 
     override fun create() {
         spriteBatch = SpriteBatch()
-        tiles = Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"))
         camera = OrthographicCamera()
         viewport = PixelPerfectViewport(480f, 270f, camera)
         camera.translate(testLevel.pxWidth / 2f, testLevel.pxHeight / -2f)
@@ -143,9 +142,12 @@ class GdxApp : ApplicationListener {
         camera.update()
         spriteBatch.projectionMatrix = camera.combined
         spriteBatch.begin()
-        testLevel.layerBackground.render(spriteBatch, tiles)
-        testLevel.layerCollisions.render(spriteBatch, tiles)
-        testLevel.layerCustom_tiles.render(spriteBatch, tiles)
+        testLevel.renderBg(spriteBatch)
+        testLevel.layerBackground.render(spriteBatch)
+        testLevel.layerCollisions.render(spriteBatch)
+        testLevel.layerCustom_tiles.render(spriteBatch)
+        // OR
+        // testLevel.render(spriteBatch)
         spriteBatch.end()
     }
 
@@ -180,7 +182,6 @@ public class GdxTest implements ApplicationListener {
         world.load();
         testLevel = world.getAllLevels().get(0);
         spriteBatch = new SpriteBatch();
-        tiles = new Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"));
         camera = new OrthographicCamera();
         viewport = new PixelPerfectViewport(480, 270, camera);
         camera.translate(testLevel.getPxWidth() / 2f, testLevel.getPxHeight() / -2f, 0f);
@@ -198,9 +199,12 @@ public class GdxTest implements ApplicationListener {
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        testLevel.getLayerBackground().render(spriteBatch, tiles);
-        testLevel.getLayerCollisions().render(spriteBatch, tiles);
-        testLevel.getLayerCustom_tiles().render(spriteBatch, tiles);
+        testLevel.renderBgImage(spriteBatch);
+        testLevel.getLayerBackground().render(spriteBatch);
+        testLevel.getLayerCollisions().render(spriteBatch);
+        testLevel.getLayerCustom_tiles().render(spriteBatch);
+        // OR
+        // testLevel.render(spriteBatch);
         spriteBatch.end();
     }
 
@@ -293,7 +297,6 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
             KotlinPlatformType.attribute,
             KotlinPlatformType.jvm // pass in the JVM 
         )
-        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
     }
 }
 
@@ -322,7 +325,6 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
             KotlinPlatformType.attribute,
             KotlinPlatformType.jvm // pass in the JVM 
         )
-        attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, Usage.JAVA_RUNTIME))
     }
 }
 
