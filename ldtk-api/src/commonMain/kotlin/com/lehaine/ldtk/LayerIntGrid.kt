@@ -22,7 +22,7 @@ open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: L
     /**
      * IntGrid integer values, map is based on coordIds
      */
-    val intGrid get() = _intGrid.toMap()
+    val intGrid = _intGrid.toMap()
 
     /**
      * Get the Integer value at selected coordinates

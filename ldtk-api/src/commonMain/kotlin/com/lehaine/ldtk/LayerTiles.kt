@@ -8,7 +8,7 @@ open class LayerTiles(
     val untypedTileset = Tileset(tilesetDefJson)
 
     private val _tiles = mutableMapOf<Int, List<TileInfo>>()
-    val tiles get() = _tiles.toMap()
+    val tiles: Map<Int, List<TileInfo>>
 
     init {
         json.gridTiles.forEach {
@@ -19,6 +19,7 @@ open class LayerTiles(
                 mutList.add(TileInfo(it.t, it.f))
             }
         }
+        tiles = _tiles.toMap()
     }
 
     fun getTileStackAt(cx: Int, cy: Int): List<TileInfo> {
