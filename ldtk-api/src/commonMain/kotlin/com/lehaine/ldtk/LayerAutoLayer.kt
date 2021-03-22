@@ -1,9 +1,10 @@
 package com.lehaine.ldtk
 
 open class LayerAutoLayer(
+    project: Project,
     val tilesetDefJson: TilesetDefinition, json: LayerInstance
-) : Layer(json) {
-    val untypedTileset = Tileset(tilesetDefJson)
+) : Layer(project, json) {
+   open val tileset = project.tilesets[json.tilesetDefUid]!!
     val autoTiles = json.autoLayerTiles.map {
         AutoTile(it.t, it.f, it.px[0], it.px[1])
     }
@@ -22,10 +23,6 @@ open class LayerAutoLayer(
             _autoTilesCoordIdMap[getCoordId(autoTile.renderX / gridSize, autoTile.renderY / gridSize)] = autoTile
         }
         autoTilesCoordIdMap = _autoTilesCoordIdMap.toMap()
-    }
-
-    open fun getTileset(): Tileset {
-        return untypedTileset
     }
 
     data class AutoTile(val tileId: Int, val flips: Int, val renderX: Int, val renderY: Int)

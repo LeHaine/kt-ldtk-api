@@ -9,7 +9,7 @@ enum class LayerType {
     Unknown
 }
 
-open class Layer(val json: LayerInstance) {
+open class Layer(val project: Project, val json: LayerInstance) {
     val identifier: String = json.identifier
     val type: LayerType = LayerType.valueOf(json.type)
 

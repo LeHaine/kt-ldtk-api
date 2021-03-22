@@ -3,15 +3,13 @@ package com.lehaine.gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.lehaine.ldtk.IntGridValueDefinition
-import com.lehaine.ldtk.LayerInstance
-import com.lehaine.ldtk.LayerIntGridAutoLayer
-import com.lehaine.ldtk.TilesetDefinition
+import com.lehaine.ldtk.*
 
 open class GdxLayerIntGridAutoLayer(
+    project: Project,
     tilesetDefJson: TilesetDefinition,
     intGridValues: List<IntGridValueDefinition>, json: LayerInstance
-) : LayerIntGridAutoLayer(tilesetDefJson, intGridValues, json) {
+) : LayerIntGridAutoLayer(project, tilesetDefJson, intGridValues, json) {
 
     /**
      * Renders the layer. Due to LDtks coordinate system being flipped for LibGDX we need to negate the Y-pos and transform
@@ -21,7 +19,7 @@ open class GdxLayerIntGridAutoLayer(
      * @param pixelHeight the height of the level `level.pxHei`
      */
     fun render(batch: Batch, tilesTexture: Texture, pixelHeight: Int) {
-        val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
+        val tileset = tileset as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
 

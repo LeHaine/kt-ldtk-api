@@ -5,9 +5,11 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.lehaine.ldtk.LayerInstance
 import com.lehaine.ldtk.LayerTiles
+import com.lehaine.ldtk.Project
 import com.lehaine.ldtk.TilesetDefinition
 
-open class GdxLayerTiles(tilesetDefJson: TilesetDefinition, json: LayerInstance) : LayerTiles(tilesetDefJson, json) {
+open class GdxLayerTiles(project: Project, tilesetDefJson: TilesetDefinition, json: LayerInstance) :
+    LayerTiles(project, tilesetDefJson, json) {
 
     /**
      * Renders the layer. Due to LDtks coordinate system being flipped for LibGDX we need to negate the Y-pos and transform
@@ -17,7 +19,7 @@ open class GdxLayerTiles(tilesetDefJson: TilesetDefinition, json: LayerInstance)
      * @param pixelHeight the height of the level `level.pxHei`
      */
     fun render(batch: Batch, tilesTexture: Texture, pixelHeight: Int) {
-        val tileset = getTileset() as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
+        val tileset = tileset as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
 

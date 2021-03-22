@@ -173,21 +173,21 @@ open class Level(val project: Project, val definition: LevelDefinition) {
         return when (json.type) { //IntGrid, Entities, Tiles or AutoLayer
             "IntGrid" -> {
                 val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues
-                LayerIntGrid(intGridValues, json)
+                LayerIntGrid(project, intGridValues, json)
             }
             "Entities" -> {
-                entityLayer = LayerEntities(json).apply {
+                entityLayer = LayerEntities(project, json).apply {
                     instantiateEntities()
                 }
                 entityLayer
             }
             "Tiles" -> {
                 val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!
-                LayerTiles(tilesetDef, json)
+                LayerTiles(project, tilesetDef, json)
             }
             "AutoLayer" -> {
                 val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!
-                LayerAutoLayer(tilesetDef, json)
+                LayerAutoLayer(project, tilesetDef, json)
             }
             else -> error("Unable to instantiate layer for level $identifier")
         }

@@ -53,6 +53,10 @@ open class Project(val projectFilePath: String) {
         val json = LDtkApi.parseLDtkFile(jsonString) ?: error("Unable to parse LDtk file content!")
         defs = json.defs
 
+        json.defs.tilesets.forEach {
+            tilesets[it.uid] = Tileset(this, it)
+        }
+
         json.levelDefinitions.forEach { levelJson ->
             val level = instantiateLevel(levelJson)
             level?.let {
@@ -60,10 +64,6 @@ open class Project(val projectFilePath: String) {
             }
         }
 
-        json.defs.tilesets.forEach {
-            tilesets[it.uid] = Tileset(it)
-
-        }
         worldLayout = json.worldLayout
         bgColorHex = json.bgColor
         bgColorInt = hexToInt(json.bgColor)

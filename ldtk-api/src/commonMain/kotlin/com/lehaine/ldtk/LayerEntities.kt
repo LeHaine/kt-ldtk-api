@@ -1,6 +1,9 @@
 package com.lehaine.ldtk
 
-open class LayerEntities(json: LayerInstance) : Layer(json) {
+open class LayerEntities(
+    project: Project,
+    json: LayerInstance
+) : Layer(project, json) {
 
     private val _entities = mutableListOf<Entity>()
     val entities get() = _entities.toList()

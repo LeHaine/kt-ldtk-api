@@ -1,6 +1,10 @@
 package com.lehaine.ldtk
 
-open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: LayerInstance) : Layer(json) {
+open class LayerIntGrid(
+    project: Project,
+    val intGridValues: List<IntGridValueDefinition>,
+    json: LayerInstance
+) : Layer(project, json) {
 
     data class ValueInfo(val identifier: String?, val color: Int)
 

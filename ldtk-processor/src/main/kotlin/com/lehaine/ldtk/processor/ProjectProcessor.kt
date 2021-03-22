@@ -453,11 +453,13 @@ open class ProjectProcessor : AbstractProcessor() {
             val name = "Tileset_${it.identifier}"
             val tilesetClassSpec = TypeSpec.classBuilder(name).apply {
                 superclass(baseTilesetClass())
-                addSuperclassConstructorParameter("%N", "json")
+                    .addSuperclassConstructorParameter("%N", "project")
+                    .addSuperclassConstructorParameter("%N", "json")
 
             }
             val tilesetConstructor =
                 FunSpec.constructorBuilder()
+                    .addParameter("project", Project::class)
                     .addParameter("json", TilesetDefinition::class)
 
 
@@ -485,8 +487,8 @@ open class ProjectProcessor : AbstractProcessor() {
 
         layers.forEach { layerDef ->
             val layerName = "$LAYER_PREFIX${layerDef.identifier}"
-            val layerClassSpec = TypeSpec.classBuilder(layerName)
-            val layerConstructor = FunSpec.constructorBuilder()
+            val layerClassSpec = TypeSpec.classBuilder(layerName).addSuperclassConstructorParameter("%N", "project")
+            val layerConstructor = FunSpec.constructorBuilder().addParameter("project", Project::class)
 
             instantiateLayerFun
                 .beginControlFlow("if (\"${layerDef.identifier}\" == json.identifier)")
@@ -538,7 +540,7 @@ open class ProjectProcessor : AbstractProcessor() {
                         extendLayerClass(baseLayerIntGridClass().kotlin)
                         instantiateLayerFun
                             .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
-                            .addStatement("val layer = %L.%L.$layerName(intGridValues, json)", pkg, className)
+                            .addStatement("val layer = %L.%L.$layerName(project, intGridValues, json)", pkg, className)
 
 
                     } else {
@@ -549,20 +551,16 @@ open class ProjectProcessor : AbstractProcessor() {
                             val tilesetType = ClassName.bestGuess(tileset.typeName)
                             layerClassSpec.addProperty(
                                 PropertySpec.builder("tileset", tilesetType)
-                                    .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
-                                    .build()
-                            )
-                            layerClassSpec.addFunction(
-                                FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                                     .addModifiers(KModifier.OVERRIDE)
-                                    .addStatement("return tileset").build()
+                                    .initializer("%L(%N,%N)", tileset.typeName, "project", "tilesetDefJson")
+                                    .build()
                             )
                         }
                         instantiateLayerFun
                             .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
                             .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
                             .addStatement(
-                                "val layer = %L.%L.$layerName(tilesetDef, intGridValues, json)",
+                                "val layer = %L.%L.$layerName(project, tilesetDef, intGridValues, json)",
                                 pkg,
                                 className
                             )
@@ -575,19 +573,15 @@ open class ProjectProcessor : AbstractProcessor() {
                         val tilesetType = ClassName.bestGuess(tileset.typeName)
                         layerClassSpec.addProperty(
                             PropertySpec.builder("tileset", tilesetType)
-                                .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
-                                .build()
-                        )
-                        layerClassSpec.addFunction(
-                            FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                                 .addModifiers(KModifier.OVERRIDE)
-                                .addStatement("return tileset").build()
+                                .initializer("%L(%N,%N)", tileset.typeName, "project", "tilesetDefJson")
+                                .build()
                         )
                     }
 
                     instantiateLayerFun
                         .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
-                        .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName(project, tilesetDef, json)", pkg, className)
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
@@ -625,7 +619,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     )
 
                     instantiateLayerFun
-                        .addStatement("val layer = %L.%L.$layerName(json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName(project, json)", pkg, className)
                 }
                 "Tiles" -> {
                     extendLayerClass(baseLayerTilesClass().kotlin)
@@ -635,18 +629,14 @@ open class ProjectProcessor : AbstractProcessor() {
                     val tilesetType = ClassName.bestGuess(tileset.typeName)
                     layerClassSpec.addProperty(
                         PropertySpec.builder("tileset", tilesetType)
-                            .initializer("%L(%N)", tileset.typeName, "tilesetDefJson")
-                            .build()
-                    )
-                    layerClassSpec.addFunction(
-                        FunSpec.builder("getTileset").returns(baseTilesetClass().asTypeName())
                             .addModifiers(KModifier.OVERRIDE)
-                            .addStatement("return tileset").build()
+                            .initializer("%L(%N,%N)", tileset.typeName, "project", "tilesetDefJson")
+                            .build()
                     )
 
                     instantiateLayerFun
                         .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
-                        .addStatement("val layer = %L.%L.$layerName(tilesetDef, json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName(project, tilesetDef, json)", pkg, className)
                 }
                 else -> {
                     error("Unknown layer type ${layerDef.type}")
