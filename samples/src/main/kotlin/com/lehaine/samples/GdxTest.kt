@@ -26,7 +26,6 @@ class GdxApp : ApplicationListener {
     private val world = World().apply { load() }
 
     private var currentWorldIdx = 0
-    private var worldBgImage: TextureRegion? = null
     private lateinit var worldLevel: World.WorldLevel
 
     private val velocity = Vector2()
@@ -85,10 +84,7 @@ class GdxApp : ApplicationListener {
         spriteBatch.projectionMatrix = camera.combined
         shapeRenderer.projectionMatrix = camera.combined
         spriteBatch.begin()
-        worldLevel.renderBgImage(spriteBatch)
-        worldLevel.layerCavern_background.render(spriteBatch)
-        worldLevel.layerCollisions.render(spriteBatch)
-        worldLevel.layerCustom_tiles.render(spriteBatch)
+        worldLevel.render(spriteBatch)
         spriteBatch.end()
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)

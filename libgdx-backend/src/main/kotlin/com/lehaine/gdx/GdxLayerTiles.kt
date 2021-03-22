@@ -8,15 +8,15 @@ import com.lehaine.ldtk.Project
 import com.lehaine.ldtk.TilesetDefinition
 
 open class GdxLayerTiles(project: Project, tilesetDefJson: TilesetDefinition, json: LayerInstance) :
-    LayerTiles(project, tilesetDefJson, json) {
+    LayerTiles(project, tilesetDefJson, json), Renderable {
 
     /**
      * Renders the layer. Due to LDtks coordinate system being flipped for LibGDX we need to negate the Y-pos and transform
      * it by the level height
      * @param batch the batch to use for drawing
-     * @param tilesTexture the target tiles texture to render
+     * @param targetTexture the target tiles texture to render
      */
-    fun render(batch: Batch, tilesTexture: Texture? = null) {
+    override fun render(batch: Batch, targetTexture: Texture?) {
         val tileset = tileset as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         for (cy in 0..cHeight) {
@@ -24,7 +24,7 @@ open class GdxLayerTiles(project: Project, tilesetDefJson: TilesetDefinition, js
                 if (hasAnyTileAt(cx, cy)) {
                     getTileStackAt(cx, cy).forEach { tileInfo ->
                         tileset.getLDtkTile(
-                            tileInfo.tileId, tileInfo.flipBits, tilesTexture
+                            tileInfo.tileId, tileInfo.flipBits, targetTexture
                         )?.also {
                             batch.draw(
                                 it.region.texture,

@@ -15,19 +15,18 @@ open class GdxLayerAutoLayer(
     project,
     tilesetDefJson,
     json
-) {
+), Renderable {
     /**
      * Renders the layer. Due to LDtks coordinate system being flipped for LibGDX we need to negate the Y-pos and transform
      * it by the level height
      * @param batch the batch to use for drawing
-     * @param tilesTexture the tile texture
-     * @param pixelHeight the height of the level `level.pxHei`
+     * @param targetTexture the tile texture
      */
-    fun render(batch: Batch, tilesTexture: Texture? = null) {
+    override fun render(batch: Batch, targetTexture: Texture?) {
         val tileset = tileset as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
         autoTiles.forEach { autoTile ->
-            tileset.getAutoLayerLDtkTile(autoTile, tilesTexture)?.also {
+            tileset.getAutoLayerLDtkTile(autoTile, targetTexture)?.also {
                 batch.draw(
                     it.region.texture,
                     (autoTile.renderX + pxTotalOffsetX).toFloat(),

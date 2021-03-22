@@ -8,7 +8,7 @@ import com.lehaine.ldtk.Level
 import com.lehaine.ldtk.LevelDefinition
 import com.lehaine.ldtk.Project
 
-open class GdxLevel(project: Project, definition: LevelDefinition) : Level(project, definition) {
+open class GdxLevel(project: Project, definition: LevelDefinition) : Level(project, definition), Renderable {
 
     private var cachedTextureRegion: TextureRegion? = null
 
@@ -58,6 +58,16 @@ open class GdxLevel(project: Project, definition: LevelDefinition) : Level(proje
         }
     }
 
+    override fun render(batch: Batch, targetTexture: Texture?) {
+        renderBgImage(batch)
+        for (i in allUntypedLayers.indices.reversed()) {
+            val layer = allUntypedLayers[i]
+            if (layer is Renderable) {
+                layer.render(batch, targetTexture)
+            }
+        }
+    }
+
     fun dispose() {
         cachedTextureRegion?.texture?.dispose()
         project.tilesets.forEach {
@@ -66,4 +76,5 @@ open class GdxLevel(project: Project, definition: LevelDefinition) : Level(proje
             }
         }
     }
+
 }
