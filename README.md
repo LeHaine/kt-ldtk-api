@@ -119,7 +119,6 @@ public class SampleJava {
 class GdxApp : ApplicationListener {
 
     private lateinit var spriteBatch: SpriteBatch
-    private lateinit var tiles: Texture
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
     private val world = World().apply { load() }
@@ -171,7 +170,6 @@ For a full Java example check out the repository [here](https://github.com/LeHai
 public class GdxTest implements ApplicationListener {
 
     private SpriteBatch spriteBatch;
-    private Texture tiles;
     private Camera camera;
     private PixelPerfectViewport viewport;
     private final World world = new World();
