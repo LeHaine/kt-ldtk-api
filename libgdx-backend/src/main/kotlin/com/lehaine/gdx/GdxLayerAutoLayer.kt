@@ -2,7 +2,6 @@ package com.lehaine.gdx
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.lehaine.ldtk.LayerAutoLayer
 import com.lehaine.ldtk.LayerInstance
 import com.lehaine.ldtk.Project
@@ -24,17 +23,15 @@ open class GdxLayerAutoLayer(
      * @param tilesTexture the tile texture
      * @param pixelHeight the height of the level `level.pxHei`
      */
-    fun render(batch: Batch, tilesTexture: Texture, pixelHeight: Int) {
+    fun render(batch: Batch, tilesTexture: Texture? = null) {
         val tileset = tileset as? GdxTileset ?: error("Unable to load tileset for $identifier layer!")
 
-        val tiles = TextureRegion.split(tilesTexture, tileset.tileGridSize, tileset.tileGridSize)
-
         autoTiles.forEach { autoTile ->
-            tileset.getAutoLayerLDtkTile(tiles, autoTile)?.also {
+            tileset.getAutoLayerLDtkTile(autoTile, tilesTexture)?.also {
                 batch.draw(
                     it.region.texture,
                     (autoTile.renderX + pxTotalOffsetX).toFloat(),
-                    -(autoTile.renderY + pxTotalOffsetY - pixelHeight).toFloat(), // LDtk is y-down, so invert it
+                    -(autoTile.renderY + pxTotalOffsetY - cHeight * gridSize).toFloat(), // LDtk is y-down, so invert it
                     0f,
                     0f,
                     gridSize.toFloat(),

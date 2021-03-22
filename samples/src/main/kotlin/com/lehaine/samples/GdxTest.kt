@@ -23,8 +23,6 @@ class GdxApp : ApplicationListener {
 
     private lateinit var spriteBatch: SpriteBatch
     private lateinit var shapeRenderer: ShapeRenderer
-    private lateinit var worldTiles: Texture
-    private lateinit var unitTestWorldTiles: Texture
     private lateinit var camera: OrthographicCamera
     private lateinit var viewport: FitViewport
     private val world = World().apply { load() }
@@ -42,8 +40,6 @@ class GdxApp : ApplicationListener {
     override fun create() {
         spriteBatch = SpriteBatch()
         shapeRenderer = ShapeRenderer()
-        worldTiles = Texture(Gdx.files.internal("Cavernas_by_Adam_Saltsman.png"))
-        unitTestWorldTiles = Texture(Gdx.files.internal("Minecraft_texture_pack.gif"))
         camera = OrthographicCamera()
         viewport = PixelPerfectViewport(480f, 270f, camera)
         loadLevel(currentWorldIdx)
@@ -92,9 +88,9 @@ class GdxApp : ApplicationListener {
         shapeRenderer.projectionMatrix = camera.combined
         spriteBatch.begin()
         renderBgImage(spriteBatch, worldLevel)
-        worldLevel.layerCavern_background.render(spriteBatch, worldTiles, worldLevel.pxHeight)
-        worldLevel.layerCollisions.render(spriteBatch, worldTiles, worldLevel.pxHeight)
-        worldLevel.layerCustom_tiles.render(spriteBatch, worldTiles, worldLevel.pxHeight)
+        worldLevel.layerCavern_background.render(spriteBatch)
+        worldLevel.layerCollisions.render(spriteBatch)
+        worldLevel.layerCustom_tiles.render(spriteBatch)
         spriteBatch.end()
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
