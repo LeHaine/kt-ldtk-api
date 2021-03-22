@@ -15,7 +15,7 @@ open class Project(val projectFilePath: String) {
         protected set
 
     val tilesets = mutableMapOf<Int, Tileset>()
-    private val assetCache = mutableMapOf<String, ByteArray>()
+    protected val assetCache = mutableMapOf<String, ByteArray>()
 
     private val _allUntypedLevels = mutableListOf<Level>()
     val allUntypedLevels get() = _allUntypedLevels.toList()

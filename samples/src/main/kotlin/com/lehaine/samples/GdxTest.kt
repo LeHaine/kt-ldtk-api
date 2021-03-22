@@ -87,7 +87,6 @@ class GdxApp : ApplicationListener {
         spriteBatch.projectionMatrix = camera.combined
         shapeRenderer.projectionMatrix = camera.combined
         spriteBatch.begin()
-        renderBgImage(spriteBatch, worldLevel)
         worldLevel.layerCavern_background.render(spriteBatch)
         worldLevel.layerCollisions.render(spriteBatch)
         worldLevel.layerCustom_tiles.render(spriteBatch)
@@ -113,43 +112,10 @@ class GdxApp : ApplicationListener {
     private fun loadLevel(levelIdx: Int) {
         if (levelIdx <= world.allLevels.size - 1) {
             worldLevel = world.allLevels[levelIdx]
-            if (worldLevel.hasBgImage) {
-                worldBgImage?.texture?.dispose()
-                val crop = worldLevel.bgImageInfos!!.cropRect
-                worldBgImage = TextureRegion(
-                    Texture(Gdx.files.internal(worldLevel.bgImageInfos!!.relFilePath))
-                ).apply {
-                    setRegion(crop.x.toInt(), crop.y.toInt(), crop.w.toInt(), crop.h.toInt())
-                }
-            }
         }
         camera.position.set(worldLevel.pxWidth / 2f, worldLevel.pxHeight / 2f + 20f, camera.position.z)
     }
 
-    private fun renderBgImage(spriteBatch: SpriteBatch, level: Level) {
-        level.bgImageInfos?.let { bgImageInfo ->
-            worldBgImage?.let {
-                spriteBatch.draw(
-                    it.texture,
-                    bgImageInfo.topLeftX.toFloat(),
-                    bgImageInfo.topLeftY.toFloat(),
-                    0f,
-                    0f,
-                    it.regionWidth.toFloat(),
-                    it.regionHeight.toFloat(),
-                    bgImageInfo.scaleX,
-                    bgImageInfo.scaleY,
-                    0f,
-                    it.regionX,
-                    it.regionY,
-                    it.regionWidth,
-                    it.regionHeight,
-                    false,
-                    false
-                )
-            }
-        }
-    }
 
     private fun renderEntity(
         shapeRenderer: ShapeRenderer,

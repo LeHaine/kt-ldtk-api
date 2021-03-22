@@ -34,19 +34,4 @@ object LDtkApi {
     const val ENTITY_PREFIX = "Entity"
     const val LEVEL_SUFFIX = "Level"
     const val LAYER_PREFIX = "Layer"
-
-    object PlainObjectSerializer : KSerializer<Any> {
-        override val descriptor: SerialDescriptor
-            get() = PrimitiveSerialDescriptor("com.lehaine.ldtk.LDtkApi.PlainObjectSerializer", PrimitiveKind.STRING)
-
-        override fun deserialize(decoder: Decoder): Any {
-            return ""
-        }
-
-        override fun serialize(encoder: Encoder, value: Any) {
-            throw Exception("This serializer can only be used for deserialization!")
-        }
-
-    }
-
 }

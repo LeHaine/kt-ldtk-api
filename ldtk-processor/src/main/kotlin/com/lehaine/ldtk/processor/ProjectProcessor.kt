@@ -17,7 +17,6 @@ import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.MirroredTypeException
 import kotlin.reflect.KClass
 
 @AutoService(Processor::class)
@@ -43,6 +42,14 @@ open class ProjectProcessor : AbstractProcessor() {
         return Tileset::class.java
     }
 
+    open fun baseProjectClass(): Class<out Project> {
+        return Project::class.java
+    }
+
+    open fun baseLevelClass(): Class<out Level> {
+        return Level::class.java
+    }
+
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(LDtkProject::class.java.name)
     }
@@ -56,12 +63,6 @@ open class ProjectProcessor : AbstractProcessor() {
         roundEnv.getElementsAnnotatedWith(LDtkProject::class.java)
             .forEach {
                 val ldtkProject = it.getAnnotation(LDtkProject::class.java)
-                var extendClass: TypeName? = null
-                try {
-                    ldtkProject.extendClass
-                } catch (ex: MirroredTypeException) {
-                    extendClass = ex.typeMirror.asTypeName()
-                }
 
                 val ldtkFileLocation = ldtkProject.ldtkFileLocation
                 val className = if (ldtkProject.name.isBlank()) {
@@ -71,12 +72,12 @@ open class ProjectProcessor : AbstractProcessor() {
                 }
 
                 val pkg = processingEnv.elementUtils.getPackageOf(it).toString()
-                generateProject(className, pkg, ldtkFileLocation, extendClass!!)
+                generateProject(className, pkg, ldtkFileLocation)
             }
         return true
     }
 
-    private fun generateProject(className: String, pkg: String, ldtkFileLocation: String, extendClass: TypeName) {
+    private fun generateProject(className: String, pkg: String, ldtkFileLocation: String) {
         try {
             val resource =
                 processingEnv.options["kapt.kotlin.generated"] ?: error("Unable to find kotlin generated path")
@@ -90,13 +91,13 @@ open class ProjectProcessor : AbstractProcessor() {
 
             val fileSpec = FileSpec.builder(pkg, className).indent(FILE_INDENT)
             val projectClassSpec = TypeSpec.classBuilder(className).apply {
-                superclass(extendClass)
+                superclass(baseProjectClass())
                 addSuperclassConstructorParameter("%S", ldtkFileLocation)
                 addFunction(
                     FunSpec.builder("instantiateLevel")
                         .addModifiers(KModifier.OVERRIDE)
                         .addParameter("json", LevelDefinition::class)
-                        .returns(Level::class)
+                        .returns(baseLevelClass())
                         .addStatement("return %L$LEVEL_SUFFIX(this, json)", className)
                         .build()
                 )
@@ -125,9 +126,6 @@ open class ProjectProcessor : AbstractProcessor() {
                 ).getter(
                     FunSpec.getterBuilder().addCode(
                         CodeBlock.builder()
-//                            .beginControlFlow("allUntypedLevels.map")
-//                            .addStatement("it as %T", levelClassType)
-//                            .endControlFlow()
                             .addStatement("return allUntypedLevels as List<%T>", levelClassType)
                             .build()
                     ).build()
@@ -259,7 +257,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             if (name == "Color") {
                                 instantiateLayerFun.addStatement("val arrList = it.value!!.stringList!!")
                                     .beginControlFlow("val result = arrList.map")
-                                    .addStatement("val value = Project.hexToInt(it)")
+                                    .addStatement("val value = %T.hexToInt(it)", Project::class)
                                     .addStatement("Color(value, it)")
                                     .endControlFlow()
                                     .addStatement("$privateEntityFieldName.addAll(result)")
@@ -370,7 +368,10 @@ open class ProjectProcessor : AbstractProcessor() {
                             addToEntity(fieldDefJson.identifier, colorClass, colorDefault)
                             fields.add(fieldDefJson.identifier)
 
-                            instantiateLayerFun.addStatement("val value = Project.hexToInt(it.value!!.content!!)")
+                            instantiateLayerFun.addStatement(
+                                "val value = %T.hexToInt(it.value!!.content!!)",
+                                Project::class
+                            )
                                 .addStatement("val hexValue = it.value!!.content!!")
                                 .addStatement("$entityFieldName = Color(value, hexValue)")
 
@@ -459,7 +460,7 @@ open class ProjectProcessor : AbstractProcessor() {
             }
             val tilesetConstructor =
                 FunSpec.constructorBuilder()
-                    .addParameter("project", Project::class)
+                    .addParameter("project", baseProjectClass())
                     .addParameter("json", TilesetDefinition::class)
 
 
@@ -488,7 +489,7 @@ open class ProjectProcessor : AbstractProcessor() {
         layers.forEach { layerDef ->
             val layerName = "$LAYER_PREFIX${layerDef.identifier}"
             val layerClassSpec = TypeSpec.classBuilder(layerName).addSuperclassConstructorParameter("%N", "project")
-            val layerConstructor = FunSpec.constructorBuilder().addParameter("project", Project::class)
+            val layerConstructor = FunSpec.constructorBuilder().addParameter("project", baseProjectClass())
 
             instantiateLayerFun
                 .beginControlFlow("if (\"${layerDef.identifier}\" == json.identifier)")
@@ -533,6 +534,9 @@ open class ProjectProcessor : AbstractProcessor() {
                 }
             }
 
+
+            val projectCast =
+                if (baseProjectClass() == Project::class.java) "project" else "project as ${baseProjectClass().simpleName}"
             when (layerDef.type) {
                 "IntGrid" -> {
                     if (layerDef.autoTilesetDefUid == null) {
@@ -540,7 +544,7 @@ open class ProjectProcessor : AbstractProcessor() {
                         extendLayerClass(baseLayerIntGridClass().kotlin)
                         instantiateLayerFun
                             .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
-                            .addStatement("val layer = %L.%L.$layerName(project, intGridValues, json)", pkg, className)
+                            .addStatement("val layer = %L.%L.$layerName($projectCast, intGridValues, json)", pkg, className)
 
 
                     } else {
@@ -560,7 +564,7 @@ open class ProjectProcessor : AbstractProcessor() {
                             .addStatement("val intGridValues = project.getLayerDef(json.layerDefUid)!!.intGridValues")
                             .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
                             .addStatement(
-                                "val layer = %L.%L.$layerName(project, tilesetDef, intGridValues, json)",
+                                "val layer = %L.%L.$layerName($projectCast, tilesetDef, intGridValues, json)",
                                 pkg,
                                 className
                             )
@@ -581,7 +585,7 @@ open class ProjectProcessor : AbstractProcessor() {
 
                     instantiateLayerFun
                         .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
-                        .addStatement("val layer = %L.%L.$layerName(project, tilesetDef, json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName($projectCast, tilesetDef, json)", pkg, className)
                 }
                 "Entities" -> {
                     extendLayerClass(LayerEntities::class)
@@ -619,7 +623,7 @@ open class ProjectProcessor : AbstractProcessor() {
                     )
 
                     instantiateLayerFun
-                        .addStatement("val layer = %L.%L.$layerName(project, json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName($projectCast, json)", pkg, className)
                 }
                 "Tiles" -> {
                     extendLayerClass(baseLayerTilesClass().kotlin)
@@ -636,7 +640,7 @@ open class ProjectProcessor : AbstractProcessor() {
 
                     instantiateLayerFun
                         .addStatement("val tilesetDef = project.getTilesetDef(json.tilesetDefUid)!!")
-                        .addStatement("val layer = %L.%L.$layerName(project, tilesetDef, json)", pkg, className)
+                        .addStatement("val layer = %L.%L.$layerName($projectCast, tilesetDef, json)", pkg, className)
                 }
                 else -> {
                     error("Unknown layer type ${layerDef.type}")
@@ -666,13 +670,13 @@ open class ProjectProcessor : AbstractProcessor() {
         instantiateLayerFun: FunSpec.Builder
     ) {
         val levelClassSpec = TypeSpec.classBuilder("${className}$LEVEL_SUFFIX").apply {
-            superclass(Level::class)
+            superclass(baseLevelClass())
             addSuperclassConstructorParameter("%N", "project")
             addSuperclassConstructorParameter("%N", "json")
         }
         val levelConstructor =
             FunSpec.constructorBuilder()
-                .addParameter("project", Project::class)
+                .addParameter("project", baseProjectClass())
                 .addParameter("json", LevelDefinition::class)
 
         levelClassSpec.primaryConstructor(levelConstructor.build())

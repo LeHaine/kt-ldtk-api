@@ -69,4 +69,9 @@ open class GdxTileset(project: Project, json: TilesetDefinition) : Tileset(proje
         }
         return getLDtkTile(autoTile.tileId, autoTile.flips, textureTarget)
     }
+
+    fun dispose() {
+        cachedTexture?.dispose()
+        cachedTextureRegions = null
+    }
 }
