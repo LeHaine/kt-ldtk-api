@@ -43,7 +43,7 @@ open class LayerIntGrid(val intGridValues: List<IntGridValueDefinition>, json: L
      * @return true if there is any value at selected coordinates.
      */
     fun hasValue(cx: Int, cy: Int, value: Int? = null): Boolean {
-        return value == null && getInt(cx, cy) != -1 ||
+        return value == null && getInt(cx, cy) != 0 ||
                 value != null && getInt(cx, cy) == value
     }
 
