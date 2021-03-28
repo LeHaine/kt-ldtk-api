@@ -7,7 +7,7 @@
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
 The `ldtk-api` module is built for Kotlin Multiplatform which mean it *should* work for JVM and JS targets.
 
-This library can be used for any JVM game engine/framework. It features a separate LibGDX module for easy rendering.
+This library can be used for any Kotlin Multiplatform or JVM game engine/framework/project. It features a separate LibGDX module for easy rendering and an example Korge project.
 
 ![LibGDX Example](/screenshots/example_2.gif "LibGDX rendering example")
 
