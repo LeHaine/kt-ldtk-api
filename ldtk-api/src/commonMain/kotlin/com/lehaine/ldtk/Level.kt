@@ -53,6 +53,7 @@ open class Level(val project: Project, val definition: LevelDefinition) {
         private set
     var bgColor = Project.hexToInt(definition.bgColor)
         private set
+    val bgColorHex = definition.bgColor
     val hasBgImage: Boolean
         get() = bgImageInfos != null
     var bgImageInfos: LevelBgImage? = if (definition.bgRelPath.isNullOrEmpty() || definition.bgPos == null) {
