@@ -232,7 +232,7 @@ open class ProjectProcessor : AbstractProcessor() {
                 .beginControlFlow("if (\"${entityDef.identifier}\" == json.identifier)")
                 .addStatement("val entity = %L.%L.${entityClassName}(json)", pkg, projClassName)
                 .beginControlFlow("json.fieldInstances.forEach")
-            entityDef.fieldDefs.forEach { fieldDefJson ->
+            entityDef.fieldDefs.forEach fieldsDefs@{ fieldDefJson ->
                 instantiateLayerFun.beginControlFlow("if(\"${fieldDefJson.identifier}\" == it.identifier)")
                 val canBeNull = fieldDefJson.canBeNull
                 val isArray = arrayReg.matches(fieldDefJson.type)
@@ -284,35 +284,39 @@ open class ProjectProcessor : AbstractProcessor() {
                                     ClassName.bestGuess(enumName)
                                 }
                                 "ExternEnum." in name -> {
-                                    error("ExternEnums are not supported!")
+                                    println("WARNING: ExternEnums are not supported!")
+                                    null
                                 }
                                 else -> {
-                                    error("Unsupported Array type ${fieldDefJson.type}")
+                                    println("Unsupported Array type ${fieldDefJson.type}")
+                                    null
                                 }
                             }
                         }
                     }
-                    entityClassSpec.addProperty(
-                        PropertySpec.builder(
-                            "_${fieldDefJson.identifier}",
-                            ClassName("kotlin.collections", "MutableList").parameterizedBy(fieldClassType)
-                        ).initializer(
-                            CodeBlock.builder()
-                                .addStatement("mutableListOf()")
-                                .build()
-                        ).build()
-                    )
-                    entityClassSpec.addProperty(
-                        PropertySpec.builder(
-                            fieldDefJson.identifier,
-                            List::class.asTypeName().parameterizedBy(fieldClassType)
-                        ).getter(
-                            FunSpec.getterBuilder()
-                                .addStatement("return _${fieldDefJson.identifier}.toList()")
-                                .build()
-                        ).build()
-                    )
-                    fields.add(fieldDefJson.identifier)
+                    fieldClassType?.let {
+                        entityClassSpec.addProperty(
+                            PropertySpec.builder(
+                                "_${fieldDefJson.identifier}",
+                                ClassName("kotlin.collections", "MutableList").parameterizedBy(fieldClassType)
+                            ).initializer(
+                                CodeBlock.builder()
+                                    .addStatement("mutableListOf()")
+                                    .build()
+                            ).build()
+                        )
+                        entityClassSpec.addProperty(
+                            PropertySpec.builder(
+                                fieldDefJson.identifier,
+                                List::class.asTypeName().parameterizedBy(fieldClassType)
+                            ).getter(
+                                FunSpec.getterBuilder()
+                                    .addStatement("return _${fieldDefJson.identifier}.toList()")
+                                    .build()
+                            ).build()
+                        )
+                        fields.add(fieldDefJson.identifier)
+                    }
                 } else {
                     when (name) {
                         "Int", "Double", "Boolean", "String" -> {
@@ -406,10 +410,10 @@ open class ProjectProcessor : AbstractProcessor() {
                                     instantiateLayerFun.addStatement("$entityFieldName = $type.valueOf(it.value!!.content!!)")
                                 }
                                 "ExternEnum." in typeName -> {
-                                    error("ExternEnums are not supported!")
+                                    println("WARNING: ExternEnums are not supported!")
                                 }
                                 else -> {
-                                    error("Unsupported field type $typeName")
+                                    println("WARNING: Unsupported field type $typeName")
                                 }
                             }
                         }

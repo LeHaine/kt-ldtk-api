@@ -5,7 +5,7 @@
 		"doc": "https://ldtk.io/json",
 		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
 		"appAuthor": "Sebastien 'deepnight' Benard",
-		"appVersion": "0.8.1",
+		"appVersion": "0.9.0",
 		"url": "https://ldtk.io"
 	},
 	"identifier": "Main_tests",
@@ -16,6 +16,7 @@
 	"pxHei": 512,
 	"__bgColor": "#271E27",
 	"bgColor": "#271E27",
+	"useAutoIdentifier": false,
 	"bgRelPath": "N2D - SpaceWallpaper1280x448.png",
 	"bgPos": "Cover",
 	"bgPivotX": 0,
@@ -43,8 +44,8 @@
 		{
 			"__identifier": "level_reward",
 			"__value": "Ammo",
-			"__type": "LocalEnum.DroppedItemType",
-			"defUid": 101,
+			"__type": "ExternEnum.DroppedItemType",
+			"defUid": 95,
 			"realEditorValues": [{
 				"id": "V_String",
 				"params": ["Ammo"]
@@ -62,12 +63,13 @@
 			"__pxTotalOffsetX": 0,
 			"__pxTotalOffsetY": 0,
 			"__tilesetDefUid": 46,
-			"__tilesetRelPath": "Cavernas_by_Adam_Saltsman.png",
+			"__tilesetRelPath": "Cavernas_by_Adam_Saltsman-Extended.png",
 			"levelId": 0,
 			"layerDefUid": 41,
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
@@ -388,12 +390,13 @@
 			"__pxTotalOffsetX": 0,
 			"__pxTotalOffsetY": 0,
 			"__tilesetDefUid": 46,
-			"__tilesetRelPath": "Cavernas_by_Adam_Saltsman.png",
+			"__tilesetRelPath": "Cavernas_by_Adam_Saltsman-Extended.png",
 			"levelId": 0,
 			"layerDefUid": 82,
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [],
 			"autoLayerTiles": [
 				{ "px": [8,48], "src": [48,80], "f": 0, "t": 126, "d": [85,385] },
@@ -450,6 +453,7 @@
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [],
 			"autoLayerTiles": [],
 			"seed": 4819766,
@@ -482,6 +486,16 @@
 							"__type": "Float",
 							"defUid": 7,
 							"realEditorValues": [{ "id": "V_Float", "params": [0.5] }]
+						},
+						{
+							"__identifier": "lootDrop",
+							"__value": "Gold",
+							"__type": "ExternEnum.DroppedItemType",
+							"defUid": 38,
+							"realEditorValues": [{
+								"id": "V_String",
+								"params": ["Gold"]
+							}]
 						},
 						{
 							"__identifier": "path",
@@ -618,6 +632,16 @@
 								"id": "V_String",
 								"params": ["FireBall"]
 							}]
+						},
+						{
+							"__identifier": "externEnums",
+							"__value": ["Gold"],
+							"__type": "Array<ExternEnum.DroppedItemType>",
+							"defUid": 77,
+							"realEditorValues": [{
+								"id": "V_String",
+								"params": ["Gold"]
+							}]
 						}
 					]
 				},
@@ -679,6 +703,7 @@
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [],
 			"autoLayerTiles": [],
 			"seed": 7063302,
@@ -869,6 +894,7 @@
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [
 				1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -923,6 +949,7 @@
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
 			"visible": true,
+			"optionalRules": [],
 			"intGridCsv": [
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

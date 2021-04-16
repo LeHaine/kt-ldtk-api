@@ -9,13 +9,17 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.lehaine.gdx.convertToGdxPos
 import com.lehaine.ldtk.Entity
+import com.lehaine.ldtk.LDtkProject
 import com.lehaine.ldtk.LayerIntGrid
+
+// designate class for loading and attaching LDtk file to
+@LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
+class _World(projectFilePath: String)
 
 class GdxApp : ApplicationListener {
 
@@ -90,10 +94,6 @@ class GdxApp : ApplicationListener {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         worldLevel.layerEntities.allPlayer.forEach {
             renderEntity(shapeRenderer, it, Color.GREEN, gridSize, worldLevel.pxHeight)
-        }
-
-        worldLevel.layerEntities.allMob.forEach {
-            renderEntity(shapeRenderer, it, Color.RED, gridSize, worldLevel.pxHeight)
         }
 
         worldLevel.layerEntities.allItem.forEach {

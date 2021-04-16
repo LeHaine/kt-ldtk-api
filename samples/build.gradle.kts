@@ -31,3 +31,21 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx:1.9.12")
 }
+
+
+
+tasks {
+    create("regenerateLDtkCode") {
+        dependsOn("removeLDtkGeneratedCode")
+        dependsOn("generateLDtkCode")
+    }
+
+    create<Delete>("removeLDtkGeneratedCode") {
+        delete = setOf("$buildDir/generated")
+    }
+
+    create("generateLDtkCode") {
+        dependsOn("kaptKotlin")
+        mustRunAfter("removeLDtkGeneratedCode")
+    }
+}

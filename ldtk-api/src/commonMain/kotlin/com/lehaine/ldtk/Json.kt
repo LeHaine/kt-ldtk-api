@@ -151,7 +151,7 @@ data class Definitions(
     val layers: List<LayerDefinition>,
 
     /**
-     * An array containing all custom fields available to all levels.
+     * A list containing all custom fields available to all levels.
      */
     val levelFields: List<FieldDefinition>,
 
@@ -223,7 +223,7 @@ data class EntityDefinition(
     val showName: Boolean,
 
     /**
-     * An array of strings that classifies this entity
+     * A list of strings that classifies this entity
      */
     val tags: List<String>,
 
@@ -257,7 +257,7 @@ data class EntityDefinition(
 @Serializable
 data class FieldDefinition(
     /**
-     * Human readable value type (eg. `Int`, `Float`, `Point`, etc.). If the field is an array,
+     * Human readable value type (eg. `Int`, `Float`, `Point`, etc.). If the field is a list,
      * this field will look like `Array<...>` (eg. `Array<Int>`, `Array<Point>` etc.)
      */
     @SerialName("__type")
@@ -296,7 +296,7 @@ data class FieldDefinition(
     val identifier: String,
 
     /**
-     * TRUE if the value is an array of multiple values
+     * TRUE if the value is a list of multiple values
      */
     val isArray: Boolean,
 
@@ -360,7 +360,7 @@ data class EnumDefinition(
 @Serializable
 data class EnumValueDefinition(
     /**
-     * An array of 4 Int values that refers to the tile in the tileset image: `[ x, y, width,
+     * A list of 4 Int values that refers to the tile in the tileset image: `[ x, y, width,
      * height ]`
      */
     @SerialName("__tileSrcRect")
@@ -375,7 +375,12 @@ data class EnumValueDefinition(
      * The optional ID of the tile
      */
     @SerialName("tileId")
-    val tileID: Int? = null
+    val tileID: Int? = null,
+
+    /**
+     * Optional color
+     */
+    val color: Int
 )
 
 @Serializable
@@ -404,7 +409,7 @@ data class LayerDefinition(
     val displayOpacity: Float,
 
     /**
-     * An array of tags to forbid some Entities in this layer
+     * A list of tags to forbid some Entities in this layer
      */
     val excludedTags: List<String>,
 
@@ -419,7 +424,7 @@ data class LayerDefinition(
     val identifier: String,
 
     /**
-     * An array that defines extra optional info for each IntGrid value. The array is sorted
+     * A list that defines extra optional info for each IntGrid value. The array is sorted
      * using value (ascending).
      */
     val intGridValues: List<IntGridValueDefinition>,
@@ -437,7 +442,7 @@ data class LayerDefinition(
     val pxOffsetY: Int,
 
     /**
-     * An array of tags to filter Entities that can be added to this layer
+     * A list of tags to filter Entities that can be added to this layer
      */
     val requiredTags: List<String>,
 
@@ -529,6 +534,18 @@ enum class Type(val value: String) {
 data class TilesetDefinition(
 
     /**
+     * Grid-based height
+     */
+    @SerialName("__cHei")
+    val cHei: Int,
+
+    /**
+     * Grid-based width
+     */
+    @SerialName("__cWid")
+    val cWid: Int,
+
+    /**
      * Unique String identifier
      */
     val identifier: String,
@@ -561,10 +578,32 @@ data class TilesetDefinition(
     val tileGridSize: Int,
 
     /**
-     * Unique Intidentifier
+     * Unique Identifier
      */
-    val uid: Int
+    val uid: Int,
+
+    /**
+     * A list of custom tile metadata
+     */
+    val customData: List<CustomData>,
+
+    /**
+     * Tileset tags using Enum values specified by tagsSourceEnumId.
+     * This array contains 1 element per Enum value, which contains A list of all Tile IDs that are tagged with it.
+     */
+    val enumTags: List<EnumTag>,
+
+    /**
+     * Optional Enum definition UID used for this tileset meta-data
+     */
+    val tagsSourceEnumUid: Int?
 )
+
+@Serializable
+data class CustomData(val data: String, val tileId: Int)
+
+@Serializable
+data class EnumTag(val enumValueId: String, val tileIds: List<Int>)
 
 /**
  * This section contains all the level data. It can be found in 2 distinct forms, depending
@@ -592,7 +631,7 @@ data class LevelDefinition(
     val bgPos: LevelBackgroundPosition? = null,
 
     /**
-     * An array listing all other levels touching this one on the world map. In "linear" world
+     * A list listing all other levels touching this one on the world map. In "linear" world
      * layouts, this array is populated with previous/next levels in array, and `dir` depends on
      * the linear horizontal/vertical layout.
      */
@@ -636,7 +675,7 @@ data class LevelDefinition(
     val externalRelPath: String? = null,
 
     /**
-     * An array containing this level custom field values.
+     * A list containing this level custom field values.
      */
     val fieldInstances: List<FieldInstance>,
 
@@ -646,7 +685,7 @@ data class LevelDefinition(
     val identifier: String,
 
     /**
-     * An array containing all Layer instances. **IMPORTANT**: if the project option "*Save
+     * A list containing all Layer instances. **IMPORTANT**: if the project option "*Save
      * levels separately*" is enabled, this field will be `null`.<br/>  This array is **sorted
      * in display order**: the 1st layer is the top-most and the last is behind.
      */
@@ -684,20 +723,20 @@ data class LevelDefinition(
 @Serializable
 data class LevelBackgroundPosition(
     /**
-     * An array of 4 float values describing the cropped sub-rectangle of the displayed
+     * A list of 4 float values describing the cropped sub-rectangle of the displayed
      * background image. This cropping happens when original is larger than the level bounds.
      * Array format: `[ cropX, cropY, cropWidth, cropHeight ]`
      */
     val cropRect: List<Float>,
 
     /**
-     * An array containing the `[scaleX,scaleY]` values of the **cropped** background image,
+     * A list containing the `[scaleX,scaleY]` values of the **cropped** background image,
      * depending on `bgPos` option.
      */
     val scale: List<Float>,
 
     /**
-     * An array containing the `[x,y]` pixel coordinates of the top-left corner of the
+     * A list containing the `[x,y]` pixel coordinates of the top-left corner of the
      * **cropped** background image, depending on `bgPos` option.
      */
     val topLeftPx: List<Int>
@@ -768,7 +807,7 @@ object MultiAssociatedValueSerializer : KSerializer<MultiAssociatedValue> {
                 return MultiAssociatedValue(stringMapList = newList)
             }
 
-            return MultiAssociatedValue(stringList = arrList.map { it.jsonPrimitive.content})
+            return MultiAssociatedValue(stringList = arrList.map { it.jsonPrimitive.content })
         } else if (json is JsonObject) {
             val map = mutableMapOf<String, String>()
             json.jsonObject.forEach {
@@ -845,7 +884,7 @@ data class LayerInstance(
     val type: String,
 
     /**
-     * An array containing all tiles generated by Auto-layer rules. The array is already sorted
+     * A list containing all tiles generated by Auto-layer rules. The array is already sorted
      * in display order (ie. 1st tile is beneath 2nd, which is beneath 3rd etc.).<br/><br/>
      * Note: if multiple tiles are stacked in the same cell as the result of different rules,
      * all tiles behind opaque ones will be discarded.
@@ -976,7 +1015,7 @@ data class EntityInstance(
     val defUid: Int,
 
     /**
-     * An array of all custom fields and their values.
+     * A list of all custom fields and their values.
      */
     val fieldInstances: List<FieldInstance>,
 
@@ -1005,7 +1044,7 @@ data class EntityInstance(
 @Serializable
 data class EntityInstanceTile(
     /**
-     * An array of 4 Int values that refers to the tile in the tileset image: `[ x, y, width,
+     * A list of 4 Int values that refers to the tile in the tileset image: `[ x, y, width,
      * height ]`
      */
     val srcRect: List<Int>,
