@@ -57,13 +57,6 @@ data class ProjectJson(
     val defs: Definitions,
 
     /**
-     * If TRUE, all layers in all levels will also be exported as PNG along with the project
-     * file (default is FALSE)
-     */
-    @SerialName("exportPng")
-    val exportPNG: Boolean,
-
-    /**
      * If TRUE, a Tiled compatible file will also be generated along with the LDtk JSON file
      * (default is FALSE)
      */
@@ -120,8 +113,9 @@ data class ProjectJson(
      * An enum that describes how levels are organized in this project (ie. linearly or in a 2D
      * space). Possible values: `Free`, `GridVania`, `LinearHorizontal`, `LinearVertical`
      */
-    val worldLayout: WorldLayout
-)
+    val worldLayout: WorldLayout,
+
+    )
 
 /**
  * A structure containing all the definitions of this project
