@@ -5,26 +5,23 @@
 
 # About
 This is a Kotlin and Java API to parse and load **LDtk project** files. 
-The `ldtk-api` module is built for Kotlin Multiplatform which mean it *should* work for JVM and JS targets.
+The `ldtk-api` module is built for Kotlin Multiplatform which means it works for JVM and JS targets. Other targets have not been tested yet.
 
-This library can be used for any Kotlin Multiplatform or JVM game engine/framework/project. It features a separate LibGDX module for easy rendering and an example Korge project.
+This library can be used for any Kotlin Multiplatform or JVM game engine/framework/project. It features a sample LibGDX project for both annotation processing and rendering as well as a KorGE example.
 
-# WARNING
-The LibGDX module is going to be deprecated and moving out of this repository and into a separate repository. See this [issue](https://github.com/LeHaine/kt-ldtk-api/issues/13) for more info.
-
-![LibGDX Example](/screenshots/example_3.gif "LibGDX rendering example")
+**LibGDX Sample Example**
+![LibGDX Sample Example](/screenshots/example_3.gif "LibGDX rendering example")
 
 [LDtk official website](https://ldtk.io/)
 
 **Helpful links:**
 
-[Korge Kotlin Multiplatform Example](https://github.com/LeHaine/korge-ldtk-example)
+[Korge Kotlin Multiplatform Example](https://github.com/LeHaine/korge-ldtk-example) - **May be outdated but should give a good idea on how to use it**
 
 ## Features
 - **Annotation processing**: An **optional** annotation that will allow fully generated typesafe code to be used within your game.
 - **Compile time code gen**: When using the annotation processor, the project code will be generated at compile time and available right away.
 - **No runtime reflection**: Reflection is used at compile time which is used to generate code.
-- **LibGDX Module**: Are you using LibGDX as a game framework? Use this module to easily render the loaded LDtk files.
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
 
@@ -115,123 +112,6 @@ public class SampleJava {
 }
 ```
 
-## Sample code for LibGDX modules
-
-**Kotlin Example**
-```Kotlin
-class GdxApp : ApplicationListener {
-
-    private lateinit var spriteBatch: SpriteBatch
-    private lateinit var camera: OrthographicCamera
-    private lateinit var viewport: FitViewport
-    private val world = World().apply { load() }
-    private val testLevel = world.allLevels[0]
-
-    override fun create() {
-        spriteBatch = SpriteBatch()
-        camera = OrthographicCamera()
-        viewport = PixelPerfectViewport(480f, 270f, camera)
-        camera.translate(testLevel.pxWidth / 2f, testLevel.pxHeight / -2f)
-    }
-
-    override fun resize(width: Int, height: Int) {
-        viewport.update(width, height, false)
-    }
-
-    override fun render() {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        camera.update()
-        spriteBatch.projectionMatrix = camera.combined
-        spriteBatch.begin()
-        testLevel.renderBg(spriteBatch)
-        testLevel.layerBackground.render(spriteBatch)
-        testLevel.layerCollisions.render(spriteBatch)
-        testLevel.layerCustom_tiles.render(spriteBatch)
-        // OR
-        // testLevel.render(spriteBatch)
-        spriteBatch.end()
-    }
-
-    override fun pause() {
-    }
-
-    override fun resume() {
-    }
-
-    override fun dispose() {
-    }
-
-}
-```
-
-**Java Example**
-
-For a full Java example check out the repository [here](https://github.com/LeHaine/gdx-ldtk-api-java-sample).
-```Java
-@LDtkProject(ldtkFileLocation = "sample.ldtk", name = "World")
-public class GdxTest implements ApplicationListener {
-
-    private SpriteBatch spriteBatch;
-    private Camera camera;
-    private PixelPerfectViewport viewport;
-    private final World world = new World();
-    private final World.WorldLevel testLevel;
-
-    @Override
-    public void create() {
-        world.load();
-        testLevel = world.getAllLevels().get(0);
-        spriteBatch = new SpriteBatch();
-        camera = new OrthographicCamera();
-        viewport = new PixelPerfectViewport(480, 270, camera);
-        camera.translate(testLevel.getPxWidth() / 2f, testLevel.getPxHeight() / -2f, 0f);
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height, false);
-    }
-
-    @Override
-    public void render() {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
-        testLevel.renderBgImage(spriteBatch);
-        testLevel.getLayerBackground().render(spriteBatch);
-        testLevel.getLayerCollisions().render(spriteBatch);
-        testLevel.getLayerCustom_tiles().render(spriteBatch);
-        // OR
-        // testLevel.render(spriteBatch);
-        spriteBatch.end();
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void dispose() {
-
-    }
-
-    public static void main(String[] args) {
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowedMode(960, 540);
-        new Lwjgl3Application(new GdxTest(), config);
-    }
-}
-```
-
 ## Sample code when NOT using the annotation to generate code
 
 ```Kotlin 
@@ -258,10 +138,6 @@ level.allUntypedLayers.forEach { layer ->
 ```
 
 You can check out a few samples in the [samples](samples) module.
-
-## Documentation
-
-TODO
 
 ## Download
 
@@ -304,34 +180,5 @@ configurations.all { // kapt has an issue with determining the correct KMM libra
 dependencies {
     implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
     kapt("com.lehaine.kt-ldtk-api:ldtk-processor:$version")
-}
-```
-
-### Dependencies for LibGDX modules
-**Note:** Check for latest version at the top.
-
-**build.gradle.kts**
-```Kotlin
-allprojects {
-    repositories {
-        maven(url="https://jitpack.io")
-    }
-}
-```
-
-```Kotlin
-configurations.all { // kapt has an issue with determining the correct KMM library, so we need to help it
-    if (name.contains("kapt")) {
-        attributes.attribute(
-            KotlinPlatformType.attribute,
-            KotlinPlatformType.jvm // pass in the JVM 
-        )
-    }
-}
-
-dependencies {
-    implementation("com.lehaine.kt-ldtk-api:ldtk-api:$version")
-    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:$version")
-    kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:$version")
 }
 ```
