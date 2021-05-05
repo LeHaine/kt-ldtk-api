@@ -6,14 +6,14 @@ repositories {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes("Automatic-Module-Name" to "com.lehaine.libgdx-ldtk-processor")
+        attributes("Automatic-Module-Name" to "com.lehaine.libgdx-ldtk-processor-sample")
     }
 }
 
 publishing {
     publications {
-        create<MavenPublication>("libgdx-ldtk-processor") {
-            artifactId = "libgdx-ldtk-processor"
+        create<MavenPublication>("libgdx-ldtk-processor-sample") {
+            artifactId = "libgdx-ldtk-processor-sample"
             from(components["java"])
         }
     }
@@ -22,7 +22,7 @@ publishing {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))
-    implementation(project(":libgdx-backend"))
+    implementation(project(":libgdx-backend-sample"))
     implementation(project(":ldtk-processor"))
 //    implementation("com.lehaine:ldtk-api-jvm:$version")
 //    implementation("com.lehaine:libgdx-backend:$version")

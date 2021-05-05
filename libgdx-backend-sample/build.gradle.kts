@@ -5,14 +5,14 @@ repositories {
 
 tasks.named<Jar>("jar") {
     manifest {
-        attributes("Automatic-Module-Name" to "com.lehaine.libgdx-backend")
+        attributes("Automatic-Module-Name" to "com.lehaine.libgdx-backend-sample")
     }
 }
 
 publishing {
     publications {
-        create<MavenPublication>("libgdx-backend") {
-            artifactId = "libgdx-backend"
+        create<MavenPublication>("libgdx-backend-sample") {
+            artifactId = "libgdx-backend-sample"
             from(components["java"])
         }
     }

@@ -19,8 +19,8 @@ configurations.all {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":ldtk-api"))
-    implementation(project(":libgdx-backend"))
-    kapt(project(":libgdx-ldtk-processor"))
+    implementation(project(":libgdx-backend-sample"))
+    kapt(project(":libgdx-ldtk-processor-sample"))
 //    implementation("com.lehaine.kt-ldtk-api:ldtk-api:-SNAPSHOT")
 //    implementation("com.lehaine.kt-ldtk-api:libgdx-backend:-SNAPSHOT")
 //    kapt("com.lehaine.kt-ldtk-api:libgdx-ldtk-processor:-SNAPSHOT")
