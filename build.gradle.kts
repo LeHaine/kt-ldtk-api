@@ -5,9 +5,9 @@ allprojects {
 
 
 plugins {
-    kotlin("jvm") version "1.4.31" apply false
-    kotlin("kapt") version "1.4.31" apply false
-    kotlin("multiplatform") version "1.4.31" apply false
+    kotlin("jvm") version "1.5.0" apply false
+    kotlin("kapt") version "1.5.0" apply false
+    kotlin("multiplatform") version "1.5.0" apply false
 }
 
 subprojects {
