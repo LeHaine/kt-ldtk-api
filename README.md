@@ -16,7 +16,8 @@ This library can be used for any Kotlin Multiplatform or JVM game engine/framewo
 
 **Helpful links:**
 
-[Korge Kotlin Multiplatform Example](https://github.com/LeHaine/korge-ldtk-example) - **May be outdated but should give a good idea on how to use it**
+- [KorGE Kotlin Multiplatform Example](https://github.com/LeHaine/korge-ldtk-example) - **May be outdated but should give a good idea on how to use it**
+- [KorGE LDtk View](https://github.com/LeHaine/kiwi/tree/master/src/commonMain/kotlin/com/lehaine/kiwi/korge/view/ldtk) - A view implemented for rendering LDtk levels in KorGE used in my personal library for KorGE called [Kiwi](https://github.com/LeHaine/kiwi).
 
 ## Features
 - **Annotation processing**: An **optional** annotation that will allow fully generated typesafe code to be used within your game.
