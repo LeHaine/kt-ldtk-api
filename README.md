@@ -26,6 +26,12 @@ This library can be used for any Kotlin Multiplatform or JVM game engine/framewo
 - **Extremely simple**: Parsing and loading a file is extremely easy in just a few lines of code
 
 
+## Versioning
+|API Version|LDtk Version   |
+|---|---|
+|1.4.0|0.9.3|
+
+
 # Usage
 ## Sample code 
 Create any class and add an `@LDtkProject` annotation to it with the location to your LDtk file on your projects classpath.
