@@ -1,3 +1,6 @@
+# NO LONGER MAINTAINED 
+**If you need LDtk support consider checking out [LittleKt - A Kotlin Multiplatform game framework](https://github.com/LittleKtOrg/LittleKt) which has full LDtk loading and rendering support.**
+
 
 [![Release](https://jitpack.io/v/com.lehaine/kt-ldtk-api.svg)](https://jitpack.io/#com.lehaine/kt-ldtk-api)
 [![Version](https://img.shields.io/github/v/tag/lehaine/kt-ldtk-api?label=version)](https://github.com/LeHaine/kt-ldtk-api/releases)
